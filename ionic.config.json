@@ -1,0 +1,7 @@
+{
+  "name": "Junction",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
