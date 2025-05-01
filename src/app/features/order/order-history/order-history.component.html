@@ -1,0 +1,153 @@
+<!-- src/app/features/order/order-history/order-history.component.html -->
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/order"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Order History</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <!-- Loading Skeleton -->
+    <div *ngIf="isLoading">
+      <ion-card *ngFor="let i of [1, 2, 3]">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-skeleton-text [animated]="true" style="width: 50%"></ion-skeleton-text>
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="order-skeleton">
+            <ion-skeleton-text [animated]="true" style="width: 70%"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+    
+    <!-- Active Orders Section -->
+    <div *ngIf="!isLoading && activeOrders.length > 0" class="order-section">
+      <h2>Active Orders</h2>
+      
+      <ion-card *ngFor="let order of activeOrders" class="order-card active">
+        <ion-card-header>
+          <ion-card-title>
+            <div class="order-title">
+              <span>
+                Order #{{ order.id?.substring(0, 6)?.toUpperCase() || '------' }}
+              </span>
+              <ion-badge [color]="getStatusColor(order.status)">
+                {{ getStatusText(order.status) }}
+              </ion-badge>
+            </div>
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="order-details">
+            <div class="detail">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>{{ getFormattedDate(order.orderTime) }}</span>
+            </div>
+            
+            <div class="detail">
+              <ion-icon name="cafe-outline"></ion-icon>
+              <span>{{ order.items.length }} items</span>
+            </div>
+            
+            <div class="detail">
+              <ion-icon name="receipt-outline"></ion-icon>
+              <span>${{ order.total.toFixed(2) }}</span>
+            </div>
+          </div>
+          
+          <div class="order-items">
+            <div *ngFor="let item of order.items.slice(0, 2)" class="item-summary">
+              {{ item.quantity }}x {{ item.name }}
+            </div>
+            
+            <div *ngIf="order.items.length > 2" class="item-summary more">
+              +{{ order.items.length - 2 }} more items
+            </div>
+          </div>
+          
+          <div class="order-actions">
+            <ion-button expand="block" (click)="trackOrder(order.id || '')">
+              Track Order
+              <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+    
+    <!-- Past Orders Section -->
+    <div *ngIf="!isLoading && pastOrders.length > 0" class="order-section">
+      <h2>Past Orders</h2>
+      
+      <ion-card *ngFor="let order of pastOrders" class="order-card">
+        <ion-card-header>
+          <ion-card-title>
+            <div class="order-title">
+              <span>
+                Order #{{ order.id?.substring(0, 6)?.toUpperCase() || '------' }}
+              </span>
+              <ion-badge [color]="getStatusColor(order.status)">
+                {{ getStatusText(order.status) }}
+              </ion-badge>
+            </div>
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="order-details">
+            <div class="detail">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>{{ getFormattedDate(order.orderTime) }}</span>
+            </div>
+            
+            <div class="detail">
+              <ion-icon name="cafe-outline"></ion-icon>
+              <span>{{ order.items.length }} items</span>
+            </div>
+            
+            <div class="detail">
+              <ion-icon name="receipt-outline"></ion-icon>
+              <span>${{ order.total.toFixed(2) }}</span>
+            </div>
+          </div>
+          
+          <div class="order-items">
+            <div *ngFor="let item of order.items.slice(0, 2)" class="item-summary">
+              {{ item.quantity }}x {{ item.name }}
+            </div>
+            
+            <div *ngIf="order.items.length > 2" class="item-summary more">
+              +{{ order.items.length - 2 }} more items
+            </div>
+          </div>
+          
+          <div class="order-actions">
+            <ion-button expand="block" fill="outline" (click)="reorder(order)">
+              Reorder
+              <ion-icon name="cart-outline" slot="end"></ion-icon>
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+    
+    <!-- No Orders State -->
+    <div *ngIf="!isLoading && activeOrders.length === 0 && pastOrders.length === 0" class="no-orders">
+      <ion-icon name="cafe-outline"></ion-icon>
+      <h2>No Orders Yet</h2>
+      <p>You haven't placed any orders yet. Browse our menu and place your first order.</p>
+      
+      <ion-button routerLink="/menu" expand="block">
+        Browse Menu
+      </ion-button>
+    </div>
+  </ion-content>

@@ -1,0 +1,101 @@
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/coffee-journey"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Coffee Achievements</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <h1 class="main-title">Your Coffee Achievements</h1>
+    
+    <p class="intro-text">
+      Track your coffee journey and unlock achievements as you explore different coffees, brewing methods, and more!
+    </p>
+    
+    <!-- Progress Overview -->
+    <ion-card class="progress-card">
+      <ion-card-content>
+        <div class="progress-header">
+          <div class="progress-stats">
+            <div class="stat-item">
+              <span class="stat-value">{{ getUnlockedCount() }}/{{ achievements.length }}</span>
+              <span class="stat-label">Achievements</span>
+            </div>
+            
+            <div class="stat-item">
+              <span class="stat-value">{{ getTotalPoints() }}</span>
+              <span class="stat-label">Points</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="progress-bar-container">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="getProgressPercentage()"></div>
+          </div>
+          <div class="progress-text">{{ getProgressPercentage() | number:'1.0-0' }}% Complete</div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+    
+    <!-- Loading Indicator -->
+    <div *ngIf="isLoading" class="loading-container">
+      <ion-spinner name="circles"></ion-spinner>
+      <p>Loading achievements...</p>
+    </div>
+    
+    <!-- Achievements List -->
+    <div *ngIf="!isLoading" class="achievements-container">
+      <h2 class="section-title">Unlocked Achievements</h2>
+      
+      <div class="empty-state" *ngIf="!achievements.some(a => a.unlocked)">
+        <ion-icon name="trophy-outline"></ion-icon>
+        <p>You haven't unlocked any achievements yet. Start exploring to earn your first achievement!</p>
+      </div>
+      
+      <div class="achievements-grid" *ngIf="achievements.some(a => a.unlocked)">
+        <ion-card *ngFor="let achievement of achievements" class="achievement-card" [class.unlocked]="achievement.unlocked" [class.locked]="!achievement.unlocked">
+          <div class="achievement-icon" *ngIf="achievement.unlocked">
+            <img [src]="achievement.iconURL" [alt]="achievement.name">
+          </div>
+          
+          <div class="achievement-icon locked" *ngIf="!achievement.unlocked">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+          </div>
+          
+          <div class="achievement-content">
+            <h3>{{ achievement.name }}</h3>
+            <p>{{ achievement.description }}</p>
+            
+            <div class="achievement-footer">
+              <div class="points">+{{ achievement.pointsAwarded }}</div>
+              <div class="date" *ngIf="achievement.unlockedDate">
+                {{ achievement.unlockedDate | date:'mediumDate' }}
+              </div>
+            </div>
+          </div>
+        </ion-card>
+      </div>
+      
+      <h2 class="section-title">Locked Achievements</h2>
+      
+      <div class="achievements-grid">
+        <ion-card *ngFor="let achievement of achievements" class="achievement-card locked" [class.hidden]="achievement.unlocked">
+          <div class="achievement-icon locked">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+          </div>
+          
+          <div class="achievement-content">
+            <h3>{{ achievement.name }}</h3>
+            <p>{{ achievement.description }}</p>
+            
+            <div class="achievement-footer">
+              <div class="points">+{{ achievement.pointsAwarded }}</div>
+            </div>
+          </div>
+        </ion-card>
+      </div>
+    </div>
+  </ion-content>

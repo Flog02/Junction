@@ -1,0 +1,174 @@
+/* src/app/features/gift-cards/gift-cards.page.scss */
+
+.hero-section {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  
+  .hero-section h1 {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--ion-color-primary);
+  }
+  
+  .hero-section p {
+    color: var(--ion-color-medium);
+    margin-bottom: 16px;
+  }
+  
+  .create-button {
+    margin-top: 8px;
+  }
+  
+  ion-segment {
+    margin-bottom: 24px;
+  }
+  
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 0;
+  }
+  
+  .loading-container ion-spinner {
+    margin-bottom: 16px;
+  }
+  
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 0;
+    text-align: center;
+  }
+  
+  .empty-state ion-icon {
+    font-size: 48px;
+    color: var(--ion-color-medium);
+    margin-bottom: 16px;
+  }
+  
+  .empty-state h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+  
+  .empty-state p {
+    color: var(--ion-color-medium);
+    margin-bottom: 16px;
+  }
+  
+  .gift-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  
+  .gift-card-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .gift-card-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .gift-card-preview {
+    position: relative;
+    width: 80px;
+    height: 50px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-right: 16px;
+    flex-shrink: 0;
+  }
+  
+  .gift-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .gift-card-amount {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+  
+  .gift-card-status {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--ion-color-danger);
+    color: white;
+    font-size: 10px;
+    padding: 2px 4px;
+    text-transform: uppercase;
+  }
+  
+  .gift-card-details {
+    flex: 1;
+  }
+  
+  .gift-card-title {
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  
+  .gift-card-subtitle {
+    font-size: 12px;
+    color: var(--ion-color-medium);
+    margin-bottom: 4px;
+  }
+  
+  .gift-card-balance {
+    font-size: 14px;
+    color: var(--ion-color-success);
+    font-weight: bold;
+  }
+  
+  .gift-card-balance.zero-balance {
+    color: var(--ion-color-danger);
+  }
+  
+  .gift-card-chevron {
+    color: var(--ion-color-medium);
+    margin-left: 8px;
+  }
+  
+  .redemption-section {
+    background-color: var(--ion-color-light);
+    padding: 24px;
+    border-radius: 12px;
+    margin-top: 32px;
+  }
+  
+  .redemption-section h2 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: var(--ion-color-primary);
+  }
+  
+  .redemption-section p {
+    color: var(--ion-color-medium);
+    margin-bottom: 16px;
+  }

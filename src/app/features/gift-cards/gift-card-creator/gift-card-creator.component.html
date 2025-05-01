@@ -1,0 +1,230 @@
+
+<ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/gift-cards"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Create Gift Card</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <div class="stepper-container">
+      <div class="stepper">
+        <div class="step" [ngClass]="{'active': currentStep >= 1, 'completed': currentStep > 1}">
+          <div class="step-number">1</div>
+          <div class="step-label">Recipient</div>
+        </div>
+        <div class="step-line" [ngClass]="{'active': currentStep > 1}"></div>
+        
+        <div class="step" [ngClass]="{'active': currentStep >= 2, 'completed': currentStep > 2}">
+          <div class="step-number">2</div>
+          <div class="step-label">Amount</div>
+        </div>
+        <div class="step-line" [ngClass]="{'active': currentStep > 2}"></div>
+        
+        <div class="step" [ngClass]="{'active': currentStep >= 3, 'completed': currentStep > 3}">
+          <div class="step-number">3</div>
+          <div class="step-label">Design</div>
+        </div>
+        <div class="step-line" [ngClass]="{'active': currentStep > 3}"></div>
+        
+        <div class="step" [ngClass]="{'active': currentStep >= 4}">
+          <div class="step-number">4</div>
+          <div class="step-label">Message</div>
+        </div>
+      </div>
+    </div>
+    <form [formGroup]="giftCardForm" (ngSubmit)="onSubmit()">
+      <!-- Step 1: Recipient Info -->
+      <div *ngIf="currentStep === 1">
+        <h2 class="step-title">Recipient Information</h2>
+        <p class="step-description">Enter the details of the person who will receive this gift card.</p>
+        
+        <ion-item>
+          <ion-label position="stacked">Recipient Name</ion-label>
+          <ion-input formControlName="recipientName" placeholder="Enter recipient name"></ion-input>
+          <ion-note slot="error" *ngIf="giftCardForm.get('recipientName')?.touched && giftCardForm.get('recipientName')?.invalid">
+            {{ getErrorMessage('recipientName') }}
+          </ion-note>
+        </ion-item>
+        
+        <ion-item class="ion-margin-bottom">
+          <ion-label position="stacked">Recipient Email</ion-label>
+          <ion-input formControlName="recipientEmail" type="email" placeholder="Enter recipient email"></ion-input>
+          <ion-note slot="error" *ngIf="giftCardForm.get('recipientEmail')?.touched && giftCardForm.get('recipientEmail')?.invalid">
+            {{ getErrorMessage('recipientEmail') }}
+          </ion-note>
+        </ion-item>
+        
+        <div class="navigation-buttons">
+          <div></div> <!-- Empty div for spacing -->
+          <ion-button (click)="nextStep()">
+            Next
+            <ion-icon name="arrow-forward" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+      
+      <!-- Step 2: Amount -->
+      <div *ngIf="currentStep === 2">
+        <h2 class="step-title">Gift Card Amount</h2>
+        <p class="step-description">Select an amount for your gift card.</p>
+        
+        <div class="amount-selector">
+          <div 
+            *ngFor="let amount of standardAmounts" 
+            class="amount-option" 
+            [ngClass]="{'selected': giftCardForm.get('amount')?.value === amount && !showCustomAmount}"
+            (click)="selectAmount(amount)"
+          >
+            ${{ amount }}
+          </div>
+          
+          <div 
+            class="amount-option custom-amount" 
+            [ngClass]="{'selected': showCustomAmount}"
+            (click)="toggleCustomAmount()"
+          >
+            Custom
+          </div>
+        </div>
+        
+        <div *ngIf="showCustomAmount" class="custom-amount-container">
+          <ion-item>
+            <ion-label position="stacked">Custom Amount ($5-$500)</ion-label>
+            <ion-input 
+              formControlName="customAmount" 
+              type="number" 
+              min="5"
+              max="500"
+              placeholder="Enter amount"
+              (ionChange)="onCustomAmountChange()"
+            ></ion-input>
+            <ion-note slot="error" *ngIf="giftCardForm.get('customAmount')?.touched && giftCardForm.get('customAmount')?.invalid">
+              {{ getErrorMessage('customAmount') }}
+            </ion-note>
+          </ion-item>
+        </div>
+        
+        <div class="navigation-buttons">
+          <ion-button fill="outline" (click)="previousStep()">
+            <ion-icon name="arrow-back" slot="start"></ion-icon>
+            Back
+          </ion-button>
+          <ion-button (click)="nextStep()">
+            Next
+            <ion-icon name="arrow-forward" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+      
+      <!-- Step 3: Design -->
+      <div *ngIf="currentStep === 3">
+        <h2 class="step-title">Gift Card Design</h2>
+        <p class="step-description">Choose a design for your gift card.</p>
+        
+        <ion-item class="ion-margin-bottom">
+          <ion-label position="stacked">Occasion</ion-label>
+          <ion-select formControlName="occasion">
+            <ion-select-option *ngFor="let occasion of standardOccasions" [value]="occasion">
+              {{ occasion }}
+            </ion-select-option>
+          </ion-select>
+        </ion-item>
+        
+        <div class="templates-grid">
+          <div 
+            *ngFor="let template of giftCardTemplates" 
+            class="template-card" 
+            [ngClass]="{'selected': selectedTemplate?.id === template.id}"
+            (click)="selectTemplate(template)"
+          >
+            <img [src]="template.imageUrl" [alt]="template.name" class="template-image">
+            <div class="template-name">{{ template.name }}</div>
+            <ion-icon 
+              *ngIf="selectedTemplate?.id === template.id" 
+              name="checkmark-circle" 
+              class="template-selected-icon"
+            ></ion-icon>
+          </div>
+        </div>
+        
+        <ion-note 
+          *ngIf="giftCardForm.get('design')?.touched && giftCardForm.get('design')?.invalid" 
+          color="danger"
+          class="error-message"
+        >
+          Please select a design
+        </ion-note>
+        
+        <div class="navigation-buttons">
+          <ion-button fill="outline" (click)="previousStep()">
+            <ion-icon name="arrow-back" slot="start"></ion-icon>
+            Back
+          </ion-button>
+          <ion-button (click)="nextStep()">
+            Next
+            <ion-icon name="arrow-forward" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+      
+      <!-- Step 4: Message -->
+      <div *ngIf="currentStep === 4">
+        <h2 class="step-title">Personal Message</h2>
+        <p class="step-description">Add a personal message to your gift card.</p>
+        
+        <ion-item class="ion-margin-bottom">
+          <ion-label position="stacked">Message (Optional)</ion-label>
+          <ion-textarea 
+            formControlName="message" 
+            rows="4" 
+            placeholder="Enter your personal message"
+          ></ion-textarea>
+          <ion-note slot="helper">
+            {{ giftCardForm.get('message')?.value.length || 0 }}/200 characters
+          </ion-note>
+          <ion-note slot="error" *ngIf="giftCardForm.get('message')?.touched && giftCardForm.get('message')?.invalid">
+            {{ getErrorMessage('message') }}
+          </ion-note>
+        </ion-item>
+        
+        <!-- Gift Card Preview -->
+        <div class="preview-container">
+          <h3 class="preview-title">Gift Card Preview</h3>
+          
+          <div class="gift-card-preview">
+            <img 
+              [src]="selectedTemplate?.imageUrl || 'assets/gift-cards/default.jpg'" 
+              alt="Gift Card Preview" 
+              class="gift-card-image"
+            >
+            
+            <div class="gift-card-overlay">
+              <div class="gift-card-amount">${{ showCustomAmount ? giftCardForm.get('customAmount')?.value : giftCardForm.get('amount')?.value }}</div>
+              <div class="gift-card-occasion">{{ giftCardForm.get('occasion')?.value }}</div>
+              <div class="gift-card-message" *ngIf="giftCardForm.get('message')?.value">
+                "{{ giftCardForm.get('message')?.value }}"
+              </div>
+              <div class="gift-card-recipient">
+                To: {{ giftCardForm.get('recipientName')?.value }}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="navigation-buttons">
+          <ion-button fill="outline" (click)="previousStep()">
+            <ion-icon name="arrow-back" slot="start"></ion-icon>
+            Back
+          </ion-button>
+          <ion-button type="submit" [disabled]="giftCardForm.invalid || isSubmitting">
+            Send Gift Card
+            <ion-icon name="send" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </form>
+   
+  </ion-content>

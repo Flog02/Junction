@@ -1,0 +1,235 @@
+/* src/app/features/table-service/table-order/table-order.component.scss */
+:host {
+    display: block;
+  }
+  
+  /* Table Information Card */
+  .table-info-card {
+    display: flex;
+    background-color: var(--ion-card-background);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    
+    .table-number {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--ion-color-primary);
+      color: white;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-right: 20px;
+      flex-shrink: 0;
+      
+      span {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.9;
+      }
+      
+      h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+      }
+    }
+    
+    .table-details {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex: 1;
+      
+      .detail {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+        
+        ion-icon {
+          margin-right: 8px;
+          font-size: 1.2rem;
+          color: var(--ion-color-medium);
+        }
+        
+        span {
+          font-size: 1rem;
+        }
+        
+        &.store-name span {
+          font-weight: 500;
+        }
+      }
+    }
+  }
+  
+  /* Loading Container */
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 0;
+    
+    ion-spinner {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+    }
+    
+    p {
+      color: var(--ion-color-medium);
+      font-size: 1rem;
+    }
+  }
+  
+  /* Cart Card */
+  .cart-card {
+    margin-bottom: 20px;
+    
+    .item-controls {
+      display: flex;
+      align-items: center;
+      
+      .item-quantity {
+        width: 24px;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+      
+      .item-price {
+        margin-left: 12px;
+        font-weight: 600;
+        min-width: 60px;
+        text-align: right;
+      }
+    }
+    
+    .cart-summary {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--ion-color-light);
+      
+      .summary-line {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        color: var(--ion-color-medium);
+        
+        &.total {
+          margin-top: 8px;
+          padding-top: 8px;
+          border-top: 1px dashed var(--ion-color-light);
+          font-weight: 600;
+          font-size: 1.1rem;
+          color: var(--ion-color-dark);
+        }
+      }
+    }
+    
+    ion-button {
+      margin-top: 20px;
+    }
+  }
+  
+  /* Menu Section */
+  .menu-section {
+    margin-bottom: 30px;
+    
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--ion-color-dark);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--ion-color-light);
+    }
+  }
+  
+  /* Products Grid */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    
+    .product-card {
+      margin: 0;
+      height: 100%;
+      
+      .product-image {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+      }
+      
+      ion-card-header {
+        padding-top: 12px;
+        padding-bottom: 8px;
+      }
+      
+      ion-card-title {
+        font-size: 1rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      
+      .product-description {
+        font-size: 0.8rem;
+        color: var(--ion-color-medium);
+        height: 35px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        margin-bottom: 12px;
+      }
+      
+      .product-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        
+        .product-price {
+          font-weight: 600;
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+  
+  /* Responsive Adjustments */
+  @media (min-width: 768px) {
+    .products-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+  }
+  
+  /* Dark Mode Adjustments */
+  @media (prefers-color-scheme: dark) {
+    .cart-summary {
+      .summary-line {
+        color: var(--ion-color-medium-tint);
+        
+        &.total {
+          color: var(--ion-color-light);
+          border-top-color: var(--ion-color-dark-shade);
+        }
+      }
+    }
+    
+    .menu-section h2 {
+      color: var(--ion-color-light);
+      border-bottom-color: var(--ion-color-dark-shade);
+    }
+  }

@@ -1,0 +1,52 @@
+<!-- src/app/features/auth/verify-email/verify-email.page.html -->
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/auth/login"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Verify Email</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <ion-grid>
+      <ion-row class="ion-justify-content-center">
+        <ion-col size-md="6" size-lg="5" size-xs="12">
+          <div class="logo-container">
+            <img src="assets/icons/cafe-logo.png" alt="Café Logo" class="logo">
+            <h1 class="ion-text-center">Digital Café</h1>
+            <p class="ion-text-center">Email verification</p>
+          </div>
+          
+          <ion-card>
+            <ion-card-content>
+              <div class="verify-email-container">
+                <ion-icon name="mail-outline" class="mail-icon"></ion-icon>
+                <h2>Verify Your Email</h2>
+                <p>
+                  A verification link has been sent to <strong>{{ email }}</strong>. 
+                  Please check your inbox and click the verification link to activate your account.
+                </p>
+                <p class="small-text">
+                  If you don't see the email, please check your spam folder.
+                </p>
+                
+                <ion-button expand="block" color="primary" (click)="resendVerificationEmail()" class="ion-margin-bottom">
+                  Resend Verification Email
+                </ion-button>
+                
+                <ion-button expand="block" fill="outline" (click)="goHome()">
+                  <ion-icon name="home-outline" slot="start"></ion-icon>
+                  Continue to App
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+          
+          <div class="ion-text-center ion-margin-top">
+            <p>Changed your mind? <a routerLink="/auth/login">Return to Login</a></p>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </ion-content>

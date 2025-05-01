@@ -1,0 +1,121 @@
+<!-- src/app/features/table-service/table-order/table-order.component.html -->
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/table-service"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Table Order</ion-title>
+      <ion-buttons slot="end">
+        <ion-button [disabled]="cartItems.length === 0" (click)="placeOrder()">
+          <ion-icon name="cart-outline" slot="start"></ion-icon>
+          {{ getCartItemCount() }}
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <!-- Table Information -->
+    <div class="table-info-card" *ngIf="tableInfo">
+      <div class="table-number">
+        <span>Table</span>
+        <h2>{{ tableInfo.tableNumber }}</h2>
+      </div>
+      
+      <div class="table-details">
+        <div class="detail">
+          <ion-icon name="restaurant-outline"></ion-icon>
+          <span>{{ tableInfo.seats }} seats</span>
+        </div>
+        
+        <div class="detail store-name">
+          <ion-icon name="cafe-outline"></ion-icon>
+          <span>{{ tableInfo.storeId }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Loading Indicator -->
+    <div class="loading-container" *ngIf="isLoading">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Loading menu...</p>
+    </div>
+    
+    <!-- Main Content -->
+    <div *ngIf="!isLoading">
+      <!-- Cart Summary (if items exist) -->
+      <ion-card *ngIf="cartItems.length > 0" class="cart-card">
+        <ion-card-header>
+          <ion-card-title>Your Order</ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <ion-list lines="full">
+            <ion-item *ngFor="let item of cartItems; let i = index">
+              <ion-label>
+                <h2>{{ item.name }}</h2>
+                <p *ngIf="item.customizations.size">{{ item.customizations.size.name }}</p>
+              </ion-label>
+              <div slot="end" class="item-controls">
+                <ion-button fill="clear" size="small" (click)="removeFromCart(i)">
+                  <ion-icon name="remove-circle-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+                <span class="item-quantity">{{ item.quantity }}</span>
+                <ion-button fill="clear" size="small" (click)="addItemQuantity(i)">
+                  <ion-icon name="add-circle-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+                <span class="item-price">${{ (item.itemTotal).toFixed(2) }}</span>
+              </div>
+            </ion-item>
+          </ion-list>
+          
+          <div class="cart-summary">
+            <div class="summary-line">
+              <span>Subtotal</span>
+              <span>${{ getCartTotal().toFixed(2) }}</span>
+            </div>
+            <div class="summary-line">
+              <span>Tax</span>
+              <span>${{ (getCartTotal() * 0.0725).toFixed(2) }}</span>
+            </div>
+            <div class="summary-line total">
+              <span>Total</span>
+              <span>${{ (getCartTotal() * 1.0725).toFixed(2) }}</span>
+            </div>
+          </div>
+          
+          <ion-button expand="block" (click)="placeOrder()" [disabled]="isPlacingOrder">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            <ng-container *ngIf="!isPlacingOrder">Place Order</ng-container>
+            <ion-spinner name="dots" *ngIf="isPlacingOrder"></ion-spinner>
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+      
+      <!-- Menu Categories -->
+      <div class="menu-section">
+        <h2>Quick Order</h2>
+        
+        <div class="products-grid">
+          <ion-card *ngFor="let product of featuredProducts" class="product-card">
+            <img [src]="product.imageURL" [alt]="product.name" class="product-image" />
+            
+            <ion-card-header>
+              <ion-card-title>{{ product.name }}</ion-card-title>
+            </ion-card-header>
+            
+            <ion-card-content>
+              <p class="product-description">{{ product.description }}</p>
+              
+              <div class="product-footer">
+                <span class="product-price">${{ product.price.toFixed(2) }}</span>
+                <ion-button fill="outline" size="small" (click)="addToCart(product)">
+                  Add to Order
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+      </div>
+    </div>
+  </ion-content>

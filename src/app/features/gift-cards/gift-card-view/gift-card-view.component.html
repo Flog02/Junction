@@ -1,0 +1,111 @@
+<ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/gift-cards"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Gift Card</ion-title>
+      <ion-buttons slot="end" *ngIf="giftCard">
+        <ion-button (click)="shareGiftCard()">
+          <ion-icon name="share-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <div *ngIf="isLoading" class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading gift card...</p>
+    </div>
+    
+    <div *ngIf="error" class="error-container">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <h2>Error</h2>
+      <p>{{ error }}</p>
+      <ion-button routerLink="/gift-cards">Back to Gift Cards</ion-button>
+    </div>
+    
+    <div *ngIf="!isLoading && !error && giftCard" class="gift-card-container">
+      <!-- Gift Card Visual -->
+      <div class="gift-card" [ngClass]="{'redeemed': giftCard.status === 'redeemed', 'expired': giftCard.status === 'expired'}">
+        <img 
+          [src]="'assets/gift-cards/' + giftCard.design + '.jpg'" 
+          alt="Gift Card" 
+          class="gift-card-image"
+          onError="this.src='assets/gift-cards/default.jpg'"
+        >
+        
+        <div class="gift-card-overlay">
+          <div class="gift-card-amount">${{ giftCard.amount }}</div>
+          <div class="gift-card-occasion">{{ giftCard.occasion }}</div>
+          
+          <div *ngIf="giftCard.status !== 'active'" class="gift-card-status-badge">
+            {{ giftCard.status | uppercase }}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Gift Card Details -->
+      <div class="gift-card-details">
+        <div class="gift-card-code-container">
+          <div class="gift-card-code">{{ giftCard.code }}</div>
+          <ion-button fill="clear" size="small" (click)="copyCode()">
+            <ion-icon name="copy-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+        
+        <div class="gift-card-info">
+          <div class="info-item">
+            <div class="info-label">Recipient</div>
+            <div class="info-value">{{ giftCard.recipientName }}</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">From</div>
+            <div class="info-value">{{ giftCard.senderName || 'Someone special' }}</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Created</div>
+            <div class="info-value">{{ formatDate(giftCard.createdDate) }}</div>
+          </div>
+          
+          <div class="info-item">
+            <div class="info-label">Expires</div>
+            <div class="info-value">{{ formatDate(giftCard.expiryDate) }}</div>
+          </div>
+          
+          <div class="info-item" *ngIf="giftCard.status === 'redeemed'">
+            <div class="info-label">Redeemed</div>
+            <div class="info-value">{{ formatDate(giftCard.redeemedDate) }}</div>
+          </div>
+          
+          <div class="info-item" *ngIf="giftCard.message">
+            <div class="info-label">Message</div>
+            <div class="info-value message">{{ giftCard.message }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <ion-button expand="block" *ngIf="giftCard.status === 'active'" (click)="showRedeemDialog()">
+          Redeem Gift Card
+        </ion-button>
+        
+        <ion-button expand="block" fill="outline" routerLink="/gift-cards/create">
+          Create Your Own Gift Card
+        </ion-button>
+      </div>
+      
+      <!-- Usage Instructions -->
+      <div class="usage-instructions" *ngIf="giftCard.status === 'active'">
+        <h2>How to use this gift card</h2>
+        <ol>
+          <li>Present this gift card when checking out at any of our locations</li>
+          <li>Or redeem it now to add it to your account for online orders</li>
+          <li>Gift card can be used for multiple purchases until the balance is depleted</li>
+        </ol>
+      </div>
+    </div>
+  </ion-content>

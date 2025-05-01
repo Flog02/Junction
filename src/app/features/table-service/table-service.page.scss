@@ -1,0 +1,218 @@
+/* src/app/features/table-service/table-service.page.scss */
+:host {
+    display: block;
+  }
+  
+  /* Hero Section */
+  .hero-section {
+    padding: 1.5rem 0 2rem;
+    margin-bottom: 2rem;
+    
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--ion-color-primary);
+    }
+    
+    p {
+      font-size: 1.1rem;
+      color: var(--ion-color-medium);
+      margin-bottom: 2rem;
+    }
+  }
+  
+  .scan-button-container {
+    max-width: 400px;
+    margin: 0 auto;
+    
+    ion-button {
+      --border-radius: 12px;
+      height: 56px;
+      font-size: 1.1rem;
+      
+      ion-icon {
+        font-size: 1.4rem;
+        margin-right: 0.5rem;
+      }
+    }
+    
+    .scan-note {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--ion-color-medium);
+      margin-top: 0.75rem;
+    }
+  }
+  
+  /* Section styling */
+  .section {
+    margin-bottom: 3rem;
+    
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--ion-color-dark);
+      border-bottom: 1px solid var(--ion-color-light);
+      padding-bottom: 0.75rem;
+    }
+  }
+  
+  /* Steps styling */
+  .step-card {
+    background-color: var(--ion-card-background);
+    border-radius: 12px;
+    padding: 2rem 1rem;
+    text-align: center;
+    height: 100%;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    .step-number {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 30px;
+      height: 30px;
+      background-color: var(--ion-color-primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    
+    ion-icon {
+      font-size: 3rem;
+      color: var(--ion-color-primary);
+      margin-bottom: 1rem;
+    }
+    
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+    
+    p {
+      color: var(--ion-color-medium);
+      font-size: 0.95rem;
+      margin: 0;
+    }
+  }
+  
+  /* Store list styling */
+  .store-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  
+  .store-card {
+    height: 100%;
+    margin: 0;
+    
+    ion-card-header {
+      padding-bottom: 0.5rem;
+    }
+    
+    ion-card-title {
+      font-size: 1.2rem;
+    }
+    
+    .store-address {
+      font-size: 0.9rem;
+      color: var(--ion-color-medium);
+      margin-bottom: 1rem;
+    }
+    
+    .store-details {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      
+      .store-detail {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        
+        ion-icon {
+          font-size: 1.1rem;
+          margin-right: 0.4rem;
+          color: var(--ion-color-medium);
+        }
+        
+        .no-wait {
+          color: var(--ion-color-success);
+        }
+        
+        .short-wait {
+          color: var(--ion-color-success-shade);
+        }
+        
+        .medium-wait {
+          color: var(--ion-color-warning);
+        }
+        
+        .long-wait {
+          color: var(--ion-color-danger);
+        }
+      }
+    }
+    
+    .visit-btn {
+      margin-top: 0.5rem;
+    }
+  }
+  
+  /* FAQ Section */
+  .faq-section ion-card {
+    margin: 0;
+  }
+  
+  .faq-item {
+    margin-bottom: 1.5rem;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+    
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--ion-color-primary);
+    }
+    
+    p {
+      font-size: 0.95rem;
+      color: var(--ion-color-medium-shade);
+      margin: 0;
+    }
+  }
+  
+  /* Dark mode adjustments */
+  @media (prefers-color-scheme: dark) {
+    .hero-section {
+      h1 {
+        color: var(--ion-color-primary-tint);
+      }
+    }
+    
+    .section h2 {
+      border-bottom-color: var(--ion-color-dark-shade);
+      color: var(--ion-color-light);
+    }
+    
+    .step-card {
+      background-color: var(--ion-card-background);
+    }
+  }

@@ -1,0 +1,164 @@
+/* src/app/features/order/order-history/order-history.component.scss */
+:host {
+    display: block;
+  }
+  
+  /* Section Styles */
+  .order-section {
+    margin-bottom: 24px;
+    
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--ion-color-dark);
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--ion-color-light);
+    }
+  }
+  
+  /* Order Card Styles */
+  .order-card {
+    margin-bottom: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    
+    &.active {
+      border-left: 4px solid var(--ion-color-primary);
+    }
+    
+    ion-card-header {
+      padding-bottom: 8px;
+    }
+    
+    .order-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      span {
+        font-size: 1.1rem;
+        font-weight: 600;
+      }
+      
+      ion-badge {
+        --padding-start: 8px;
+        --padding-end: 8px;
+        --padding-top: 4px;
+        --padding-bottom: 4px;
+        font-size: 0.8rem;
+        border-radius: 12px;
+      }
+    }
+  }
+  
+  /* Order Details Style */
+  .order-details {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    
+    .detail {
+      flex: 1 0 auto;
+      display: flex;
+      align-items: center;
+      margin-right: 16px;
+      margin-bottom: 8px;
+      min-width: 100px;
+      
+      ion-icon {
+        font-size: 1.1rem;
+        margin-right: 8px;
+        color: var(--ion-color-medium);
+      }
+      
+      span {
+        font-size: 0.9rem;
+        color: var(--ion-color-dark);
+      }
+    }
+  }
+  
+  /* Order Items Style */
+  .order-items {
+    margin-bottom: 16px;
+    padding: 12px;
+    background-color: var(--ion-color-light);
+    border-radius: 8px;
+    
+    .item-summary {
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      &.more {
+        color: var(--ion-color-medium);
+        font-style: italic;
+        font-size: 0.85rem;
+      }
+    }
+  }
+  
+  /* Order Actions Style */
+  .order-actions {
+    ion-button {
+      margin: 0;
+    }
+  }
+  
+  /* Loading Skeleton Style */
+  .order-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 0;
+  }
+  
+  /* No Orders State */
+  .no-orders {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 16px;
+    
+    ion-icon {
+      font-size: 64px;
+      color: var(--ion-color-medium);
+      margin-bottom: 16px;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    p {
+      color: var(--ion-color-medium);
+      margin-bottom: 24px;
+      max-width: 300px;
+    }
+    
+    ion-button {
+      width: 100%;
+      max-width: 300px;
+    }
+  }
+  
+  /* Dark Mode Adjustments */
+  @media (prefers-color-scheme: dark) {
+    .order-section h2 {
+      color: var(--ion-color-light);
+      border-bottom-color: var(--ion-color-dark-shade);
+    }
+    
+    .order-items {
+      background-color: var(--ion-color-step-100);
+    }
+  }

@@ -1,0 +1,179 @@
+<!-- src/app/features/gift-cards/gift-cards.page.html -->
+
+<ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/home"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Gift Cards</ion-title>
+      <ion-buttons slot="end">
+        <ion-button routerLink="/gift-cards/create">
+          <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <div class="hero-section">
+      <h1>Digital Gift Cards</h1>
+      <p>Send the perfect gift to your coffee-loving friends and family</p>
+      <ion-button routerLink="/gift-cards/create" expand="block" class="create-button">
+        <ion-icon name="gift-outline" slot="start"></ion-icon>
+        Create New Gift Card
+      </ion-button>
+    </div>
+    
+    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="active">
+        <ion-label>Active</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="received">
+        <ion-label>Received</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="sent">
+        <ion-label>Sent</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    
+    <div *ngIf="isLoading" class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading gift cards...</p>
+    </div>
+    
+    <!-- Active Gift Cards -->
+    <div *ngIf="!isLoading && selectedSegment === 'active'">
+      <div *ngIf="activeGiftCards.length === 0" class="empty-state">
+        <ion-icon name="card-outline"></ion-icon>
+        <h2>No Active Gift Cards</h2>
+        <p>You don't have any active gift cards yet.</p>
+        <ion-button routerLink="/gift-cards/redeem" fill="outline">
+          Redeem a Gift Card
+        </ion-button>
+      </div>
+      
+      <div *ngIf="activeGiftCards.length > 0" class="gift-cards-list">
+        <div *ngFor="let giftCard of activeGiftCards" class="gift-card-item" [routerLink]="['/gift-cards', giftCard.id]">
+          <div class="gift-card-preview">
+            <img 
+              [src]="'assets/gift-cards/' + giftCard.design + '.jpg'" 
+              alt="Gift Card" 
+              class="gift-card-image"
+              onError="this.src='assets/gift-cards/default.jpg'"
+            >
+            <div class="gift-card-amount">${{ giftCard.amount }}</div>
+          </div>
+          
+          <div class="gift-card-details">
+            <div class="gift-card-title">
+              {{ giftCard.occasion }} Card
+            </div>
+            <div class="gift-card-subtitle">
+              Expires: {{ formatDate(giftCard.expiryDate) }}
+            </div>
+            <div class="gift-card-balance">
+              Balance: ${{ giftCard.amount }}
+            </div>
+          </div>
+          
+          <ion-icon name="chevron-forward" class="gift-card-chevron"></ion-icon>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Received Gift Cards -->
+    <div *ngIf="!isLoading && selectedSegment === 'received'">
+      <div *ngIf="receivedGiftCards.length === 0" class="empty-state">
+        <ion-icon name="mail-outline"></ion-icon>
+        <h2>No Received Gift Cards</h2>
+        <p>You haven't received any gift cards yet.</p>
+        <ion-button routerLink="/gift-cards/redeem" fill="outline">
+          Redeem a Gift Card
+        </ion-button>
+      </div>
+      
+      <div *ngIf="receivedGiftCards.length > 0" class="gift-cards-list">
+        <div *ngFor="let giftCard of receivedGiftCards" class="gift-card-item" [routerLink]="['/gift-cards', giftCard.id]">
+          <div class="gift-card-preview">
+            <img 
+              [src]="'assets/gift-cards/' + giftCard.design + '.jpg'" 
+              alt="Gift Card" 
+              class="gift-card-image"
+              onError="this.src='assets/gift-cards/default.jpg'"
+            >
+            <div class="gift-card-amount">${{ giftCard.initialAmount }}</div>
+            <div *ngIf="giftCard.status !== 'active'" class="gift-card-status">
+              {{ giftCard.status }}
+            </div>
+          </div>
+          
+          <div class="gift-card-details">
+            <div class="gift-card-title">
+              From: {{ giftCard.senderName || 'Someone special' }}
+            </div>
+            <div class="gift-card-subtitle">
+              Received: {{ formatDate(giftCard.createdDate) }}
+            </div>
+            <div class="gift-card-balance" [ngClass]="{'zero-balance': giftCard.amount === 0}">
+              {{ giftCard.status === 'active' ? 'Balance: $' + giftCard.amount : 'Used: $' + giftCard.initialAmount }}
+            </div>
+          </div>
+          
+          <ion-icon name="chevron-forward" class="gift-card-chevron"></ion-icon>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Sent Gift Cards -->
+    <div *ngIf="!isLoading && selectedSegment === 'sent'">
+      <div *ngIf="sentGiftCards.length === 0" class="empty-state">
+        <ion-icon name="paper-plane-outline"></ion-icon>
+        <h2>No Sent Gift Cards</h2>
+        <p>You haven't sent any gift cards yet.</p>
+        <ion-button routerLink="/gift-cards/create" fill="outline">
+          Send a Gift Card
+        </ion-button>
+      </div>
+      
+      <div *ngIf="sentGiftCards.length > 0" class="gift-cards-list">
+        <div *ngFor="let giftCard of sentGiftCards" class="gift-card-item" [routerLink]="['/gift-cards', giftCard.id]">
+          <div class="gift-card-preview">
+            <img 
+              [src]="'assets/gift-cards/' + giftCard.design + '.jpg'" 
+              alt="Gift Card" 
+              class="gift-card-image"
+              onError="this.src='assets/gift-cards/default.jpg'"
+            >
+            <div class="gift-card-amount">${{ giftCard.initialAmount }}</div>
+            <div *ngIf="giftCard.status !== 'active'" class="gift-card-status">
+              {{ giftCard.status }}
+            </div>
+          </div>
+          
+          <div class="gift-card-details">
+            <div class="gift-card-title">
+              To: {{ giftCard.recipientName }}
+            </div>
+            <div class="gift-card-subtitle">
+              Sent: {{ formatDate(giftCard.createdDate) }}
+            </div>
+            <div class="gift-card-balance" [ngClass]="{'zero-balance': giftCard.amount === 0}">
+              {{ giftCard.status === 'active' ? 'Balance: $' + giftCard.amount : 
+                giftCard.status === 'redeemed' ? 'Redeemed' : 'Expired' }}
+            </div>
+          </div>
+          
+          <ion-icon name="chevron-forward" class="gift-card-chevron"></ion-icon>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Gift Card Redemption Instructions -->
+    <div class="redemption-section">
+      <h2>Have a Gift Card?</h2>
+      <p>Redeem your gift card to add it to your account balance.</p>
+      <ion-button routerLink="/gift-cards/redeem" fill="outline" expand="block">
+        Redeem Gift Card
+      </ion-button>
+    </div>
+  </ion-content>

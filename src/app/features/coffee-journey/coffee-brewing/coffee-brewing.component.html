@@ -1,0 +1,85 @@
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/coffee-journey"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Brewing Methods</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <h1 class="main-title">Coffee Brewing Methods</h1>
+    
+    <p class="intro-text">
+      Learn about different coffee brewing methods and how they affect the taste of your coffee. Select a method below to explore.
+    </p>
+    
+    <!-- Methods Navigation -->
+    <div class="method-nav">
+      <ion-segment (ionChange)="selectMethod($event.detail.value)">
+        <ion-segment-button *ngFor="let method of brewingMethods" [value]="method.id" [checked]="method.id === selectedMethod?.id">
+          <ion-label>{{ method.name }}</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+    
+    <!-- Selected Method Details -->
+    <ion-card *ngIf="selectedMethod" class="method-card">
+      <ion-img [src]="selectedMethod.imageUrl" class="method-image"></ion-img>
+      
+      <ion-card-header>
+        <ion-card-title>{{ selectedMethod.name }}</ion-card-title>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <p class="method-description">{{ selectedMethod.description }}</p>
+        
+        <div class="specs-grid">
+          <div class="spec-item">
+            <h3>Brew Time</h3>
+            <p>{{ selectedMethod.brewTime }}</p>
+          </div>
+          
+          <div class="spec-item">
+            <h3>Grind Size</h3>
+            <p>{{ selectedMethod.grindSize }}</p>
+          </div>
+          
+          <div class="spec-item">
+            <h3>Water Temp</h3>
+            <p>{{ selectedMethod.waterTemp }}</p>
+          </div>
+          
+          <div class="spec-item">
+            <h3>Coffee:Water</h3>
+            <p>{{ selectedMethod.ratio }}</p>
+          </div>
+        </div>
+        
+        <div class="method-steps">
+          <h3>Brewing Steps</h3>
+          <ol>
+            <li *ngFor="let step of selectedMethod.steps">{{ step }}</li>
+          </ol>
+        </div>
+      </ion-card-content>
+    </ion-card>
+    
+    <!-- Tips Section -->
+    <ion-card class="tips-card">
+      <ion-card-header>
+        <ion-card-title>Brewing Tips</ion-card-title>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <ul class="tips-list">
+          <li>Use freshly roasted beans, ideally within 2-4 weeks of the roast date</li>
+          <li>Grind your coffee just before brewing for maximum freshness</li>
+          <li>Use filtered water for the cleanest flavor</li>
+          <li>Maintain consistent water temperature throughout the brewing process</li>
+          <li>Invest in a quality burr grinder for consistent particle size</li>
+          <li>Measure your coffee and water with a scale for consistency</li>
+        </ul>
+      </ion-card-content>
+    </ion-card>
+  </ion-content>

@@ -1,0 +1,145 @@
+/* src/app/features/table-service/qr-scanner/qr-scanner.component.scss */
+.scanner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding: 1rem;
+  }
+  
+  .video-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    overflow: hidden;
+    border-radius: 16px;
+    aspect-ratio: 4/3;
+    background-color: #000;
+    margin-bottom: 1rem;
+  }
+  
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1); // Mirror effect
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    
+    &.active {
+      opacity: 1;
+    }
+  }
+  
+  .scan-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: rgba(0, 0, 0, 0.2);
+    
+    &.active {
+      opacity: 1;
+    }
+    
+    .scan-frame {
+      width: 80%;
+      height: 80%;
+      border: 2px solid var(--ion-color-primary);
+      border-radius: 10px;
+      box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+      position: relative;
+      
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--ion-color-primary);
+        animation: scanLine 2s linear infinite;
+      }
+    }
+  }
+  
+  .scan-controls {
+    position: absolute;
+    bottom: 1rem;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    
+    .scan-btn {
+      --background: rgba(0, 0, 0, 0.6);
+      --border-radius: 50%;
+      --padding-start: 0;
+      --padding-end: 0;
+      width: 60px;
+      height: 60px;
+      
+      ion-icon {
+        font-size: 24px;
+      }
+    }
+  }
+  
+  .scanner-status {
+    margin-top: 1rem;
+    text-align: center;
+    
+    p {
+      margin: 0 0 1rem;
+      color: var(--ion-color-medium);
+    }
+    
+    .error-text {
+      color: var(--ion-color-danger);
+    }
+  }
+  
+  .error-card {
+    width: 100%;
+    max-width: 500px;
+    margin: 2rem 0;
+    
+    .error-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 1rem;
+      
+      ion-icon {
+        color: var(--ion-color-danger);
+        font-size: 48px;
+        margin-bottom: 1rem;
+      }
+    }
+  }
+  
+  @keyframes scanLine {
+    0% {
+      top: 0;
+    }
+    50% {
+      top: calc(100% - 2px);
+    }
+    100% {
+      top: 0;
+    }
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    .scan-overlay {
+      background: rgba(0, 0, 0, 0.4);
+    }
+  }
