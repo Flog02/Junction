@@ -35,7 +35,7 @@ bootstrapApplication(AppComponent, {
 });
 
 import { addIcons } from 'ionicons';
-import { addCircleOutline, addOutline, arrowForward, barChartOutline, cafeOutline, calendarOutline, cartOutline, chatbubbleOutline, checkmarkCircle, checkmarkCircleOutline, chevronForward, cubeOutline, fastFoodOutline, flame, flameOutline, giftOutline, iceCreamOutline, leafOutline, locationOutline, logoInstagram, mapOutline, notificationsOutline, optionsOutline, personCircleOutline, refreshOutline, restaurantOutline, star, starOutline } from 'ionicons/icons';
+import { addCircleOutline,cardOutline , addOutline, arrowForward, barChartOutline, cafeOutline, calendarOutline, cartOutline, chatbubbleOutline, checkmarkCircle, checkmarkCircleOutline, chevronForward, cubeOutline, fastFoodOutline, flame, flameOutline, giftOutline, iceCreamOutline, leafOutline, locationOutline, logoInstagram, mapOutline, notificationsOutline, optionsOutline, personCircleOutline, refreshOutline, restaurantOutline, star, starOutline } from 'ionicons/icons';
 addIcons({ 
 'gift-outline':giftOutline,
 'checkmark-circle-outline':checkmarkCircleOutline,
