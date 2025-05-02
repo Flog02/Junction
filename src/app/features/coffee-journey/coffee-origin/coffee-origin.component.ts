@@ -73,6 +73,7 @@ interface CoffeeOrigin {
 })
 export class CoffeeOriginComponent implements OnInit {
   @Input() originId!: string;
+
   
   origins: { [key: string]: CoffeeOrigin } = {
     'ethiopia': {
@@ -132,4 +133,6 @@ export class CoffeeOriginComponent implements OnInit {
   selectOrigin(originId: any) {
     this.selectedOrigin = this.origins[originId] || this.origins['ethiopia'];
   }
+ 
+
 }

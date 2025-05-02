@@ -1,5 +1,3 @@
-// src/app/features/menu/menu.page.ts
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
@@ -8,14 +6,14 @@ import { Subject, takeUntil } from 'rxjs';
 import { ProductService } from '../../core/services/product.service';
 import { OrderService } from '../../core/services/order.service';
 import { Product } from '../../core/models/product.model';
-import { ToastController } from '@ionic/angular/standalone';
+import { ToastController, IonIcon, IonFab, IonButton, IonCardContent, IonCardSubtitle, IonCardTitle, IonCardHeader, IonCard, IonSpinner, IonContent, IonBadge, IonButtons, IonBackButton, IonToolbar, IonHeader, IonTitle } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-menu',
-  template: 'hi',
-//   styleUrls: ['./menu.page.scss'],
+  templateUrl: './menu.page.html',
+  styleUrls: ['./menu.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule]
+  imports: [IonTitle, IonHeader, IonToolbar, IonBackButton, IonButtons, IonBadge, IonContent, IonSpinner, IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonCardContent, IonButton, IonFab, IonIcon, CommonModule, RouterModule]
 })
 export class MenuPage implements OnInit, OnDestroy {
   categories = [
@@ -39,11 +37,12 @@ export class MenuPage implements OnInit, OnDestroy {
   
   constructor(
     private productService: ProductService,
-    private orderService: OrderService,
+    public orderService: OrderService, // Changed to public for template access
     private router: Router,
     private route: ActivatedRoute,
     private toastController: ToastController
   ) {}
+  
   
   ngOnInit() {
     // Check for table order parameters
@@ -120,6 +119,11 @@ export class MenuPage implements OnInit, OnDestroy {
       }
     });
   }
+  getCategoryIcon(categoryId: string): string {
+    const category = this.categories.find(c => c.id === categoryId);
+    return category ? category.icon : 'cafe-outline';
+  }
+
   
   async presentToast(message: string) {
     const toast = await this.toastController.create({
@@ -130,4 +134,5 @@ export class MenuPage implements OnInit, OnDestroy {
     
     await toast.present();
   }
+  
 }

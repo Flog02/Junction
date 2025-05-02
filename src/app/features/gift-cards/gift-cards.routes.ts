@@ -6,6 +6,7 @@ import { GiftCardCreatorComponent } from './gift-card-creator/gift-card-creator.
 import { GiftCardViewComponent } from './gift-card-view/gift-card-view.component';
 // import { GiftCardRedeemerComponent } from './gift-card-redeemer/gift-card-redeemer.component';
 import { authGuard } from '../../core/guards/auth.guard';
+import { GiftCardRedeemerComponent } from './gift-card-redeemer/gift-card-redeemer.component';
 
 export const GIFT_CARD_ROUTES: Routes = [
   {
@@ -18,11 +19,11 @@ export const GIFT_CARD_ROUTES: Routes = [
     component: GiftCardCreatorComponent,
     canActivate: [authGuard]
   },
-//   {
-//     path: 'redeem',
-//     component: GiftCardRedeemerComponent,
-//     canActivate: [authGuard]
-//   },
+  {
+    path: 'redeem',
+    component: GiftCardRedeemerComponent,
+    canActivate: [authGuard]
+  },
   {
     path: ':id',
     component: GiftCardViewComponent,

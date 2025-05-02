@@ -9,7 +9,7 @@ import { Order, OrderItem } from '../../../core/models/order.model';
 @Component({
   selector: 'app-order-summary',
   standalone: true,
-  imports: [CommonModule,IonButton,IonIcon,IonBadge],
+  imports: [CommonModule, IonButton, IonIcon],
   template: `
     <div class="order-summary">
       <h3 class="summary-title" *ngIf="title">{{ title }}</h3>
@@ -51,19 +51,19 @@ import { Order, OrderItem } from '../../../core/models/order.model';
       <div class="price-summary">
         <div class="price-row">
           <span>Subtotal</span>
-          <span>{{ order?.subtotal | currency }}</span>
+          <span>{{ order.subtotal | currency }}</span>
         </div>
         <div class="price-row">
           <span>Tax</span>
-          <span>{{ order?.tax | currency }}</span>
+          <span>{{ order.tax | currency }}</span>
         </div>
         <div class="price-row" *ngIf="order?.tip">
           <span>Tip</span>
-          <span>{{ order?.tip | currency }}</span>
+          <span>{{ order.tip | currency }}</span>
         </div>
         <div class="price-row total">
           <span>Total</span>
-          <span>{{ order?.total | currency }}</span>
+          <span>{{ order.total | currency }}</span>
         </div>
       </div>
       

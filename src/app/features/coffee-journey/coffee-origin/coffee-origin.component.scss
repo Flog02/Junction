@@ -1,200 +1,263 @@
+/* src/app/features/coffee-journey/coffee-origin/coffee-origin.component.scss */
 :host {
-    display: block;
+  --padding: 16px;
+  --card-border-radius: 16px;
+  --specs-gap: 16px;
+}
+
+// Main title and intro
+.main-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: var(--ion-color-dark);
+}
+
+.intro-text {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ion-color-medium);
+  margin-bottom: 24px;
+}
+
+// Origin navigation
+.origin-nav {
+  margin-bottom: 24px;
+  
+  ion-segment {
+    --background: transparent;
+    background: transparent;
   }
   
-  .main-title {
-    font-size: 28px;
+  ion-segment-button {
+    --indicator-color: var(--ion-color-primary);
+    --color-checked: var(--ion-color-primary);
+    --color: var(--ion-color-medium);
+    text-transform: none;
+    font-size: 14px;
+    letter-spacing: 0;
+    min-width: auto;
+    
+    &::part(indicator) {
+      transition: transform 250ms ease;
+    }
+  }
+}
+
+// Origin card
+.origin-card {
+  margin-bottom: 24px;
+  border-radius: var(--card-border-radius);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.origin-image {
+  height: 200px;
+  object-fit: cover;
+  
+  @media (min-width: 768px) {
+    height: 300px;
+  }
+}
+
+ion-card-subtitle {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 500;
+}
+
+ion-card-title {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.origin-description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--ion-color-dark);
+  margin-bottom: 24px;
+}
+
+// Specs grid
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--specs-gap);
+  margin-bottom: 24px;
+}
+
+.spec-item {
+  background-color: var(--ion-color-light-tint);
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  transition: transform 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+  }
+  
+  .spec-icon {
+    width: 40px;
+    height: 40px;
+    background-color: var(--ion-color-primary-tint);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    
+    ion-icon {
+      font-size: 20px;
+      color: var(--ion-color-primary);
+    }
+  }
+  
+  h3 {
+    font-size: 14px;
     font-weight: bold;
-    margin-bottom: 8px;
-    color: var(--ion-color-primary);
+    margin: 0 0 8px;
+    color: var(--ion-color-dark);
   }
   
-  .intro-text {
-    font-size: 16px;
-    line-height: 1.5;
-    margin-bottom: 24px;
+  p {
+    font-size: 14px;
+    margin: 0;
     color: var(--ion-color-medium);
+    line-height: 1.4;
+  }
+}
+
+// Flavor profile
+.flavor-profile {
+  margin-top: 8px;
+  
+  h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 16px;
+    color: var(--ion-color-dark);
+    border-bottom: 1px solid var(--ion-color-light);
+    padding-bottom: 8px;
+  }
+}
+
+.flavor-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.flavor-tag {
+  background-color: var(--ion-color-tertiary-tint);
+  color: var(--ion-color-tertiary-shade);
+  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  display: inline-block;
+}
+
+// Education card
+.education-card {
+  border-radius: var(--card-border-radius);
+  margin-bottom: 24px;
+  background-color: var(--ion-color-warning-tint);
+  
+  ion-card-header {
+    --color: var(--ion-color-warning-shade);
   }
   
-  .origin-nav {
-    margin-bottom: 24px;
+  ion-card-title {
+    font-size: 18px;
+    color: var(--ion-color-warning-shade);
+  }
+}
+
+.education-section {
+  margin-bottom: 16px;
+  
+  h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0 0 8px;
+    color: var(--ion-color-dark);
+  }
+  
+  p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ion-color-dark);
+    margin: 0;
+  }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Map card
+.map-card {
+  border-radius: var(--card-border-radius);
+  margin-bottom: 24px;
+  background-color: var(--ion-color-success-tint);
+  
+  ion-card-header {
+    --color: var(--ion-color-success-shade);
+  }
+  
+  ion-card-title {
+    font-size: 18px;
+    color: var(--ion-color-success-shade);
+  }
+  
+  p {
+    margin-bottom: 16px;
+  }
+}
+
+.map-container {
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.coffee-map {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+// Dark mode adjustments
+@media (prefers-color-scheme: dark) {
+  .spec-item {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .flavor-tag {
+    background-color: rgba(106, 100, 255, 0.2);
+    color: var(--ion-color-tertiary);
+  }
+  
+  .education-card {
+    --background: rgba(255, 196, 9, 0.1);
     
-    ion-segment {
-      --background: var(--ion-color-light);
+    ion-card-title {
+      color: var(--ion-color-warning);
     }
   }
   
-  .origin-card {
-    margin-bottom: 24px;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  .map-card {
+    --background: rgba(47, 223, 117, 0.1);
     
-    .origin-image {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-    }
-    
-    .origin-description {
-      font-size: 16px;
-      line-height: 1.5;
-      margin-bottom: 20px;
-      color: var(--ion-color-medium-shade);
-    }
-  }
-  
-  .specs-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-    
-    .spec-item {
-      background-color: var(--ion-color-light);
-      padding: 12px;
-      border-radius: 8px;
-      
-      h3 {
-        font-size: 14px;
-        margin: 0 0 4px 0;
-        color: var(--ion-color-medium);
-        font-weight: 500;
-      }
-      
-      p {
-        font-size: 16px;
-        margin: 0;
-        font-weight: 600;
-        color: var(--ion-color-dark);
-      }
+    ion-card-title {
+      color: var(--ion-color-success);
     }
   }
   
   .flavor-profile {
-    margin-bottom: 24px;
-    
     h3 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: var(--ion-color-dark);
-    }
-    
-    .flavor-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      
-      .flavor-tag {
-        background-color: var(--ion-color-primary-tint);
-        color: var(--ion-color-primary-contrast);
-        padding: 6px 12px;
-        border-radius: 16px;
-        font-size: 14px;
-        font-weight: 500;
-      }
+      border-bottom-color: rgba(255, 255, 255, 0.1);
     }
   }
-  
-  .origin-map {
-    h3 {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      color: var(--ion-color-dark);
-    }
-    
-    .map-placeholder {
-      background-color: var(--ion-color-light);
-      height: 200px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      
-      ion-icon {
-        font-size: 48px;
-        color: var(--ion-color-medium);
-        margin-bottom: 16px;
-      }
-      
-      p {
-        color: var(--ion-color-medium);
-        margin: 0;
-        font-size: 14px;
-      }
-    }
-  }
-  
-  .facts-card {
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    
-    ion-card-header {
-      background-color: var(--ion-color-light);
-    }
-    
-    .fact-item {
-      display: flex;
-      margin-bottom: 20px;
-      
-      &:last-child {
-        margin-bottom: 0;
-      }
-      
-      ion-icon {
-        font-size: 24px;
-        color: var(--ion-color-primary);
-        margin-right: 16px;
-        flex-shrink: 0;
-      }
-      
-      .fact-content {
-        flex: 1;
-        
-        h3 {
-          font-size: 16px;
-          font-weight: 600;
-          margin: 0 0 4px 0;
-          color: var(--ion-color-dark);
-        }
-        
-        p {
-          font-size: 14px;
-          margin: 0;
-          color: var(--ion-color-medium);
-          line-height: 1.4;
-        }
-      }
-    }
-  }
-  
-  /* Dark Mode Adjustments */
-  @media (prefers-color-scheme: dark) {
-    .specs-grid .spec-item {
-      background-color: var(--ion-background-color-step-50);
-      
-      p {
-        color: var(--ion-color-light);
-      }
-    }
-    
-    .flavor-profile .flavor-tags .flavor-tag {
-      background-color: var(--ion-color-primary-shade);
-    }
-    
-    .origin-map .map-placeholder {
-      background-color: var(--ion-background-color-step-50);
-    }
-    
-    .facts-card ion-card-header {
-      background-color: var(--ion-background-color-step-50);
-    }
-    
-    .facts-card .fact-item .fact-content h3 {
-      color: var(--ion-color-light);
-    }
-  }
+}

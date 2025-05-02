@@ -1,8 +1,6 @@
-// src/app/features/order/order-confirmation/order-confirmation.component.ts
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {  } from '@ionic/angular/standalone';
+import { IonButton, IonIcon, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonCardSubtitle, IonSpinner, IonContent, IonTitle, IonToolbar, IonHeader } from '@ionic/angular/standalone';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -12,10 +10,10 @@ import { LoyaltyService } from '../../../core/services/loyalty.service';
 
 @Component({
   selector: 'app-order-confirmation',
-  template: 'hi1',
-//   styleUrls: ['./order-confirmation.component.scss'],
+  templateUrl: './order-confirmation.component.html',
+  styleUrls: ['./order-confirmation.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule]
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonSpinner, IonCardSubtitle, IonCardTitle, IonCardHeader, IonCardContent, IonCard, IonIcon, IonButton, CommonModule, RouterModule]
 })
 export class OrderConfirmationComponent implements OnInit, OnDestroy {
   order: Order | null = null;

@@ -1,5 +1,3 @@
-// src/app/features/order/order.page.ts
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -7,13 +5,18 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { OrderService } from '../../core/services/order.service';
 import { Order } from '../../core/models/order.model';
-
+import { IonIcon, IonFab, IonList, IonItemGroup, IonItemDivider, IonLabel, IonBadge, IonSpinner, IonContent, IonToolbar, IonSegment, IonSegmentButton, IonTitle, IonButtons, IonHeader, IonBackButton, IonButton } from "@ionic/angular/standalone";
+import { FormsModule } from '@angular/forms';
+interface OrderMonth {
+  month: string;
+  orders: Order[];
+}
 @Component({
   selector: 'app-order',
-  template: 'hi',
-//   styleUrls: ['./order.page.scss'],
+  templateUrl:'./order.page.html',
+  styleUrls: ['./order.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule]
+  imports: [IonButton, FormsModule,IonBackButton, IonHeader, IonButtons, IonTitle, IonSegmentButton, IonSegment, IonToolbar, IonContent, IonSpinner, IonBadge, IonLabel, IonItemDivider, IonItemGroup, IonList, IonFab, IonIcon, CommonModule, RouterModule]
 })
 export class OrderPage implements OnInit, OnDestroy {
   activeOrders: Order[] = [];
@@ -24,6 +27,8 @@ export class OrderPage implements OnInit, OnDestroy {
   
   private destroy$ = new Subject<void>();
   
+  pastOrdersByMonth: OrderMonth[] = [];
+
   constructor(private orderService: OrderService) {}
   
   ngOnInit() {
@@ -68,6 +73,34 @@ export class OrderPage implements OnInit, OnDestroy {
           console.error('Failed to load past orders:', err);
         }
       });
+  }
+
+  groupOrdersByMonth() {
+    const monthMap = new Map<string, Order[]>();
+    
+    this.pastOrders.forEach(order => {
+      const date = new Date(order.orderTime);
+      const monthYear = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+      
+      if (!monthMap.has(monthYear)) {
+        monthMap.set(monthYear, []);
+      }
+      
+      monthMap.get(monthYear)?.push(order);
+    });
+    
+    // Convert map to array
+    this.pastOrdersByMonth = [];
+    monthMap.forEach((orders, month) => {
+      this.pastOrdersByMonth.push({ month, orders });
+    });
+    
+    // Sort groups by date (most recent first)
+    this.pastOrdersByMonth.sort((a, b) => {
+      const dateA = new Date(a.orders[0].orderTime);
+      const dateB = new Date(b.orders[0].orderTime);
+      return dateB.getTime() - dateA.getTime();
+    });
   }
   
   segmentChanged(event: any) {

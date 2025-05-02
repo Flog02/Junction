@@ -1,0 +1,181 @@
+<!-- src/app/features/order/order.page.html -->
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>My Orders</ion-title>
+  </ion-toolbar>
+  
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)">
+      <ion-segment-button value="active">
+        <ion-label>Active</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="past">
+        <ion-label>Past Orders</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Loading Indicator -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="circles"></ion-spinner>
+    <p>Loading orders...</p>
+  </div>
+  
+  <!-- Active Orders -->
+  <div *ngIf="selectedSegment === 'active'" class="orders-container">
+    <div *ngIf="!isLoading && activeOrders.length === 0" class="empty-state">
+      <ion-icon name="cafe-outline"></ion-icon>
+      <h3>No Active Orders</h3>
+      <p>Place a new order to enjoy our delicious coffee!</p>
+      <ion-button routerLink="/menu" expand="block">
+        Order Now
+      </ion-button>
+    </div>
+    
+    <ion-list *ngIf="activeOrders.length > 0">
+      <ion-item *ngFor="let order of activeOrders" [routerLink]="['/orders', order.id]" detail>
+        <div class="order-item">
+          <div class="order-header">
+            <div class="order-number">#{{ order.id?.substring(0, 8) }}</div>
+            <ion-badge [color]="getStatusColor(order.status)">
+              {{ order.status | titlecase }}
+            </ion-badge>
+          </div>
+          
+          <div class="order-content">
+            <div class="order-time">{{ formatDate(order.orderTime) }}</div>
+            
+            <div class="order-items">
+              <div *ngFor="let item of order.items.slice(0, 2)" class="item-detail">
+                <span class="item-quantity">{{ item.quantity }}x</span>
+                <span class="item-name">{{ item.name }}</span>
+              </div>
+              <div *ngIf="order.items.length > 2" class="more-items">
+                +{{ order.items.length - 2 }} more items
+              </div>
+            </div>
+          </div>
+          
+          <div class="order-footer">
+            <div class="payment-info">
+              <span class="order-total">{{ order.total | currency }}</span>
+              <ion-badge color="medium" class="payment-badge">
+                {{ order.paymentStatus | titlecase }}
+              </ion-badge>
+            </div>
+            
+            <div class="order-actions" *ngIf="order.status === 'pending' || order.status === 'processing'">
+              <ion-button size="small" fill="clear" color="danger">
+                Cancel
+              </ion-button>
+            </div>
+          </div>
+          
+          <!-- Additional order info -->
+          <div class="order-details" *ngIf="order.status === 'processing'">
+            <div class="detail-item" *ngIf="order.processTime">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Process started: {{ formatDate(order.processTime) }}</span>
+            </div>
+            
+            <div class="detail-item" *ngIf="order.notes">
+              <ion-icon name="document-text-outline"></ion-icon>
+              <span>Notes: {{ order.notes }}</span>
+            </div>
+          </div>
+        </div>
+      </ion-item>
+    </ion-list>
+  </div>
+  
+  <!-- Past Orders -->
+  <div *ngIf="selectedSegment === 'past'" class="orders-container">
+    <div *ngIf="!isLoading && pastOrders.length === 0" class="empty-state">
+      <ion-icon name="timer-outline"></ion-icon>
+      <h3>No Order History</h3>
+      <p>Your past orders will appear here once you've completed an order.</p>
+      <ion-button routerLink="/menu" expand="block">
+        Place Your First Order
+      </ion-button>
+    </div>
+    
+    <ion-list *ngIf="pastOrders.length > 0">
+      <ion-item-group *ngFor="let group of pastOrdersByMonth">
+        <ion-item-divider sticky>
+          <ion-label>{{ group.month }}</ion-label>
+        </ion-item-divider>
+        
+        <ion-item *ngFor="let order of group.orders" [routerLink]="['/orders', order.id]" detail>
+          <div class="order-item">
+            <div class="order-header">
+              <div class="order-number">#{{ order.id?.substring(0, 8) }}</div>
+              <div class="status-container">
+                <ion-badge [color]="getStatusColor(order.status)">
+                  {{ order.status | titlecase }}
+                </ion-badge>
+                <ion-badge color="medium" class="payment-badge">
+                  {{ order.paymentMethod }}
+                </ion-badge>
+              </div>
+            </div>
+            
+            <div class="order-content">
+              <div class="order-time">{{ formatDate(order.orderTime) }}</div>
+              
+              <div class="order-items">
+                <div *ngFor="let item of order.items.slice(0, 2)" class="item-detail">
+                  <span class="item-quantity">{{ item.quantity }}x</span>
+                  <span class="item-name">{{ item.name }}</span>
+                  <span class="item-custom" *ngIf="item.customizations?.size">
+                    {{ item.customizations.size.name }}
+                  </span>
+                </div>
+                <div *ngIf="order.items.length > 2" class="more-items">
+                  +{{ order.items.length - 2 }} more items
+                </div>
+              </div>
+            </div>
+            
+            <div class="order-footer">
+              <div class="payment-info">
+                <span class="order-total">{{ order.total | currency }}</span>
+                <span class="order-subtotal">Subtotal: {{ order.subtotal | currency }}</span>
+                <span class="order-tax" *ngIf="order.tax">Tax: {{ order.tax | currency }}</span>
+                <span class="order-tip" *ngIf="order.tip">Tip: {{ order.tip | currency }}</span>
+              </div>
+              
+              <div class="loyalty-info" *ngIf="order.loyaltyPointsEarned">
+                <ion-icon name="star"></ion-icon>
+                <span>+{{ order.loyaltyPointsEarned }} pts</span>
+              </div>
+            </div>
+            
+            <div class="order-details" *ngIf="order.completionTime || order.deliveredBy">
+              <div class="detail-item" *ngIf="order.completionTime">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span>Completed: {{ formatDate(order.completionTime) }}</span>
+              </div>
+              
+              <div class="detail-item" *ngIf="order.deliveredBy">
+                <ion-icon name="bicycle-outline"></ion-icon>
+                <span>Delivered by: {{ order.deliveredBy }}</span>
+              </div>
+            </div>
+          </div>
+        </ion-item>
+      </ion-item-group>
+    </ion-list>
+  </div>
+  
+  <!-- FAB for New Order -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button routerLink="/menu">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

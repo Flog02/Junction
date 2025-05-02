@@ -1,109 +1,122 @@
+<!-- src/app/features/coffee-journey/coffee-origin/coffee-origin.component.html -->
 <ion-header>
-    <ion-toolbar color="primary">
-      <ion-buttons slot="start">
-        <ion-back-button defaultHref="/coffee-journey"></ion-back-button>
-      </ion-buttons>
-      <ion-title>Coffee Origins</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/coffee-journey"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Coffee Origin</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <h1 class="main-title">Explore Coffee Origins</h1>
   
-  <ion-content class="ion-padding">
-    <h1 class="main-title">Explore Coffee Origins</h1>
+  <p class="intro-text">
+    Discover how different growing regions create unique flavor profiles in your coffee.
+  </p>
+  
+  <!-- Origins Navigation -->
+  <div class="origin-nav">
+    <ion-segment (ionChange)="selectOrigin($event.detail.value)">
+      <ion-segment-button value="ethiopia" [attr.selected]="selectedOrigin === origins['ethiopia'] ? true : null">
+        <ion-label>Ethiopia</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="colombia" [attr.selected]="selectedOrigin === origins['colombia'] ? true : null">
+        <ion-label>Colombia</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="guatemala" [attr.selected]="selectedOrigin === origins['guatemala'] ? true : null">
+        <ion-label>Guatemala</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="kenya" [attr.selected]="selectedOrigin === origins['kenya'] ? true : null">
+        <ion-label>Kenya</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+  
+  <!-- Selected Origin Details -->
+  <ion-card *ngIf="selectedOrigin" class="origin-card">
+    <ion-img [src]="selectedOrigin.imageUrl" class="origin-image"></ion-img>
     
-    <p class="intro-text">
-      Discover the unique characteristics of coffee from different regions around the world, each with their own distinct flavor profiles.
-    </p>
+    <ion-card-header>
+      <ion-card-subtitle>{{ selectedOrigin.region }}</ion-card-subtitle>
+      <ion-card-title>{{ selectedOrigin.country }}</ion-card-title>
+    </ion-card-header>
     
-    <!-- Origins Navigation -->
-    <div class="origin-nav">
-      <ion-segment (ionChange)="selectOrigin($event.detail.value)">
-        <ion-segment-button *ngFor="let origin of origins | keyvalue" [value]="origin.key" [checked]="origin.key === (selectedOrigin?.country | lowercase)">
-          <ion-label>{{ origin.value.country }}</ion-label>
-        </ion-segment-button>
-      </ion-segment>
-    </div>
-    
-    <!-- Selected Origin Details -->
-    <ion-card *ngIf="selectedOrigin" class="origin-card">
-      <ion-img [src]="selectedOrigin.imageUrl" class="origin-image"></ion-img>
+    <ion-card-content>
+      <p class="origin-description">{{ selectedOrigin.description }}</p>
       
-      <ion-card-header>
-        <ion-card-title>{{ selectedOrigin.country }}</ion-card-title>
-        <ion-card-subtitle>{{ selectedOrigin.region }}</ion-card-subtitle>
-      </ion-card-header>
-      
-      <ion-card-content>
-        <p class="origin-description">{{ selectedOrigin.description }}</p>
-        
-        <div class="specs-grid">
-          <div class="spec-item">
-            <h3>Elevation</h3>
-            <p>{{ selectedOrigin.elevation }}</p>
-          </div>
-          
-          <div class="spec-item">
-            <h3>Process</h3>
-            <p>{{ selectedOrigin.process }}</p>
-          </div>
-        </div>
-        
-        <div class="flavor-profile">
-          <h3>Flavor Profile</h3>
-          <div class="flavor-tags">
-            <div class="flavor-tag" *ngFor="let flavor of selectedOrigin.flavor">
-              {{ flavor }}
-            </div>
-          </div>
-        </div>
-        
-        <div class="origin-map">
-          <h3>Region Map</h3>
-          <div class="map-placeholder">
+      <div class="specs-grid">
+        <div class="spec-item">
+          <div class="spec-icon">
             <ion-icon name="map-outline"></ion-icon>
-            <p>Map of {{ selectedOrigin.region }}, {{ selectedOrigin.country }}</p>
           </div>
+          <h3>Region</h3>
+          <p>{{ selectedOrigin.region }}</p>
         </div>
-      </ion-card-content>
-    </ion-card>
-    
-    <!-- Coffee Facts Section -->
-    <ion-card class="facts-card">
-      <ion-card-header>
-        <ion-card-title>Coffee Facts</ion-card-title>
-      </ion-card-header>
+        
+        <div class="spec-item">
+          <div class="spec-icon">
+            <ion-icon name="globe-outline"></ion-icon>
+          </div>
+          <h3>Elevation</h3>
+          <p>{{ selectedOrigin.elevation }}</p>
+        </div>
+        
+        <div class="spec-item">
+          <div class="spec-icon">
+            <ion-icon name="water-outline"></ion-icon>
+          </div>
+          <h3>Process</h3>
+          <p>{{ selectedOrigin.process }}</p>
+        </div>
+      </div>
       
-      <ion-card-content>
-        <div class="fact-item">
-          <ion-icon name="leaf-outline"></ion-icon>
-          <div class="fact-content">
-            <h3>Coffee Plant</h3>
-            <p>Coffee is grown on trees that produce cherries. Each cherry typically contains two beans.</p>
-          </div>
+      <div class="flavor-profile">
+        <h3>Flavor Profile</h3>
+        <div class="flavor-tags">
+          <span *ngFor="let flavor of selectedOrigin.flavor" class="flavor-tag">
+            {{ flavor }}
+          </span>
         </div>
-        
-        <div class="fact-item">
-          <ion-icon name="globe-outline"></ion-icon>
-          <div class="fact-content">
-            <h3>Coffee Belt</h3>
-            <p>Coffee is grown in the "Bean Belt" - regions between the Tropics of Cancer and Capricorn.</p>
-          </div>
-        </div>
-        
-        <div class="fact-item">
-          <ion-icon name="water-outline"></ion-icon>
-          <div class="fact-content">
-            <h3>Processing Methods</h3>
-            <p>The most common processing methods are washed, natural, and honey, each creating different flavor profiles.</p>
-          </div>
-        </div>
-        
-        <div class="fact-item">
-          <ion-icon name="thermometer-outline"></ion-icon>
-          <div class="fact-content">
-            <h3>Elevation Matters</h3>
-            <p>Coffee grown at higher elevations develops more complex flavors due to slower bean development.</p>
-          </div>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </ion-content>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  
+  <!-- Coffee Origins Education -->
+  <ion-card class="education-card">
+    <ion-card-header>
+      <ion-card-title>Understanding Coffee Origins</ion-card-title>
+    </ion-card-header>
+    
+    <ion-card-content>
+      <div class="education-section">
+        <h3>Terroir</h3>
+        <p>Like wine, coffee is influenced by its terroir — the environmental factors like climate, soil, and elevation that affect the beans' taste.</p>
+      </div>
+      
+      <div class="education-section">
+        <h3>Processing Methods</h3>
+        <p>The way coffee cherries are processed after harvesting significantly impacts flavor. Common methods include washed, natural, and honey processing.</p>
+      </div>
+      
+      <div class="education-section">
+        <h3>Varietals</h3>
+        <p>Different coffee plant varieties (like Bourbon, Typica, or Gesha) have distinct flavor characteristics, similar to grape varieties in winemaking.</p>
+      </div>
+    </ion-card-content>
+  </ion-card>
+  
+  <!-- Coffee Map -->
+  <ion-card class="map-card">
+    <ion-card-header>
+      <ion-card-title>Coffee Belt</ion-card-title>
+    </ion-card-header>
+    
+    <ion-card-content>
+      <p>Coffee grows in the "Bean Belt," the region between the Tropics of Cancer and Capricorn. This equatorial zone provides the ideal climate for coffee cultivation.</p>
+      <div class="map-container">
+        <img src="assets/coffee-belt-map.png" alt="Coffee Belt Map" class="coffee-map">
+      </div>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

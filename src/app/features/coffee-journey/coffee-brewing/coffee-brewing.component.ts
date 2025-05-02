@@ -166,7 +166,15 @@ export class CoffeeBrewingComponent implements OnInit {
     this.selectMethod('espresso');
   }
   
-  selectMethod(methodId: string) {
-    this.selectedMethod = this.brewingMethods.find(method => method.id === methodId) || this.brewingMethods[0];
+ // Update your selectMethod function in coffee-brewing.component.ts
+selectMethod(methodId: string | number | undefined) {
+  if (methodId === undefined) {
+    methodId = 'espresso'; // Default to espresso if no method selected
   }
+  
+  // Convert to string if it's a number
+  const id = methodId.toString();
+  
+  this.selectedMethod = this.brewingMethods.find(method => method.id === id) || this.brewingMethods[0];
+}
 }

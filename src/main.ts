@@ -35,10 +35,36 @@ bootstrapApplication(AppComponent, {
 });
 
 import { addIcons } from 'ionicons';
-import { addCircleOutline, checkmarkCircle, checkmarkCircleOutline, giftOutline } from 'ionicons/icons';
+import { addCircleOutline, addOutline, arrowForward, barChartOutline, cafeOutline, calendarOutline, cartOutline, chatbubbleOutline, checkmarkCircle, checkmarkCircleOutline, chevronForward, cubeOutline, fastFoodOutline, flame, flameOutline, giftOutline, iceCreamOutline, leafOutline, locationOutline, logoInstagram, mapOutline, notificationsOutline, optionsOutline, personCircleOutline, refreshOutline, restaurantOutline, star, starOutline } from 'ionicons/icons';
 addIcons({ 
 'gift-outline':giftOutline,
 'checkmark-circle-outline':checkmarkCircleOutline,
 'add-circle-outline':addCircleOutline,
-'checkmark-circle':checkmarkCircle
+'checkmark-circle':checkmarkCircle,
+'person-circle-outline':personCircleOutline,
+'notifications-outline':notificationsOutline,
+'arrow-forward':arrowForward,
+'chevron-forward':chevronForward,
+'cafe-outline':cafeOutline,
+'bar-chart-outline':barChartOutline,
+'cube-outline':cubeOutline,
+'star':star,
+'flame':flame,
+'refresh-outline':refreshOutline,
+'cafeOutline':cafeOutline,
+'leafOutline':leafOutline,
+'fastFoodOutline':fastFoodOutline,
+'iceCreamOutline':iceCreamOutline,
+'cartOutline':cartOutline,
+'addOutline':addOutline,
+'optionsOutline':optionsOutline,
+'flameOutline':flameOutline,
+'restaurantOutline':restaurantOutline,
+'location-outline':locationOutline,
+'logo-instagram':logoInstagram,
+'map-outline':mapOutline,
+'calendar-outline':calendarOutline,
+'chatbubble-outline':chatbubbleOutline,
+'star-outline':starOutline,
+'card-outline':cardOutline
 });

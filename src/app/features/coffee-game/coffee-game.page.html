@@ -1,0 +1,55 @@
+<!-- src/app/features/coffee-game/coffee-game.page.html -->
+
+<ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/home"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Barista Challenge</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="resetGame()">
+          <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content>
+    <div class="game-stats-bar">
+      <div class="stat-item">
+        <div class="stat-label">Score</div>
+        <div class="stat-value">{{ gameScore }}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">High Score</div>
+        <div class="stat-value">{{ highScore }}</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Games</div>
+        <div class="stat-value">{{ completedGames }}</div>
+      </div>
+    </div>
+    
+    <div class="game-container" #gameContainer>
+      <!-- The React game component will be mounted here -->
+      <div id="coffee-game-root"></div>
+      
+      <!-- Loading state -->
+      <div *ngIf="isLoading" class="loading-overlay">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading Barista Challenge...</p>
+      </div>
+    </div>
+    
+    <div class="game-instructions">
+      <h2>How to Play</h2>
+      <p>Take on the role of a barista and create the perfect coffee drinks based on customer orders!</p>
+      <ul>
+        <li>Select an order from the list to start making it</li>
+        <li>Control the grinding, temperature, and milk levels</li>
+        <li>Try to match the target values for each parameter</li>
+        <li>Complete as many orders as possible to earn points</li>
+        <li>Earn loyalty points based on your score!</li>
+      </ul>
+    </div>
+  </ion-content>

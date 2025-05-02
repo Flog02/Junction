@@ -1,2 +1,10 @@
 // For information on how to create your own theme, please see:
 // http://ionicframework.com/docs/theming/
+/* Global variables for consistent styling across the app */
+:root {
+    --primary-gradient: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+    --card-border-radius: 16px;
+    --card-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    --transition-standard: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-timing: 0.5s;
+  }

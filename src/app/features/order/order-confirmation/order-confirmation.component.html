@@ -1,0 +1,152 @@
+<!-- src/app/features/order/order-confirmation/order-confirmation.component.html -->
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-title>Order Confirmed</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="loading-container">
+      <ion-spinner name="circles"></ion-spinner>
+      <p>Loading your order details...</p>
+    </div>
+    
+    <!-- Error state -->
+    <div *ngIf="error" class="error-container">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <h2>Something went wrong</h2>
+      <p>{{ error }}</p>
+      <ion-button (click)="goToHome()" expand="block">
+        Return to Home
+      </ion-button>
+    </div>
+    
+    <!-- Success state -->
+    <div *ngIf="!isLoading && !error && order" class="confirmation-container">
+      <div class="success-icon">
+        <ion-icon name="checkmark-circle"></ion-icon>
+      </div>
+      
+      <h1>Thank You!</h1>
+      <p class="confirmation-message">Your order has been confirmed and will be ready soon.</p>
+      
+      <!-- Order details card -->
+      <ion-card class="order-card">
+        <ion-card-header>
+          <ion-card-title>Order Details</ion-card-title>
+          <ion-card-subtitle *ngIf="order.id">Order #{{ order.id.substring(0, 8) }}</ion-card-subtitle>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="order-info">
+            <div class="info-item">
+              <span class="info-label">Ordered At:</span>
+              <span class="info-value">{{ formatDate(order.orderTime) }}</span>
+            </div>
+            
+            <div class="info-item">
+              <span class="info-label">Estimated Pickup:</span>
+              <span class="info-value">{{ getEstimatedPickupTime() }}</span>
+            </div>
+            
+            <div class="info-item" *ngIf="order.storeId">
+              <span class="info-label">Store:</span>
+              <span class="info-value">{{ order.storeId }}</span>
+            </div>
+            
+            <div class="info-item" *ngIf="order.tableNumber">
+              <span class="info-label">Table Number:</span>
+              <span class="info-value">{{ order.tableNumber }}</span>
+            </div>
+          </div>
+          
+          <div class="divider"></div>
+          
+          <div class="items-container">
+            <h3>Items</h3>
+            <div class="order-item" *ngFor="let item of order.items">
+              <div class="item-info">
+                <span class="item-quantity">{{ item.quantity }}x</span>
+                <div class="item-details">
+                  <span class="item-name">{{ item.name }}</span>
+                  <div class="item-customizations" *ngIf="item.customizations">
+                    <span *ngIf="item.customizations.size">
+                      {{ item.customizations.size.name }}
+                    </span>
+                    <span *ngIf="item.customizations.milk">
+                      • {{ item.customizations.milk.name }}
+                    </span>
+                    <span *ngIf="item.customizations.shots && item.customizations.shots.length > 0">
+                      • {{ item.customizations.shots.length }} extra shot(s)
+                    </span>
+                    <span *ngIf="item.customizations.syrups && item.customizations.syrups.length > 0">
+                      • {{ item.customizations.syrups.length }} syrup(s)
+                    </span>
+                  </div>
+                  <span class="item-instructions" *ngIf="item.specialInstructions">
+                    Note: {{ item.specialInstructions }}
+                  </span>
+                </div>
+                <span class="item-price">{{ item.itemTotal | currency }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="divider"></div>
+          
+          <div class="payment-summary">
+            <div class="payment-row">
+              <span>Subtotal</span>
+              <span>{{ order.subtotal | currency }}</span>
+            </div>
+            
+            <div class="payment-row" *ngIf="order.tax">
+              <span>Tax</span>
+              <span>{{ order.tax | currency }}</span>
+            </div>
+            
+            <div class="payment-row" *ngIf="order.tip">
+              <span>Tip</span>
+              <span>{{ order.tip | currency }}</span>
+            </div>
+            
+            <div class="payment-row total">
+              <span>Total</span>
+              <span>{{ order.total | currency }}</span>
+            </div>
+            
+            <div class="payment-method">
+              <span>Paid with {{ order.paymentMethod }}</span>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      
+      <!-- Loyalty points card -->
+      <ion-card *ngIf="loyaltyPoints > 0" class="loyalty-card">
+        <ion-card-content>
+          <div class="loyalty-icon">
+            <ion-icon name="star"></ion-icon>
+          </div>
+          <div class="loyalty-info">
+            <h3>You earned {{ loyaltyPoints }} loyalty points!</h3>
+            <p>Keep ordering to unlock rewards and special offers.</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      
+      <!-- Actions -->
+      <div class="action-buttons">
+        <ion-button expand="block" (click)="trackOrder()">
+          <ion-icon name="location" slot="start"></ion-icon>
+          Track Order
+        </ion-button>
+        
+        <ion-button expand="block" fill="outline" (click)="goToHome()">
+          <ion-icon name="home" slot="start"></ion-icon>
+          Return to Home
+        </ion-button>
+      </div>
+    </div>
+  </ion-content>
