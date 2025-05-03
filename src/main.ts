@@ -35,7 +35,7 @@ bootstrapApplication(AppComponent, {
 });
 
 import { addIcons } from 'ionicons';
-import {home, location,addCircleOutline,cardOutline , addOutline, arrowForward, barChartOutline, cafeOutline, calendarOutline, cartOutline, chatbubbleOutline, checkmarkCircle, checkmarkCircleOutline, chevronForward, cubeOutline, fastFoodOutline, flame, flameOutline, giftOutline, iceCreamOutline, leafOutline, locationOutline, logoInstagram, mapOutline, notificationsOutline, optionsOutline, personCircleOutline, refreshOutline, restaurantOutline, star, starOutline, add, alertCircleOutline, barbellOutline, timeOutline, walkOutline, timerOutline } from 'ionicons/icons';
+import {home, location,addCircleOutline,cardOutline , addOutline, arrowForward, barChartOutline, cafeOutline, calendarOutline, cartOutline, chatbubbleOutline, checkmarkCircle, checkmarkCircleOutline, chevronForward, cubeOutline, fastFoodOutline, flame, flameOutline, giftOutline, iceCreamOutline, leafOutline, locationOutline, logoInstagram, mapOutline, notificationsOutline, optionsOutline, personCircleOutline, refreshOutline, restaurantOutline, star, starOutline, add, alertCircleOutline, barbellOutline, timeOutline, walkOutline, timerOutline, colorWandOutline, fingerPrintOutline, flaskOutline, gitMergeOutline, hammerOutline, scanOutline, snowOutline, thermometerOutline, waterOutline, mailOutline, paperPlaneOutline } from 'ionicons/icons';
 addIcons({ 
   'walkoutline':walkOutline,
 'gift-outline':giftOutline,
@@ -75,6 +75,16 @@ addIcons({
 'restaurantoutline':restaurantOutline,
 "location":location,
 'home':home,
-'timer-outline':timerOutline
-
+'timer-outline':timerOutline,
+'finger-print-outline':fingerPrintOutline,
+'scan-outline':scanOutline,
+'water-outline':waterOutline,
+'flask-outline':flaskOutline,
+'snow-outline':snowOutline,
+'color-wand-outline':colorWandOutline,
+'hammer-outline':hammerOutline,
+'thermometer-outline':thermometerOutline,
+'git-merge-outline':gitMergeOutline,
+'mail-outline':mailOutline,
+'paper-plane-outline':paperPlaneOutline,
 });

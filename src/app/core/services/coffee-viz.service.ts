@@ -1,375 +1,309 @@
 // src/app/core/services/coffee-viz.service.ts
 
 import { Injectable } from '@angular/core';
-import { getStorage, ref, getDownloadURL } from '@angular/fire/storage';
-import { Observable, from, forkJoin, of } from 'rxjs';
-import { map, switchMap, catchError } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { OrderItem } from '../models/order.model';
-
-// Declare THREE namespace to avoid import errors
-declare const THREE: any;
-declare const GLTFLoader: any;
-declare const OrbitControls: any;
 
 @Injectable({
   providedIn: 'root'
 })
 export class CoffeeVizService {
-  private storage = getStorage();
-  private modelCache = new Map<string, any>(); // Cache for loaded models
-  
+  private renderer: THREE.WebGLRenderer | null = null;
+  private camera: THREE.PerspectiveCamera | null = null;
+  private controls: OrbitControls | null = null;
+  private animationFrameId: number | null = null;
+
   constructor() {}
-  
+
   /**
-   * Creates a 3D visualization of a coffee based on order details
-   * Note: Requires THREE.js to be loaded globally
+   * Creates a 3D visualization of a coffee drink based on the order item
+   * @param containerId The ID of the HTML element to render the visualization in
+   * @param orderItem The order item containing coffee details
+   * @returns An observable that emits the THREE.Scene when ready
    */
-  createCoffeeVisualization(
-    containerId: string,
-    orderItem: OrderItem
-  ): Observable<any> {
-    // Ensure THREE.js is available
-    if (typeof THREE === 'undefined') {
-      console.error('THREE.js is not available. Make sure it is loaded before using this service.');
-      return of(null);
-    }
-    
-    // Create scene, camera, renderer
-    const { scene, camera, renderer, controls } = this.setupScene(containerId);
-    
-    // Add lighting
-    this.addLighting(scene);
-    
-    // Create the model paths to load based on the order
-    const modelPaths = this.getModelPathsFromOrder(orderItem);
-    
-    // Load the models
-    return this.loadModels(modelPaths).pipe(
-      map(models => {
-        // Add models to the scene
-        models.forEach(model => {
-          if (model) {
-            scene.add(model);
-          }
-        });
-        
-        // Set camera position based on the models
-        this.positionCamera(camera, scene, controls);
-        
-        // Start animation loop
-        this.animate(scene, camera, renderer, controls);
-        
-        return scene;
-      })
-    );
-  }
-  
-  /**
-   * Sets up the 3D scene with renderer and camera
-   */
-  private setupScene(containerId: string): { 
-    scene: any; 
-    camera: any; 
-    renderer: any;
-    controls: any;
-  } {
-    // Get the container element
+  createCoffeeVisualization(containerId: string, orderItem: OrderItem): Observable<THREE.Scene> {
     const container = document.getElementById(containerId);
     if (!container) {
-      throw new Error(`Container with ID "${containerId}" not found`);
+      return new Observable(observer => {
+        observer.error(new Error(`Container with ID ${containerId} not found`));
+      });
+    }
+
+    try {
+      // Initialize scene
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf5f5f5);
+
+      // Create camera
+      this.camera = this.createCamera();
+      
+      // Create renderer
+      this.renderer = this.createRenderer(container);
+      
+      // Add orbit controls
+      this.controls = this.createControls();
+      
+      // Add lighting
+      this.addLighting(scene);
+      
+      // Create coffee model based on order item
+      this.createCoffeeModel(scene, orderItem);
+      
+      // Start animation loop
+      this.startAnimationLoop(scene);
+      
+      return of(scene);
+    } catch (error) {
+      return new Observable(observer => {
+        observer.error(error);
+      });
+    }
+  }
+
+  /**
+   * Cleans up the scene and stops animation
+   * @param scene The THREE.Scene to clean up
+   */
+  cleanupScene(scene: THREE.Scene): void {
+    // Stop animation loop
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
     }
     
-    // Get container dimensions
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+    // Dispose of orbit controls
+    if (this.controls) {
+      this.controls.dispose();
+      this.controls = null;
+    }
     
-    // Create scene
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf0f0f0); // Light gray background
+    // Dispose of renderer
+    if (this.renderer) {
+      this.renderer.dispose();
+      this.renderer = null;
+    }
     
-    // Create camera
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    // Dispose of all objects in the scene
+    this.disposeScene(scene);
+  }
+
+  /**
+   * Creates a camera for the scene
+   * @returns A THREE.PerspectiveCamera
+   */
+  private createCamera(): THREE.PerspectiveCamera {
+    const camera = new THREE.PerspectiveCamera(
+      75, // Field of view
+      window.innerWidth / window.innerHeight, // Aspect ratio
+      0.1, // Near clipping plane
+      1000 // Far clipping plane
+    );
+    
     camera.position.set(0, 5, 10);
-    
-    // Create renderer
+    return camera;
+  }
+
+  /**
+   * Creates a renderer for the scene
+   * @param container The HTML element to render in
+   * @returns A THREE.WebGLRenderer
+   */
+  private createRenderer(container: HTMLElement): THREE.WebGLRenderer {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(width, height);
+    renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.shadowMap.enabled = true;
     
-    // Clear container and add renderer
-    container.innerHTML = '';
+    // Clear the container and add the renderer
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
     container.appendChild(renderer.domElement);
-    
-    // Add orbit controls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.minDistance = 3;
-    controls.maxDistance = 20;
     
     // Handle window resize
     window.addEventListener('resize', () => {
-      const newWidth = container.clientWidth;
-      const newHeight = container.clientHeight;
-      
-      camera.aspect = newWidth / newHeight;
-      camera.updateProjectionMatrix();
-      
-      renderer.setSize(newWidth, newHeight);
+      if (this.camera && this.renderer) {
+        this.camera.aspect = container.clientWidth / container.clientHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(container.clientWidth, container.clientHeight);
+      }
     });
     
-    return { scene, camera, renderer, controls };
+    return renderer;
   }
-  
+
+  /**
+   * Creates orbit controls for the camera
+   * @returns OrbitControls
+   */
+  private createControls(): OrbitControls {
+    if (!this.camera || !this.renderer) {
+      throw new Error('Camera and renderer must be initialized before creating controls');
+    }
+    
+    const controls = new OrbitControls(this.camera, this.renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 5;
+    controls.maxDistance = 20;
+    controls.maxPolarAngle = Math.PI / 2;
+    
+    return controls;
+  }
+
   /**
    * Adds lighting to the scene
+   * @param scene The THREE.Scene to add lighting to
    */
-  private addLighting(scene: any): void {
-    // Ambient light for overall illumination
+  private addLighting(scene: THREE.Scene): void {
+    // Ambient light
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
     
-    // Directional light for shadows
+    // Directional light (sunlight)
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(5, 10, 7.5);
+    directionalLight.position.set(5, 10, 5);
     directionalLight.castShadow = true;
-    
-    // Adjust shadow properties
-    directionalLight.shadow.mapSize.width = 2048;
-    directionalLight.shadow.mapSize.height = 2048;
-    directionalLight.shadow.camera.near = 0.5;
-    directionalLight.shadow.camera.far = 50;
-    directionalLight.shadow.camera.left = -10;
-    directionalLight.shadow.camera.right = 10;
-    directionalLight.shadow.camera.top = 10;
-    directionalLight.shadow.camera.bottom = -10;
-    
     scene.add(directionalLight);
     
-    // Add a point light to simulate glow from inside the cup
-    const pointLight = new THREE.PointLight(0xffa500, 0.5, 10);
-    pointLight.position.set(0, 2, 0);
-    scene.add(pointLight);
+    // Add spotlight from above
+    const spotLight = new THREE.SpotLight(0xffffff, 0.5);
+    spotLight.position.set(0, 10, 0);
+    spotLight.angle = Math.PI / 6;
+    spotLight.penumbra = 0.2;
+    spotLight.decay = 2;
+    spotLight.distance = 50;
+    spotLight.castShadow = true;
+    scene.add(spotLight);
   }
-  
+
   /**
-   * Gets model paths based on order item details
+   * Creates a 3D model of a coffee based on the order item
+   * @param scene The THREE.Scene to add the model to
+   * @param orderItem The order item containing coffee details
    */
-  private getModelPathsFromOrder(orderItem: OrderItem): string[] {
-    const modelPaths = [];
+  private createCoffeeModel(scene: THREE.Scene, orderItem: OrderItem): void {
+    // Create a cup
+    const cupGeometry = new THREE.CylinderGeometry(2, 1.7, 4, 32);
+    const cupMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+    const cup = new THREE.Mesh(cupGeometry, cupMaterial);
+    scene.add(cup);
     
-    // Base cup model based on size
-    const sizeId = orderItem.customizations.size.id;
-    let cupSize = 'medium';
+    // Create coffee liquid
+    const liquidGeometry = new THREE.CylinderGeometry(1.9, 1.6, 3.5, 32);
     
-    if (sizeId.includes('small')) {
-      cupSize = 'small';
-    } else if (sizeId.includes('large')) {
-      cupSize = 'large';
+    // Determine coffee color based on type and customizations
+    let coffeeColor = 0x6F4E37; // Default brown color
+    
+    if (orderItem.name.toLowerCase().includes('latte')) {
+      coffeeColor = 0xC4A484; // Lighter color for latte
+    } else if (orderItem.name.toLowerCase().includes('espresso')) {
+      coffeeColor = 0x3D2314; // Dark color for espresso
     }
     
-    modelPaths.push(`3d-models/coffee-cups/${cupSize}.glb`);
-    
-    // Coffee type model
-    let coffeeType = 'latte'; // Default
-    
-    // Map common coffee types to models
-    if (orderItem.name.toLowerCase().includes('espresso')) {
-      coffeeType = 'espresso';
-    } else if (orderItem.name.toLowerCase().includes('cappuccino')) {
-      coffeeType = 'cappuccino';
-    } else if (orderItem.name.toLowerCase().includes('americano')) {
-      coffeeType = 'americano';
+    // Adjust color based on milk type
+    if (orderItem.customizations.milk) {
+      if (orderItem.customizations.milk.id === 'oat') {
+        coffeeColor = 0xD2B48C; // Slightly beige for oat milk
+      } else if (orderItem.customizations.milk.id === 'almond') {
+        coffeeColor = 0xDEB887; // Light beige for almond milk
+      }
     }
     
-    modelPaths.push(`3d-models/coffee-types/${coffeeType}.glb`);
+    const liquidMaterial = new THREE.MeshPhongMaterial({ 
+      color: coffeeColor,
+      transparent: true,
+      opacity: 0.9,
+      shininess: 30
+    });
+    
+    const liquid = new THREE.Mesh(liquidGeometry, liquidMaterial);
+    liquid.position.y = -0.2; // Position slightly below top of cup
+    scene.add(liquid);
     
     // Add toppings if any
     if (orderItem.customizations.toppings && orderItem.customizations.toppings.length > 0) {
-      orderItem.customizations.toppings.forEach(topping => {
-        if (topping.name.toLowerCase().includes('whipped')) {
-          modelPaths.push('3d-models/toppings/whipped-cream.glb');
-        } else if (topping.name.toLowerCase().includes('chocolate')) {
-          modelPaths.push('3d-models/toppings/chocolate.glb');
+      // Check for whipped cream
+      const hasWhippedCream = orderItem.customizations.toppings.some(
+        topping => topping.id === 'whipped-cream'
+      );
+      
+      if (hasWhippedCream) {
+        const creamGeometry = new THREE.SphereGeometry(1.9, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+        const creamMaterial = new THREE.MeshPhongMaterial({ 
+          color: 0xFFFFF0,
+          shininess: 100
+        });
+        const cream = new THREE.Mesh(creamGeometry, creamMaterial);
+        cream.rotation.x = Math.PI; // Flip the half-sphere
+        cream.position.y = 1.8; // Position on top of the liquid
+        scene.add(cream);
+        
+        // Add caramel drizzle if mentioned in special instructions
+        if (orderItem.specialInstructions && 
+            orderItem.specialInstructions.toLowerCase().includes('caramel')) {
+          // Create caramel drizzle pattern
+          const drizzleGeometry = new THREE.TorusGeometry(1, 0.05, 16, 100, Math.PI);
+          const drizzleMaterial = new THREE.MeshPhongMaterial({ color: 0xC65102 });
+          
+          for (let i = 0; i < 3; i++) {
+            const drizzle = new THREE.Mesh(drizzleGeometry, drizzleMaterial);
+            drizzle.position.y = 1.9;
+            drizzle.rotation.x = Math.PI / 2;
+            drizzle.rotation.z = i * Math.PI / 3;
+            scene.add(drizzle);
+          }
         }
-        // Add more mappings as needed
-      });
+      }
     }
-    
-    return modelPaths;
   }
-  
+
   /**
-   * Loads 3D models from Firebase Storage
+   * Starts the animation loop
+   * @param scene The THREE.Scene to animate
    */
-  private loadModels(modelPaths: string[]): Observable<any[]> {
-    // Ensure GLTFLoader is available
-    if (typeof GLTFLoader === 'undefined') {
-      console.error('GLTFLoader is not available. Make sure THREE.js is properly loaded.');
-      return of([]);
+  private startAnimationLoop(scene: THREE.Scene): void {
+    if (!this.renderer || !this.camera || !this.controls) {
+      return;
     }
     
-    const loader = new GLTFLoader();
-    
-    // If no models to load, return an empty array
-    if (modelPaths.length === 0) {
-      return of([]);
-    }
-    
-    // Load each model
-    const modelObservables = modelPaths.map(path => {
-      // Check cache first
-      if (this.modelCache.has(path)) {
-        // Return a clone of the cached model
-        return of(this.modelCache.get(path)?.clone());
+    const animate = () => {
+      this.animationFrameId = requestAnimationFrame(animate);
+      
+      // Update controls
+      if (this.controls) {
+        this.controls.update();
       }
       
-      // Get download URL from Firebase Storage
-      return from(getDownloadURL(ref(this.storage, path))).pipe(
-        switchMap(url => {
-          // Load the model
-          return new Observable<any>(observer => {
-            loader.load(
-              url,
-              (gltf:any) => {
-                const model = gltf.scene;
-                
-                // Setup the model
-                model.traverse((child:any) => {
-                  if ((child as any).isMesh) {
-                    const mesh = child as any;
-                    mesh.castShadow = true;
-                    mesh.receiveShadow = true;
-                    
-                    // Check if material needs transparency
-                    if (
-                      path.includes('whipped-cream') || 
-                      path.includes('latte') ||
-                      path.includes('cappuccino')
-                    ) {
-                      if (Array.isArray(mesh.material)) {
-                        mesh.material.forEach((mat: any) => {
-                          mat.transparent = true;
-                          mat.opacity = 0.85;
-                        });
-                      } else if (mesh.material) {
-                        mesh.material.transparent = true;
-                        mesh.material.opacity = 0.85;
-                      }
-                    }
-                  }
-                });
-                
-                // Cache the original model
-                this.modelCache.set(path, model.clone());
-                
-                observer.next(model);
-                observer.complete();
-              },
-              undefined,
-              (error:any) => {
-                console.error(`Error loading model ${path}:`, error);
-                observer.error(error);
-              }
-            );
-          });
-        }),
-        catchError(error => {
-          console.error(`Failed to load model ${path}:`, error);
-          return of(null); // Return null for failed models
-        })
-      );
-    });
+      // Render scene
+      if (this.renderer && this.camera) {
+        this.renderer.render(scene, this.camera);
+      }
+    };
     
-    // Return all models loaded
-    return forkJoin(modelObservables);
+    animate();
   }
-  
+
   /**
-   * Positions the camera to properly view all models in the scene
+   * Disposes of all objects in the scene
+   * @param scene The THREE.Scene to clean up
    */
-  private positionCamera(
-    camera: any,
-    scene: any,
-    controls: any
-  ): void {
-    // Create a bounding box for all objects in the scene
-    const box = new THREE.Box3().setFromObject(scene);
-    const center = new THREE.Vector3();
-    const size = new THREE.Vector3();
-    
-    box.getCenter(center);
-    box.getSize(size);
-    
-    // Calculate the distance based on the size of the objects
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const fov = camera.fov * (Math.PI / 180);
-    const distance = (maxDim / 2) / Math.tan(fov / 2);
-    
-    // Set camera position and target
-    camera.position.set(center.x, center.y + maxDim * 0.5, center.z + distance * 1.2);
-    controls.target.copy(center);
-    
-    // Update camera and controls
-    camera.updateProjectionMatrix();
-    controls.update();
-  }
-  
-  /**
-   * Animation loop
-   */
-  private animate(
-    scene: any,
-    camera: any,
-    renderer: any,
-    controls: any
-  ): void {
-    // Start the animation loop
-    const animationId = requestAnimationFrame(() => 
-      this.animate(scene, camera, renderer, controls)
-    );
-    
-    // Update controls
-    controls.update();
-    
-    // Render the scene
-    renderer.render(scene, camera);
-    
-    // Store the animation ID on the scene object for cleanup
-    scene.animationId = animationId;
-  }
-  
-  /**
-   * Cleans up the scene and stops animation
-   */
-  cleanupScene(scene: any): void {
-    // Cancel animation frame
-    if (scene.animationId) {
-      cancelAnimationFrame(scene.animationId);
-    }
-    
-    // Dispose of objects in the scene
-    scene.traverse((object: any) => {
-      if (object.isMesh) {
-        const mesh = object;
-        if (mesh.geometry) {
-          mesh.geometry.dispose();
+  private disposeScene(scene: THREE.Scene): void {
+    scene.traverse((object) => {
+      if (object instanceof THREE.Mesh) {
+        if (object.geometry) {
+          object.geometry.dispose();
         }
         
-        if (mesh.material) {
-          if (Array.isArray(mesh.material)) {
-            mesh.material.forEach((material: any) => material.dispose());
+        if (object.material) {
+          if (Array.isArray(object.material)) {
+            object.material.forEach(material => material.dispose());
           } else {
-            mesh.material.dispose();
+            object.material.dispose();
           }
         }
       }
     });
-    
-    // Clear the scene
-    while (scene.children.length > 0) {
-      scene.remove(scene.children[0]);
-    }
   }
 }
