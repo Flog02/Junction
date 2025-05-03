@@ -6,6 +6,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:public": "ng serve --host 0.0.0.0 --disable-host-check",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
@@ -41,7 +42,6 @@
     "chart.js": "^4.4.9",
     "firebase": "^11.6.1",
     "ionicons": "^7.0.0",
-    "Junction": "file:",
     "ngx-captcha": "^13.0.0",
     "rxjs": "~7.8.0",
     "three": "^0.176.0",
