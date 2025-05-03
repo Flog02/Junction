@@ -76,32 +76,33 @@ export class AuthService {
   }
 
   // Register with email/password
-  async register(email: string, password: string, displayName: string): Promise<any> {
-    try {
-      const credential = await createUserWithEmailAndPassword(this.auth, email, password);
+ // In auth.service.ts, update the register method
+async register(email: string, password: string, displayName: string, role: string = 'customer'): Promise<any> {
+  try {
+    const credential = await createUserWithEmailAndPassword(this.auth, email, password);
+    
+    // Update display name
+    if (credential.user) {
+      await updateProfile(credential.user, { displayName });
+      await sendEmailVerification(credential.user);
       
-      // Update display name
-      if (credential.user) {
-        await updateProfile(credential.user, { displayName });
-        await sendEmailVerification(credential.user);
-        
-        // Create user profile in Firestore
-        await this.createUserProfile(credential.user, displayName);
-        
-        // Initialize loyalty program
-        await this.initializeLoyaltyProgram(credential.user.uid);
-        
-        // Initialize nutrition tracking
-        await this.initializeNutritionTracking(credential.user.uid);
-        
-        this.showToast('Registration successful! Please verify your email.');
-        return credential.user;
-      }
-    } catch (error: any) {
-      this.showToast(`Registration failed: ${error.message}`);
-      throw error;
+      // Create user profile in Firestore with role
+      await this.createUserProfile(credential.user, displayName, role);
+      
+      // Initialize loyalty program
+      await this.initializeLoyaltyProgram(credential.user.uid);
+      
+      // Initialize nutrition tracking
+      await this.initializeNutritionTracking(credential.user.uid);
+      
+      this.showToast('Registration successful! Please verify your email.');
+      return credential.user;
     }
+  } catch (error: any) {
+    this.showToast(`Registration failed: ${error.message}`);
+    throw error;
   }
+}
 
   // Login with email/password
   async login(email: string, password: string): Promise<any> {
@@ -119,33 +120,34 @@ export class AuthService {
   }
 
   // Login with Google
-  async loginWithGoogle(): Promise<any> {
-    try {
-      const provider = new GoogleAuthProvider();
-      const credential = await signInWithPopup(this.auth, provider);
+  // In auth.service.ts, update the loginWithGoogle method
+async loginWithGoogle(role: string = 'customer'): Promise<any> {
+  try {
+    const provider = new GoogleAuthProvider();
+    const credential = await signInWithPopup(this.auth, provider);
+    
+    // Check if this is a new user
+    const isNewUser = getAdditionalUserInfo(credential)?.isNewUser;
+    
+    if (isNewUser && credential.user) {
+      // Create user profile with role
+      await this.createUserProfile(credential.user, credential.user.displayName || 'User', role);
       
-      // Check if this is a new user
-      const isNewUser = getAdditionalUserInfo(credential)?.isNewUser;
+      // Initialize loyalty program
+      await this.initializeLoyaltyProgram(credential.user.uid);
       
-      if (isNewUser && credential.user) {
-        // Create user profile
-        await this.createUserProfile(credential.user, credential.user.displayName || 'User');
-        
-        // Initialize loyalty program
-        await this.initializeLoyaltyProgram(credential.user.uid);
-        
-        // Initialize nutrition tracking
-        await this.initializeNutritionTracking(credential.user.uid);
-      }
-      
-      this.showToast('Google login successful!');
-      this.router.navigate(['/home']);
-      return credential.user;
-    } catch (error: any) {
-      this.showToast(`Google login failed: ${error.message}`);
-      throw error;
+      // Initialize nutrition tracking
+      await this.initializeNutritionTracking(credential.user.uid);
     }
+    
+    this.showToast('Google login successful!');
+    this.router.navigate(['/home']);
+    return credential.user;
+  } catch (error: any) {
+    this.showToast(`Google login failed: ${error.message}`);
+    throw error;
   }
+}
 
   // Logout
   async logout(): Promise<void> {
@@ -248,31 +250,33 @@ export class AuthService {
   }
 
   // Create user profile in Firestore
-  async createUserProfile(user: User, displayName: string): Promise<void> {
-    const userRef = doc(this.firestore, `users/${user.uid}`);
-    const userData = {
-      uid: user.uid,
-      email: user.email,
-      displayName: displayName,
-      photoURL: user.photoURL,
-      createdAt: new Date(),
-      lastLogin: new Date(),
-      preferences: {
-        favoriteOrder: [],
-        defaultStore: '',
-        dietaryRestrictions: [],
-        sugarPreference: 3, // Default value (0-5)
-        caffeinePreference: 3 // Default value (0-5)
-      },
-      marketingPrefs: {
-        emailNotifications: true,
-        pushNotifications: true,
-        smsNotifications: false
-      }
-    };
-    
-    await setDoc(userRef, userData);
-  }
+ // In auth.service.ts, update the createUserProfile method
+async createUserProfile(user: User, displayName: string, role: string = 'customer'): Promise<void> {
+  const userRef = doc(this.firestore, `users/${user.uid}`);
+  const userData = {
+    uid: user.uid,
+    email: user.email,
+    displayName: displayName,
+    photoURL: user.photoURL,
+    createdAt: new Date(),
+    lastLogin: new Date(),
+    role: role, // Add this line to set the role
+    preferences: {
+      favoriteOrder: [],
+      defaultStore: '',
+      dietaryRestrictions: [],
+      sugarPreference: 3, // Default value (0-5)
+      caffeinePreference: 3 // Default value (0-5)
+    },
+    marketingPrefs: {
+      emailNotifications: true,
+      pushNotifications: true,
+      smsNotifications: false
+    }
+  };
+  
+  await setDoc(userRef, userData);
+}
 
   // Get user profile from Firestore
   async getUserProfile(uid: string): Promise<any> {
@@ -443,4 +447,5 @@ async redirectBasedOnRole() {
     });
     await toast.present();
   }
+  
 }

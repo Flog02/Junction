@@ -96,33 +96,37 @@ export class RegisterPage {
   }
 
   async onSubmit() {
-    if (this.registerForm.valid) {
-      this.isLoading = true;
-      try {
-        const { displayName, email, password } = this.registerForm.value;
-        await this.authService.register(email, password, displayName);
-        this.router.navigate(['/auth/verify-email']);
-      } catch (error) {
-        console.error('Registration error:', error);
-      } finally {
-        this.isLoading = false;
-      }
-    } else {
-      this.registerForm.markAllAsTouched();
-    }
-  }
-
-  async registerWithGoogle() {
+  if (this.registerForm.valid) {
     this.isLoading = true;
     try {
-      await this.authService.loginWithGoogle();
-      this.router.navigate(['/home']);
+      const { displayName, email, password } = this.registerForm.value;
+      // Pass 'customer' as the default role
+      await this.authService.register(email, password, displayName, 'customer');
+      this.router.navigate(['/auth/verify-email']);
     } catch (error) {
-      console.error('Google login error:', error);
+      console.error('Registration error:', error);
     } finally {
       this.isLoading = false;
     }
+  } else {
+    this.registerForm.markAllAsTouched();
   }
+}
+
+async registerWithGoogle() {
+  this.isLoading = true;
+  try {
+    // Pass 'customer' as the default role
+    await this.authService.loginWithGoogle('customer');
+    this.router.navigate(['/home']);
+  } catch (error) {
+    console.error('Google login error:', error);
+  } finally {
+    this.isLoading = false;
+  }
+}
+
+ 
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;

@@ -87,3 +87,72 @@
       background: var(--ion-background-color-step-50);
     }
   }
+  // .mode-toggle {
+  //   background: #bac6eb;
+  //   border-radius: 16px;
+  //   padding: 5px;
+  //   display: flex;
+  //   margin: 20px 0;
+  //   position: relative;
+  //   overflow: hidden;
+    
+  //   // &::before {
+  //   //   content: '';
+  //   //   position: absolute;
+  //   //   width: 50%;
+  //   //   height: calc(100% - 10px);
+  //   //   background: white;
+  //   //   border-radius: 12px;
+  //   //   top: 5px;
+  //   //   z-index: 0;
+  //   //   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  //   //   transition: transform 0.3s ease;
+  //   //   transform: translateX(calc(var(--staff-mode, 0) * 100%));
+  //   // }
+    
+  //   // ion-button {
+  //   //   flex: 1;
+  //   //   --border-radius: 0;
+  //   //   --background: transparent;
+  //   //   --background-hover: transparent;
+  //   //   --background-activated: transparent;
+  //   //   --box-shadow: none;
+  //   //   --ripple-color: transparent;
+  //   //   --color: var(--ion-color-medium);
+  //   //   margin: 0;
+  //   //   height: 42px;
+  //   //   z-index: 1;
+  //   //   transition: color 0.3s ease;
+  //   //   margin-inline: 2px;
+      
+  //   //   &[fill="solid"] {
+  //   //     --color: var(--ion-color-primary);
+  //   //     font-weight: 600;
+  //   //   }
+  //   // }
+  // }
+  .mode-toggle {
+    display: flex;
+    gap: 10px;
+    margin: 24px 0;
+    
+    ion-button {
+      flex: 1;
+      --border-radius: 12px;
+      --box-shadow: none;
+      height: 50px;
+      
+      &[fill="solid"] {
+        --background: var(--ion-color-primary);
+        --color: white;
+        transform: translateY(-3px);
+        transition: transform 0.3s ease;
+      }
+      
+      &[fill="outline"] {
+        --border-color: var(--ion-color-medium);
+        --color: var(--ion-color-medium);
+        background: #f8f9fa;
+      }
+    }
+  }

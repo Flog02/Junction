@@ -241,6 +241,28 @@ export class OrderService {
     return orderForFirestore;
   }
 
+  // Add this to src/app/core/services/order.service.ts
+
+/**
+ * Gets orders by status
+ */
+getOrdersByStatus(status: string): Observable<Order[]> {
+  const ordersRef = collection(this.firestore, 'orders');
+  const statusQuery = query(
+    ordersRef,
+    where('status', '==', status),
+    orderBy('orderTime', 'desc')
+  );
+
+  return collectionData(statusQuery, { idField: 'id' }).pipe(
+    map(orders => {
+      return orders.map(order => {
+        return this.convertFromFirestore(order as any, order['id'] as string);
+      });
+    })
+  );
+}
+
  /**
  * Convert Firestore data to our Order model
  */

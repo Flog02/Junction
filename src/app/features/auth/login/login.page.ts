@@ -24,6 +24,7 @@ import { addIcons } from 'ionicons';
 import { logoGoogle, mailOutline, lockClosedOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import { AuthService } from '../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
+import { NgModel } from '@angular/forms';
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -71,6 +72,10 @@ export class LoginPage implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
+  toggleStaffMode(isStaff: boolean) {
+    this.isStaffMode = isStaff;
+    document.documentElement.style.setProperty('--staff-mode', isStaff ? '1' : '0');
+  }
 
   ngOnInit() {
     // Get the return URL from route parameters or default to '/home'
@@ -89,33 +94,38 @@ export class LoginPage implements OnInit {
 // Add this property to your LoginPage class
 isStaffMode = false;
 
-// Update the onSubmit method to handle role-based redirection
+// src/app/features/auth/login/login.page.ts
+
+// Update the onSubmit method
 async onSubmit() {
   if (this.loginForm.valid) {
     this.isLoading = true;
     try {
       const { email, password } = this.loginForm.value;
-      await this.authService.login(email, password);
       
-      // Check if user is staff and redirect accordingly
+      // Log in the user
+      const user = await this.authService.login(email, password);
+      
       if (this.isStaffMode) {
-        // Check if the user actually has staff role
-        const user = await this.authService.getCurrentUser();
-        if (user) {
-          const profile = await this.authService.getUserProfile(user.uid);
-          if (profile && (profile.role === 'staff' || profile.role === 'admin')) {
-            this.router.navigate(['/staff/dashboard']);
-            return;
-          }
+        // Get the user profile to check role
+        const userProfile = await this.authService.getUserProfile(user.uid);
+        
+        // Check if user has staff or admin role
+        if (userProfile && (userProfile.role === 'staff' || userProfile.role === 'admin')) {
+          // Navigate directly to staff dashboard
+          this.router.navigate(['/staff/dashboard']);
+        } else {
+          // User doesn't have staff role
+          this.showError('Access denied: You do not have staff privileges');
+          this.authService.logout(); // Log them out
         }
-        // If we get here, the user doesn't have staff role
-        console.log('User attempted staff login but doesn\'t have staff role');
+      } else {
+        // Regular customer login - go to home or return URL
+        this.router.navigateByUrl(this.returnUrl);
       }
-      
-      // Default navigation for customers
-      this.router.navigateByUrl(this.returnUrl);
-    } catch (error) {
+    } catch (error:any) {
       console.error('Login error:', error);
+      this.showError('Login failed: ' + (error.message || 'Please check your credentials'));
     } finally {
       this.isLoading = false;
     }
@@ -123,6 +133,16 @@ async onSubmit() {
     this.loginForm.markAllAsTouched();
   }
 }
+
+// Add this helper method
+private showError(message: string) {
+  // You can implement this with a toast or alert
+  console.error(message);
+  // Example with alert:
+  alert(message);
+}
+
+
 
   async loginWithGoogle() {
     this.isLoading = true;

@@ -74,6 +74,6 @@ export const routes: Routes = [
   },
   {
     path: 'staff',
-    children: STAFF_ROUTES  // This includes all your defined staff routes
+    loadComponent:()=>import('./features/staff/staff-dashboard/staff-dashboard.component').then(m=>m.StaffDashboardComponent)
   },
 ];

@@ -17,19 +17,16 @@
             <h1 class="ion-text-center">Digital Café</h1>
             <p class="ion-text-center">Sign in to your account</p>
           </div>
-          
+          <div class="mode-toggle ion-margin-bottom ion-text-center">
+            <ion-button [fill]="!isStaffMode ? 'solid' : 'outline'" (click)="toggleStaffMode(false)">
+              Customer
+            </ion-button>
+            <ion-button [fill]="isStaffMode ? 'solid' : 'outline'" (click)="toggleStaffMode(true)">
+              Staff
+            </ion-button>
+          </div>
           <ion-card>
             <ion-card-content>
-              <div class="mode-toggle ion-margin-bottom ion-text-center">
-                <ion-segment [(ngModel)]="isStaffMode">
-                  <ion-segment-button [value]="false">
-                    <ion-label>Customer</ion-label>
-                  </ion-segment-button>
-                  <ion-segment-button [value]="true">
-                    <ion-label>Staff</ion-label>
-                  </ion-segment-button>
-                </ion-segment>
-              </div>
               <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                 <ion-item class="ion-margin-bottom">
                   <ion-icon name="mail-outline" slot="start"></ion-icon>

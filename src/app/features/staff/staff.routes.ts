@@ -13,6 +13,7 @@ export const STAFF_ROUTES: Routes = [
     redirectTo: 'login',
     pathMatch: 'full'
   },
+
   {
     path: 'dashboard',
     component: StaffDashboardComponent,
