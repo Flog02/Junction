@@ -103,7 +103,19 @@ export class OrderCartComponent implements OnInit, OnDestroy {
     { label: 'As soon as possible', value: 'asap' },
     { label: 'In 15 minutes', value: '15min' },
     { label: 'In 30 minutes', value: '30min' },
-    { label: 'In 1 hour', value: '60min' }
+    { label: 'In 1 hour', value: '60min' },
+    { label: '9:00 AM', value: '9am' },
+    { label: '10:00 AM', value: '10am' },
+    { label: '11:00 AM', value: '11am' },
+    { label: '12:00 PM', value: '12pm' },
+    { label: '1:00 PM', value: '1pm' },
+    { label: '2:00 PM', value: '2pm' },
+    { label: '3:00 PM', value: '3pm' },
+    { label: '4:00 PM', value: '4pm' },
+    { label: '5:00 PM', value: '5pm' },
+    { label: '6:00 PM', value: '6pm' },
+    { label: '7:00 PM', value: '7pm' },
+    { label: '8:00 PM', value: '8pm' },
   ];
   
   selectedPickupTime: string = 'asap';

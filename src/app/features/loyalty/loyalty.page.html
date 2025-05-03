@@ -1,0 +1,240 @@
+<ion-header class="ion-no-border">
+    <ion-toolbar>
+        <ion-buttons slot="start">
+            <ion-back-button defaultHref="/home"></ion-back-button>
+          </ion-buttons>
+      <ion-title>
+        <div class="page-title">
+          <ion-icon name="star-outline"></ion-icon>
+          <span>Loyalty Program</span>
+        </div>
+      </ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="refreshData()">
+          <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="loading-container">
+      <ion-spinner name="circles"></ion-spinner>
+      <p>Loading your loyalty status...</p>
+    </div>
+    
+    <!-- Content when loaded -->
+    <div *ngIf="!isLoading && userLoyalty" class="loyalty-content">
+      <!-- Loyalty Card -->
+      <ion-card 
+        class="loyalty-card" 
+        [ngClass]="[getTierColorClass(userLoyalty.tier), animateCard ? 'animate-in' : '']"
+      >
+        <div class="card-background"></div>
+        
+        <ion-card-header>
+          <ion-card-subtitle>
+            <div class="tier-label">
+              <ion-icon [name]="getTierIcon(userLoyalty.tier)"></ion-icon>
+              Your Loyalty Card
+            </div>
+          </ion-card-subtitle>
+          <ion-card-title>{{ capitalizeFirstLetter(userLoyalty.tier) }} Member</ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="points-container">
+            <div class="points">
+              <span class="points-value">{{ userLoyalty.points }}</span>
+              <span class="points-label">Points</span>
+            </div>
+            
+            <div class="streak">
+              <span class="streak-value">{{ userLoyalty.streakDays }}</span>
+              <span class="streak-label">Day Streak</span>
+            </div>
+          </div>
+          
+          <div *ngIf="nextTier" class="next-tier">
+            <p class="next-tier-text">
+              <span>{{ userLoyalty.totalPointsEarned }}/{{ nextTier.threshold }} points to {{ capitalizeFirstLetter(nextTier.name) }}</span>
+            </p>
+            <ion-progress-bar [value]="userLoyalty.nextTierProgress / 100"></ion-progress-bar>
+          </div>
+          
+          <ion-button 
+            expand="block" 
+            fill="clear" 
+            class="view-benefits-btn"
+            (click)="showTierBenefits(currentTier)"
+          >
+            <ion-icon name="trophy-outline" slot="start"></ion-icon>
+            View {{ capitalizeFirstLetter(userLoyalty.tier) }} Benefits
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+      
+      <!-- Segment for Rewards/History -->
+      <ion-segment 
+        [(ngModel)]="selectedSegment" 
+        (ionChange)="segmentChanged($event)"
+        class="custom-segment"
+      >
+        <ion-segment-button value="rewards">
+          <ion-icon name="gift-outline"></ion-icon>
+          <ion-label>Rewards</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="history">
+          <ion-icon name="time-outline"></ion-icon>
+          <ion-label>History</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+      
+      <!-- Rewards Section -->
+      <div *ngIf="selectedSegment === 'rewards'">
+        <h2 class="section-title">
+          <ion-icon name="gift-outline"></ion-icon>
+          Available Rewards
+        </h2>
+        
+        <div *ngIf="availableRewards.length === 0" class="empty-state">
+          <ion-icon name="gift-outline"></ion-icon>
+          <h3>No rewards available yet</h3>
+          <p>Earn more points by making purchases to unlock rewards!</p>
+        </div>
+        
+        <div class="rewards-grid">
+          <ion-card 
+            *ngFor="let reward of availableRewards; let i = index" 
+            class="reward-card" 
+            [class.animate-in]="animateRewards"
+            [style.animation-delay]="i * 0.1 + 's'"
+          >
+            <div class="reward-header">
+              <div class="reward-points">
+                <span>{{ reward.pointsCost }}</span>
+                <small>points</small>
+              </div>
+            </div>
+            
+            <ion-card-header>
+              <ion-card-title>{{ reward.name }}</ion-card-title>
+            </ion-card-header>
+            
+            <ion-card-content>
+              <p class="reward-description">{{ reward.description }}</p>
+              
+              <div class="reward-action">
+                <ion-button 
+                  expand="block" 
+                  [disabled]="!userLoyalty || userLoyalty.points < reward.pointsCost"
+                  (click)="redeemReward(reward)"
+                  class="redeem-button"
+                >
+                  <span *ngIf="userLoyalty && userLoyalty.points >= reward.pointsCost">
+                    <ion-icon name="gift-outline" slot="start"></ion-icon>
+                    Redeem Now
+                  </span>
+                  <span *ngIf="!userLoyalty || userLoyalty.points < reward.pointsCost">
+                    Need {{ reward.pointsCost - (userLoyalty ? userLoyalty.points : 0) }} more points
+                  </span>
+                </ion-button>
+              </div>
+            </ion-card-content>
+          </ion-card>
+        </div>
+        
+        <h2 class="section-title">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          Redeemed Rewards
+        </h2>
+        
+        <div *ngIf="redeemedRewards.length === 0" class="empty-state">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <h3>No redeemed rewards yet</h3>
+          <p>Your redeemed rewards will appear here.</p>
+        </div>
+        
+        <div class="redeemed-rewards">
+          <ion-card 
+            *ngFor="let reward of redeemedRewards" 
+            class="reward-card redeemed"
+          >
+            <div class="redeemed-badge">
+              <ion-icon name="checkmark-circle"></ion-icon>
+              <span>Redeemed</span>
+            </div>
+            
+            <ion-card-header>
+              <ion-card-subtitle>
+                {{ reward.redeemedDate ? formatDate(reward.redeemedDate) : 'N/A' }}
+              </ion-card-subtitle>
+              <ion-card-title>{{ reward.name }}</ion-card-title>
+            </ion-card-header>
+            
+            <ion-card-content>
+              <p>{{ reward.description }}</p>
+            </ion-card-content>
+          </ion-card>
+        </div>
+      </div>
+      
+      <!-- History Section -->
+      <div *ngIf="selectedSegment === 'history'">
+        <h2 class="section-title">
+          <ion-icon name="time-outline"></ion-icon>
+          Points History
+        </h2>
+        
+        <div *ngIf="loyaltyHistory.length === 0" class="empty-state">
+          <ion-icon name="time-outline"></ion-icon>
+          <h3>No loyalty history yet</h3>
+          <p>Your points history will appear here.</p>
+        </div>
+        
+        <ion-card *ngIf="loyaltyHistory.length > 0" class="history-card">
+          <ion-list lines="full">
+            <ion-item-divider sticky>
+              <ion-label>Activity</ion-label>
+              <ion-note slot="end">Points</ion-note>
+            </ion-item-divider>
+            
+            <ion-item 
+              *ngFor="let item of loyaltyHistory" 
+              lines="full"
+              [ngClass]="{'positive': item.points > 0, 'negative': item.points < 0}"
+              class="history-item"
+            >
+              <ion-icon 
+                [name]="getHistoryIcon(item.type)"
+                slot="start" 
+                [color]="getHistoryIconColor(item.points)"
+                class="history-icon"
+              ></ion-icon>
+              
+              <ion-label>
+                <h2>{{ item.description }}</h2>
+                <p>{{ formatRelativeDate(item.date) }}</p>
+              </ion-label>
+              
+              <ion-note slot="end" [color]="getHistoryIconColor(item.points)" class="points-change">
+                {{ item.points > 0 ? '+' : '' }}{{ item.points }}
+              </ion-note>
+            </ion-item>
+          </ion-list>
+        </ion-card>
+      </div>
+    </div>
+    
+    <!-- No loyalty account -->
+    <div *ngIf="!isLoading && !userLoyalty" class="empty-state no-account">
+      <ion-icon name="star-outline"></ion-icon>
+      <h2>Join Our Loyalty Program</h2>
+      <p>Make your first purchase to start earning points and unlock rewards!</p>
+      <ion-button expand="block" routerLink="/menu">
+        <ion-icon name="cafe-outline" slot="start"></ion-icon>
+        Browse Menu
+      </ion-button>
+    </div>
+  </ion-content>

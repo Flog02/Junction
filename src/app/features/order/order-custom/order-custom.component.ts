@@ -179,21 +179,27 @@ export class OrderCustomComponent implements OnInit, OnDestroy {
         formConfig['sugarLevel'] = [3, [Validators.required, Validators.min(0), Validators.max(5)]];
         formConfig['caffeineLevel'] = [3, [Validators.required, Validators.min(0), Validators.max(5)]];
       } else if (this.product.category === 'dessert') {
+        // For desserts, add sugar level
         formConfig['sugarLevel'] = [3, [Validators.required, Validators.min(0), Validators.max(5)]];
+        
+        // Only add size field if sizes are available and make it required only if sizes exist
         if (this.product.customizationOptions?.sizes?.length > 0) {
           formConfig['size'] = ['', Validators.required];
         }
       } else if (this.product.category === 'food') {
+        // For food items, don't add sugar or caffeine
+        
+        // Only add size field if sizes are available and make it required only if sizes exist
         if (this.product.customizationOptions?.sizes?.length > 0) {
           formConfig['size'] = ['', Validators.required];
         }
       }
     } else {
-      // Include all possible fields
-      formConfig['size'] = ['', Validators.required];
+      // Default form when product is not yet loaded
+      formConfig['size'] = [''];
       formConfig['milk'] = [''];
-      formConfig['sugarLevel'] = [3, [Validators.required, Validators.min(0), Validators.max(5)]];
-      formConfig['caffeineLevel'] = [3, [Validators.required, Validators.min(0), Validators.max(5)]];
+      formConfig['sugarLevel'] = [3, [Validators.min(0), Validators.max(5)]];
+      formConfig['caffeineLevel'] = [3, [Validators.min(0), Validators.max(5)]];
     }
   
     return this.formBuilder.group(formConfig);
@@ -279,81 +285,68 @@ export class OrderCustomComponent implements OnInit, OnDestroy {
   /**
  * Update form controls based on product category
  */
-  updateFormControls(product: Product): void {
-    // Reset the form
-    this.orderForm = this.createOrderForm();
+ // In OrderCustomComponent (paste.txt), update the updateFormControls method:
+
+updateFormControls(product: Product): void {
+  // Reset the form with the right configuration for this product
+  this.orderForm = this.createOrderForm();
+  
+  // If the product is a beverage
+  if (product.category === 'coffee' || product.category === 'tea') {
+    // For beverages, we need all standard controls
+    // These should already be added by createOrderForm
     
-    // If the product is a beverage
-    if (product.category === 'coffee' || product.category === 'tea') {
-      // Make sure all the necessary controls exist
-      if (!this.orderForm.get('size')) {
-        this.orderForm.addControl('size', this.formBuilder.control('', Validators.required));
-      }
-      
-      if (!this.orderForm.get('milk')) {
-        this.orderForm.addControl('milk', this.formBuilder.control(''));
-      }
-      
-      if (!this.orderForm.get('sugarLevel')) {
-        this.orderForm.addControl('sugarLevel', this.formBuilder.control(3, [
-          Validators.required, Validators.min(0), Validators.max(5)
-        ]));
-      }
-      
-      if (!this.orderForm.get('caffeineLevel')) {
-        this.orderForm.addControl('caffeineLevel', this.formBuilder.control(3, [
-          Validators.required, Validators.min(0), Validators.max(5)
-        ]));
-      }
-    } 
-    // If the product is a dessert
-    else if (product.category === 'dessert') {
-      // Remove unnecessary controls
-      if (this.orderForm.get('milk')) {
-        this.orderForm.removeControl('milk');
-      }
-      
-      if (this.orderForm.get('caffeineLevel')) {
-        this.orderForm.removeControl('caffeineLevel');
-      }
-      
-      // Add sugar level control if it doesn't exist
-      if (!this.orderForm.get('sugarLevel')) {
-        this.orderForm.addControl('sugarLevel', this.formBuilder.control(3, [
-          Validators.required, Validators.min(0), Validators.max(5)
-        ]));
-      }
-      
-      // Add size control if sizes are available
-      if (this.availableSizes.length > 0 && !this.orderForm.get('size')) {
-        this.orderForm.addControl('size', this.formBuilder.control('', Validators.required));
-      } else if (this.availableSizes.length === 0 && this.orderForm.get('size')) {
-        this.orderForm.removeControl('size');
-      }
+  } 
+  // If the product is a dessert
+  else if (product.category === 'dessert') {
+    // Desserts need sugar level but not caffeine
+    // If sugar level isn't already there, add it
+    if (!this.orderForm.get('sugarLevel')) {
+      this.orderForm.addControl('sugarLevel', this.formBuilder.control(3, [
+        Validators.required, Validators.min(0), Validators.max(5)
+      ]));
     }
-    // If the product is food
-    else if (product.category === 'food') {
-      // Remove unnecessary controls
-      if (this.orderForm.get('milk')) {
-        this.orderForm.removeControl('milk');
-      }
-      
-      if (this.orderForm.get('sugarLevel')) {
-        this.orderForm.removeControl('sugarLevel');
-      }
-      
-      if (this.orderForm.get('caffeineLevel')) {
-        this.orderForm.removeControl('caffeineLevel');
-      }
-      
-      // Add size control if sizes are available
-      if (this.availableSizes.length > 0 && !this.orderForm.get('size')) {
-        this.orderForm.addControl('size', this.formBuilder.control('', Validators.required));
-      } else if (this.availableSizes.length === 0 && this.orderForm.get('size')) {
-        this.orderForm.removeControl('size');
-      }
+    
+    // Remove caffeine control if it exists
+    if (this.orderForm.get('caffeineLevel')) {
+      this.orderForm.removeControl('caffeineLevel');
+    }
+    
+    // Remove milk control if it exists
+    if (this.orderForm.get('milk')) {
+      this.orderForm.removeControl('milk');
+    }
+    
+    // Add size control only if sizes are available
+    if (this.availableSizes.length > 0 && !this.orderForm.get('size')) {
+      this.orderForm.addControl('size', this.formBuilder.control('', Validators.required));
+    } else if (this.availableSizes.length === 0 && this.orderForm.get('size')) {
+      this.orderForm.removeControl('size');
     }
   }
+  // If the product is food
+  else if (product.category === 'food') {
+    // Food doesn't need sugar, caffeine, or milk controls
+    if (this.orderForm.get('sugarLevel')) {
+      this.orderForm.removeControl('sugarLevel');
+    }
+    
+    if (this.orderForm.get('caffeineLevel')) {
+      this.orderForm.removeControl('caffeineLevel');
+    }
+    
+    if (this.orderForm.get('milk')) {
+      this.orderForm.removeControl('milk');
+    }
+    
+    // Add size control only if sizes are available
+    if (this.availableSizes.length > 0 && !this.orderForm.get('size')) {
+      this.orderForm.addControl('size', this.formBuilder.control('', Validators.required));
+    } else if (this.availableSizes.length === 0 && this.orderForm.get('size')) {
+      this.orderForm.removeControl('size');
+    }
+  }
+}
 
   
   /**
@@ -392,58 +385,80 @@ export class OrderCustomComponent implements OnInit, OnDestroy {
   /**
    * Updates the nutrition information and price based on current selections
    */
-  updateNutritionAndPrice(): void {
-    if (!this.product) return;
-    
-    const formValue = this.orderForm.value;
-    
-    // Find the selected size
-    const selectedSize = this.availableSizes.find(s => s.id === formValue.size);
-    if (!selectedSize) return;
-    
-    // Find the selected milk
-    const selectedMilk = this.availableMilk.find(m => m.id === formValue.milk);
-    
-    // Get selected shots
-    const selectedShots = this.availableShots.filter(s => s.selected);
-    
-    // Get selected syrups
-    const selectedSyrups = this.availableSyrups.filter(s => s.selected);
-    
-    // Calculate nutrition info
-    this.nutritionInfo = this.productService.calculateNutrition(
-      this.product,
-      selectedSize,
-      selectedMilk || this.availableMilk[0] || null,
-      selectedShots,
-      selectedSyrups,
-      formValue.sugarLevel,
-      formValue.caffeineLevel
-    );
-    
-    // Create an order item to calculate price
-    const orderItem: OrderItem = {
-      productId: this.product.id,
-      quantity: formValue.quantity,
-      name: this.product.name,
-      basePrice: this.product.price,
-      customizations: {
-        size: selectedSize,
-        milk: selectedMilk,
-        shots: selectedShots,
-        syrups: selectedSyrups,
-        toppings: this.availableToppings.filter(t => t.selected)
-      },
-      sugarLevel: formValue.sugarLevel,
-      caffeineLevel: formValue.caffeineLevel,
-      specialInstructions: formValue.specialInstructions,
-      itemTotal: 0,
-      nutritionInfo: this.nutritionInfo
-    };
-    
-    // Calculate item total
-    this.itemTotal = this.orderService.calculateItemTotal(orderItem);
+ // In OrderCustomComponent (paste.txt), update the updateNutritionAndPrice method:
+
+updateNutritionAndPrice(): void {
+  if (!this.product) return;
+  
+  const formValue = this.orderForm.value;
+  
+  // Find the selected size
+  const selectedSize = this.availableSizes.find(s => s.id === formValue.size);
+  
+  // For products with no size options, use a default size
+  const sizeToUse = selectedSize || 
+    (this.availableSizes.length > 0 ? this.availableSizes[0] : 
+    { id: 'default', name: 'Default', priceModifier: 0 });
+  
+  // Find the selected milk
+  const selectedMilk = this.availableMilk.find(m => m.id === formValue.milk);
+  
+  // Get selected shots or toppings based on product category
+  let selectedShotsOrToppings = [];
+  if (this.product.category === 'food' || this.product.category === 'dessert') {
+    // For food and dessert, use toppings as "shots" parameter in calculation
+    selectedShotsOrToppings = this.availableToppings.filter(t => t.selected);
+  } else {
+    // For beverages, use shots as normal
+    selectedShotsOrToppings = this.availableShots.filter(s => s.selected);
   }
+  
+  // Get selected syrups
+  const selectedSyrups = this.availableSyrups.filter(s => s.selected);
+  
+  // Get selected toppings for beverages
+  const selectedToppings = this.product.category === 'food' || this.product.category === 'dessert' 
+    ? [] 
+    : this.availableToppings.filter(t => t.selected);
+  
+  // Calculate nutrition info - for food/dessert, pass toppings as "shots" parameter
+  this.nutritionInfo = this.productService.calculateNutrition(
+    this.product,
+    sizeToUse,
+    selectedMilk || null,
+    selectedShotsOrToppings,
+    selectedSyrups,
+    formValue.sugarLevel || 3,
+    formValue.caffeineLevel || 3
+  );
+  
+  // Create an order item to calculate price
+  const orderItem: OrderItem = {
+    productId: this.product.id,
+    quantity: formValue.quantity || 1,
+    name: this.product.name,
+    basePrice: this.product.price,
+    customizations: {
+      size: sizeToUse,
+      milk: selectedMilk,
+      shots: this.product.category === 'coffee' || this.product.category === 'tea' 
+        ? selectedShotsOrToppings 
+        : [],
+      syrups: selectedSyrups,
+      toppings: this.product.category === 'food' || this.product.category === 'dessert' 
+        ? selectedShotsOrToppings 
+        : selectedToppings
+    },
+    sugarLevel: formValue.sugarLevel || 3,
+    caffeineLevel: formValue.caffeineLevel || 3,
+    specialInstructions: formValue.specialInstructions || '',
+    itemTotal: 0,
+    nutritionInfo: this.nutritionInfo
+  };
+  
+  // Calculate item total
+  this.itemTotal = this.orderService.calculateItemTotal(orderItem);
+}
   
   /**
    * Increments the quantity value
@@ -522,89 +537,110 @@ export class OrderCustomComponent implements OnInit, OnDestroy {
   /**
    * Adds the customized item to the cart
    */
-  async addToCart(): Promise<void> {
-    if (this.orderForm.invalid || !this.product) {
-      return;
-    }
+  // In OrderCustomComponent (paste.txt), update the addToCart method:
+
+async addToCart(): Promise<void> {
+  // Check form validity but make sure we don't validate controls that don't exist
+  let formIsValid = this.orderForm.valid;
+  
+  // Check if the form has proper controls based on product category
+  if (!this.product) {
+    return;
+  }
+  
+  const loading = await this.loadingController.create({
+    message: 'Adding to cart...'
+  });
+  
+  await loading.present();
+  
+  try {
+    const formValue = this.orderForm.value;
     
-    const loading = await this.loadingController.create({
-      message: 'Adding to cart...'
+    // Find selected options
+    const selectedSize = this.availableSizes.length > 0 ? 
+      this.availableSizes.find(s => s.id === formValue.size) || this.availableSizes[0] :
+      { id: 'default', name: 'Default', priceModifier: 0 };
+    
+    const selectedMilk = this.availableMilk.length > 0 ? 
+      this.availableMilk.find(m => m.id === formValue.milk) : 
+      null;
+    
+    const selectedShots = this.availableShots.filter(s => s.selected);
+    const selectedSyrups = this.availableSyrups.filter(s => s.selected);
+    const selectedToppings = this.availableToppings.filter(t => t.selected);
+    
+    // Set default values for controls that might not exist
+    const sugarLevel = this.orderForm.get('sugarLevel') ? 
+      formValue.sugarLevel : 
+      (this.product.category === 'dessert' ? 3 : 0);
+    
+    const caffeineLevel = this.orderForm.get('caffeineLevel') ? 
+      formValue.caffeineLevel : 
+      (this.product.category === 'coffee' || this.product.category === 'tea' ? 3 : 0);
+    
+    // Create order item
+    const orderItem: OrderItem = {
+      productId: this.product.id,
+      quantity: formValue.quantity,
+      name: this.product.name,
+      basePrice: this.product.price,
+      customizations: {
+        size: selectedSize,
+        milk: selectedMilk ?? undefined,
+        shots: this.product.category === 'coffee' || this.product.category === 'tea' ? 
+          selectedShots : 
+          [],
+        syrups: selectedSyrups,
+        toppings: this.product.category === 'food' || this.product.category === 'dessert' ? 
+          selectedToppings : 
+          selectedToppings
+      },
+      sugarLevel: sugarLevel,
+      caffeineLevel: caffeineLevel,
+      specialInstructions: formValue.specialInstructions || '',
+      itemTotal: this.itemTotal,
+      nutritionInfo: this.nutritionInfo
+    };
+    
+    // Add to cart
+    this.orderService.addToCart(orderItem);
+    
+    await loading.dismiss();
+    
+    const toast = await this.toastController.create({
+      message: 'Added to cart successfully!',
+      duration: 2000,
+      position: 'bottom',
+      color: 'success'
     });
     
-    await loading.present();
+    await toast.present();
     
-    try {
-      const formValue = this.orderForm.value;
-      
-      // Find selected options
-      const selectedSize = this.availableSizes.find(s => s.id === formValue.size);
-      const selectedMilk = this.availableMilk.find(m => m.id === formValue.milk);
-      const selectedShots = this.availableShots.filter(s => s.selected);
-      const selectedSyrups = this.availableSyrups.filter(s => s.selected);
-      const selectedToppings = this.availableToppings.filter(t => t.selected);
-      
-      if (!selectedSize) {
-        throw new Error('Please select a size');
-      }
-      
-      // Create order item
-      const orderItem: OrderItem = {
-        productId: this.product.id,
-        quantity: formValue.quantity,
-        name: this.product.name,
-        basePrice: this.product.price,
-        customizations: {
-          size: selectedSize,
-          milk: selectedMilk,
-          shots: selectedShots,
-          syrups: selectedSyrups,
-          toppings: selectedToppings
-        },
-        sugarLevel: formValue.sugarLevel,
-        caffeineLevel: formValue.caffeineLevel,
-        specialInstructions: formValue.specialInstructions,
-        itemTotal: this.itemTotal,
-        nutritionInfo: this.nutritionInfo
-      };
-      
-      // Add to cart
-      this.orderService.addToCart(orderItem);
-      
-      await loading.dismiss();
-      
-      const toast = await this.toastController.create({
-        message: 'Added to cart successfully!',
-        duration: 2000,
-        position: 'bottom',
-        color: 'success'
+    // Navigate back to menu or to cart
+    if (this.isTableOrder) {
+      this.router.navigate(['/menu'], {
+        queryParams: {
+          tableOrder: 'true',
+          storeId: this.storeId,
+          tableNumber: this.tableNumber
+        }
       });
-      
-      await toast.present();
-      
-      // Navigate back to menu or to cart
-      if (this.isTableOrder) {
-        this.router.navigate(['/menu'], {
-          queryParams: {
-            tableOrder: 'true',
-            storeId: this.storeId,
-            tableNumber: this.tableNumber
-          }
-        });
-      } else {
-        this.router.navigate(['/menu']);
-      }
-      
-    } catch (error: any) {
-      await loading.dismiss();
-      
-      const toast = await this.toastController.create({
-        message: `Error: ${error.message}`,
-        duration: 3000,
-        position: 'bottom',
-        color: 'danger'
-      });
-      
-      await toast.present();
+    } else {
+      this.router.navigate(['/menu']);
     }
+    
+  } catch (error: any) {
+    await loading.dismiss();
+    
+    const toast = await this.toastController.create({
+      message: `Error: ${error.message}`,
+      duration: 3000,
+      position: 'bottom',
+      color: 'danger'
+    });
+    
+    await toast.present();
   }
+}
 }

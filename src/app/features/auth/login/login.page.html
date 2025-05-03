@@ -17,6 +17,7 @@
             <h1 class="ion-text-center">Digital Café</h1>
             <p class="ion-text-center">Sign in to your account</p>
           </div>
+
           <div class="mode-toggle ion-margin-bottom ion-text-center">
             <ion-button [fill]="!isStaffMode ? 'solid' : 'outline'" (click)="toggleStaffMode(false)">
               Customer
@@ -76,6 +77,7 @@
               </ion-button>
             </ion-card-content>
           </ion-card>
+
           
           <div class="ion-text-center ion-margin-top">
             <p>Don't have an account? <a routerLink="/auth/register">Register Now</a></p>

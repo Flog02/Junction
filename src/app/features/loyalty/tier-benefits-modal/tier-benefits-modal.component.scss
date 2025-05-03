@@ -1,0 +1,206 @@
+// Tier Benefits Modal Styles
+:host {
+    --modal-max-width: 400px;
+    --modal-max-height: 90%;
+    --modal-border-radius: 16px;
+  }
+  
+  ion-header ion-toolbar {
+    --background: transparent;
+    --border-style: none;
+    
+    ion-title {
+      font-weight: 600;
+    }
+  }
+  
+  .tier-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 24px 16px;
+    border-radius: var(--modal-border-radius);
+    max-width: var(--modal-max-width);
+    margin: 0 auto;
+  }
+  
+  .tier-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    
+    ion-icon {
+      font-size: 40px;
+      color: white;
+    }
+  }
+  
+  .tier-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 20px;
+    color: var(--ion-color-dark);
+  }
+  
+  .benefits-list {
+    width: 100%;
+    margin-bottom: 24px;
+    
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--ion-color-dark);
+    }
+    
+    ion-list {
+      background: transparent;
+      margin-bottom: 16px;
+    }
+    
+    ion-item {
+      --background: transparent;
+      --padding-start: 0;
+      
+      ion-icon {
+        color: var(--ion-color-success);
+        margin-right: 12px;
+      }
+      
+      ion-label {
+        font-size: 16px;
+        white-space: normal;
+        color: var(--ion-color-dark);
+      }
+    }
+    
+    .empty-benefits {
+      text-align: center;
+      color: var(--ion-color-medium);
+      font-style: italic;
+      padding: 16px;
+    }
+  }
+  
+  .multiplier-badge {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 16px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    
+    .multiplier-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .multiplier-label {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  }
+  
+  .next-tier-info, .max-tier-info {
+    margin-bottom: 24px;
+    
+    p {
+      font-size: 16px;
+      color: var(--ion-color-dark);
+      opacity: 0.7;
+      font-style: italic;
+    }
+  }
+  
+  .close-btn {
+    --border-radius: 12px;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+  
+  // Tier specific styles
+  .tier-bronze {
+    background: linear-gradient(135deg, rgba(205, 127, 50, 0.1), rgba(232, 178, 125, 0.1));
+    
+    .tier-icon {
+      background: linear-gradient(135deg, #cd7f32, #e8b27d);
+    }
+    
+    .multiplier-badge .multiplier-value {
+      color: #cd7f32;
+    }
+  }
+  
+  .tier-silver {
+    background: linear-gradient(135deg, rgba(192, 192, 192, 0.1), rgba(230, 230, 230, 0.1));
+    
+    .tier-icon {
+      background: linear-gradient(135deg, #c0c0c0, #e6e6e6);
+    }
+    
+    .multiplier-badge .multiplier-value {
+      color: #808080;
+    }
+  }
+  
+  .tier-gold {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 236, 179, 0.1));
+    
+    .tier-icon {
+      background: linear-gradient(135deg, #ffd700, #ffecb3);
+    }
+    
+    .multiplier-badge .multiplier-value {
+      color: #daa520;
+    }
+  }
+  
+  .tier-platinum {
+    background: linear-gradient(135deg, rgba(142, 142, 142, 0.1), rgba(229, 229, 229, 0.1));
+    
+    .tier-icon {
+      background: linear-gradient(135deg, #8e8e8e, #e5e5e5);
+    }
+    
+    .multiplier-badge .multiplier-value {
+      color: #696969;
+    }
+  }
+  
+  // Dark mode adjustments
+  @media (prefers-color-scheme: dark) {
+    .tier-container {
+      background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    .multiplier-badge {
+      background-color: rgba(255, 255, 255, 0.1);
+      
+      .multiplier-value {
+        color: var(--ion-color-primary) !important;
+      }
+    }
+    
+    .tier-title, .benefits-list h3 {
+      color: var(--ion-color-light);
+    }
+    
+    ion-item ion-label {
+      color: var(--ion-color-light) !important;
+    }
+    
+    .next-tier-info p, .max-tier-info p {
+      color: var(--ion-color-light);
+    }
+  }

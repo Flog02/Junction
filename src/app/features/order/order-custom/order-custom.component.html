@@ -55,7 +55,7 @@
         </div>
         
         <!-- Size options -->
-        <div class="form-section" *ngIf="availableSizes.length > 0">
+        <div class="form-section" *ngIf="availableSizes.length > 0 && orderForm.get('size')">
           <h2 class="section-title">Size</h2>
           <div class="options-grid size-options">
             <div 
@@ -160,7 +160,7 @@
         </div>
         
         <!-- Sugar level -->
-        <div class="form-section">
+        <div class="form-section" *ngIf="orderForm.get('sugarLevel')">
           <h2 class="section-title">Sugar Level</h2>
           <div class="slider-container">
             <div class="slider-labels">
