@@ -91,7 +91,7 @@ export class CoffeeBrewingComponent implements OnInit {
         'Look for honey-like flow with tiger striping',
         'Yield should be approximately 36-40g of liquid'
       ],
-      imageUrl: 'assets/brewing/espresso.jpg'
+      imageUrl: '/assets/brewing/espresso.jpg'
     },
     {
       id: 'pour-over',
@@ -109,7 +109,7 @@ export class CoffeeBrewingComponent implements OnInit {
         'Slowly pour remaining water in circular motion',
         'Total brew time should be 2-3 minutes'
       ],
-      imageUrl: 'assets/brewing/pour-over.jpg'
+      imageUrl: '/assets/brewing/pour-over.jpg'
     },
     {
       id: 'french-press',
@@ -127,7 +127,7 @@ export class CoffeeBrewingComponent implements OnInit {
         'Place lid on top but don\'t press down, wait 4 minutes',
         'Press down slowly and pour immediately'
       ],
-      imageUrl: 'assets/brewing/french-press.jpg'
+      imageUrl: '/assets/brewing/french-press.jpg'
     },
     {
       id: 'aeropress',
@@ -145,7 +145,7 @@ export class CoffeeBrewingComponent implements OnInit {
         'Wait 1 minute, then press down slowly',
         'Press until you hear a hissing sound'
       ],
-      imageUrl: 'assets/brewing/aeropress.jpg'
+      imageUrl: '/assets/brewing/aeropress.jpg'
     }
   ];
   

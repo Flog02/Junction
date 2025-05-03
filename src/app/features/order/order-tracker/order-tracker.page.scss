@@ -1,0 +1,201 @@
+/* src/app/features/order/order-tracker/order-tracker.page.scss */
+
+.order-tracker {
+    padding: 16px 0;
+  }
+  
+  .loading-container, .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    text-align: center;
+  }
+  
+  .error-container ion-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: var(--ion-color-danger);
+  }
+  
+  .status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+  
+  .status-badge.pending {
+    background-color: var(--ion-color-warning);
+    color: var(--ion-color-warning-contrast);
+  }
+  
+  .status-badge.processing {
+    background-color: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+  }
+  
+  .status-badge.ready {
+    background-color: var(--ion-color-success);
+    color: var(--ion-color-success-contrast);
+  }
+  
+  .status-badge.delivered {
+    background-color: var(--ion-color-success);
+    color: var(--ion-color-success-contrast);
+  }
+  
+  .status-badge.cancelled {
+    background-color: var(--ion-color-danger);
+    color: var(--ion-color-danger-contrast);
+  }
+  
+  .progress-tracker {
+    margin: 24px 0;
+  }
+  
+  .progress-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+    width: 25%;
+  }
+  
+  .step.active {
+    opacity: 1;
+  }
+  
+  .step-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--ion-color-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+  
+  .step.active .step-icon {
+    background-color: var(--ion-color-primary);
+    color: var(--ion-color-primary-contrast);
+  }
+  
+  .step-label {
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  
+  .step-time {
+    font-size: 10px;
+    color: var(--ion-color-medium);
+  }
+  
+  .estimated-time {
+    text-align: center;
+    margin: 24px 0;
+    padding: 16px;
+    background-color: var(--ion-color-light);
+    border-radius: 8px;
+  }
+  
+  .estimated-time h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+  }
+  
+  .time-display {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .order-details {
+    margin-top: 24px;
+  }
+  
+  .item-list {
+    margin-top: 16px;
+  }
+  
+  .order-item {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--ion-color-light);
+  }
+  
+  .order-item:last-child {
+    border-bottom: none;
+  }
+  
+  .item-quantity {
+    margin-right: 12px;
+    font-weight: bold;
+  }
+  
+  .item-details {
+    flex: 1;
+  }
+  
+  .item-name {
+    font-weight: bold;
+  }
+  
+  .item-customizations {
+    font-size: 13px;
+    color: var(--ion-color-medium);
+    margin-top: 4px;
+  }
+  
+  .item-levels {
+    font-size: 13px;
+    color: var(--ion-color-medium);
+    margin-top: 4px;
+  }
+  
+  .special-instructions {
+    margin-top: 8px;
+    font-size: 13px;
+    background-color: rgba(var(--ion-color-warning-rgb), 0.1);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  
+  .item-price {
+    font-weight: bold;
+  }
+  
+  .order-summary {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ion-color-light);
+  }
+  
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+  }
+  
+  .summary-row.total {
+    font-weight: bold;
+    font-size: 18px;
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid var(--ion-color-light);
+  }
+  
+  .actions {
+    margin-top: 24px;
+  }

@@ -17,7 +17,7 @@ import {
   collectionData
 } from '@angular/fire/firestore';
 import { Auth, user } from '@angular/fire/auth';
-import { Observable, from, of, switchMap, map, take, BehaviorSubject } from 'rxjs';
+import { Observable, from, of, switchMap, map, take, BehaviorSubject, catchError } from 'rxjs';
 import { Order, OrderItem } from '../models/order.model';
 import { LoyaltyService } from './loyalty.service';
 import { NutritionService } from './nutrition.service';
@@ -93,12 +93,14 @@ export class OrderService {
    * Gets all orders for the current user
    */
   getUserOrders(): Observable<Order[]> {
-    // Change currentUser$ to user$ which is the correct property name
     return this.authService.user$.pipe(
       switchMap(user => {
-        if (!user) return of([]);
+        if (!user) {
+          console.log('No authenticated user found');
+          return of([]);
+        }
         
-        console.log('Getting orders for user:', user.uid); // Add logging for debugging
+        console.log('Getting orders for user:', user.uid);
         
         const ordersRef = collection(this.firestore, 'orders');
         const userOrdersQuery = query(
@@ -109,11 +111,14 @@ export class OrderService {
         
         return collectionData(userOrdersQuery, { idField: 'id' }).pipe(
           map(orders => {
-            console.log('Orders found:', orders.length); // Add logging for debugging
+            console.log('Orders found:', orders.length);
             return orders.map(order => {
-              // Pass both the order data and the ID to convertFromFirestore
               return this.convertFromFirestore(order as any, order['id'] as string);
             }) as Order[];
+          }),
+          catchError(error => {
+            console.error('Error fetching user orders:', error);
+            return of([]);
           })
         );
       })
@@ -124,9 +129,14 @@ export class OrderService {
    * Gets all active orders for the current user
    */
   getActiveOrders(): Observable<Order[]> {
-    return user(this.auth).pipe(
+    return this.authService.user$.pipe(
       switchMap(user => {
-        if (!user) return of([]);
+        if (!user) {
+          console.log('No authenticated user found');
+          return of([]);
+        }
+        
+        console.log('Getting active orders for user:', user.uid);
         
         const ordersRef = collection(this.firestore, 'orders');
         const activeOrdersQuery = query(
@@ -136,10 +146,17 @@ export class OrderService {
           orderBy('orderTime', 'desc')
         );
         
-        return collectionData(activeOrdersQuery).pipe(
-          map(orders => orders.map(order => 
-            this.convertFromFirestore(order as Order, (order as any).id)
-          ))
+        return collectionData(activeOrdersQuery, { idField: 'id' }).pipe(
+          map(orders => {
+            console.log('Active orders found:', orders.length);
+            return orders.map(order => 
+              this.convertFromFirestore(order as Order, (order as any).id)
+            );
+          }),
+          catchError(error => {
+            console.error('Error fetching active orders:', error);
+            return of([]);
+          })
         );
       })
     );
@@ -266,22 +283,37 @@ getOrdersByStatus(status: string): Observable<Order[]> {
  /**
  * Convert Firestore data to our Order model
  */
-convertFromFirestore(order: any, id: string): Order {
+ convertFromFirestore(order: any, id: string): Order {
   // Assign ID to the order
   order.id = id;
   
   // Convert Firestore timestamps to JS Date objects
-  if ((order.orderTime as any)?.toDate) {
+  if (order.orderTime && (order.orderTime as any)?.toDate) {
     order.orderTime = (order.orderTime as any).toDate();
   }
   
-  if ((order.processTime as any)?.toDate) {
+  if (order.processTime && (order.processTime as any)?.toDate) {
     order.processTime = (order.processTime as any).toDate();
   }
   
-  if ((order.completionTime as any)?.toDate) {
+  if (order.completionTime && (order.completionTime as any)?.toDate) {
     order.completionTime = (order.completionTime as any).toDate();
   }
+  
+  // Ensure order.items is an array
+  if (!Array.isArray(order.items)) {
+    console.warn('Order items is not an array:', order.id);
+    order.items = [];
+  }
+  
+  // Add default values for missing fields
+  order.status = order.status || 'pending';
+  order.paymentStatus = order.paymentStatus || 'pending';
+  order.paymentMethod = order.paymentMethod || 'card';
+  order.total = order.total || 0;
+  order.subtotal = order.subtotal || 0;
+  order.tax = order.tax || 0;
+  order.tip = order.tip || 0;
   
   return order as Order;
 }
@@ -392,4 +424,5 @@ clearCart(): void {
   
   localStorage.removeItem('cartItems');
 }
+
 }

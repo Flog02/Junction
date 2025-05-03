@@ -5,6 +5,7 @@ import { Observable, of } from 'rxjs';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { OrderItem } from '../models/order.model';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -256,8 +257,90 @@ export class CoffeeVizService {
         }
       }
     }
+    
+    // Add sugar level visualization if specified
+    if (orderItem.sugarLevel !== undefined) {
+      // Add sugar crystals based on sugar level (1-5)
+      const sugarLevel = Math.min(Math.max(orderItem.sugarLevel, 0), 5);
+      
+      if (sugarLevel > 0) {
+        // Create a group to hold all sugar crystals
+        const sugarGroup = new THREE.Group();
+        
+        // Number of sugar crystals based on sugar level
+        const numCrystals = sugarLevel * 5;
+        
+        for (let i = 0; i < numCrystals; i++) {
+          // Create a small cube for each sugar crystal
+          const crystalGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+          const crystalMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+          const crystal = new THREE.Mesh(crystalGeometry, crystalMaterial);
+          
+          // Randomly position crystals on top of the liquid or cream
+          const angle = Math.random() * Math.PI * 2;
+          const radius = Math.random() * 1.5;
+          const x = Math.cos(angle) * radius;
+          const z = Math.sin(angle) * radius;
+          
+          // If there's whipped cream, place crystals on top of it
+          const hasWhippedCream = orderItem.customizations.toppings?.some(
+            topping => topping.id === 'whipped-cream'
+          );
+          
+          const y = hasWhippedCream ? 2.0 : 1.6;
+          
+          crystal.position.set(x, y, z);
+          
+          // Add a slight random rotation to each crystal
+          crystal.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
+          );
+          
+          sugarGroup.add(crystal);
+        }
+        
+        scene.add(sugarGroup);
+      }
+    }
+    
+    // Add shots visualization if specified
+    if (orderItem.customizations.shots && orderItem.customizations.shots.length > 0) {
+      // Create a darker layer at the bottom for espresso shots
+      const shotGeometry = new THREE.CylinderGeometry(1.55, 1.5, 0.4, 32);
+      const shotMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0x3D2314,
+        transparent: false,
+        shininess: 10
+      });
+      
+      const shotLayer = new THREE.Mesh(shotGeometry, shotMaterial);
+      shotLayer.position.y = -1.7; // Position at the bottom of the cup
+      scene.add(shotLayer);
+    }
+    
+    // Add a saucer underneath the cup
+    const saucerGeometry = new THREE.CylinderGeometry(3, 3, 0.2, 32);
+    const saucerMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+    const saucer = new THREE.Mesh(saucerGeometry, saucerMaterial);
+    saucer.position.y = -2.5; // Position below the cup
+    scene.add(saucer);
+    
+    // Add a handle to the cup
+    const handleCurve = new THREE.CubicBezierCurve3(
+      new THREE.Vector3(2, 0, 0),
+      new THREE.Vector3(3, 0, 0),
+      new THREE.Vector3(3, -1, 0),
+      new THREE.Vector3(2, -1, 0)
+    );
+    
+    const handleGeometry = new THREE.TubeGeometry(handleCurve, 20, 0.2, 8, false);
+    const handleMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+    const handle = new THREE.Mesh(handleGeometry, handleMaterial);
+    scene.add(handle);
   }
-
+  
   /**
    * Starts the animation loop
    * @param scene The THREE.Scene to animate

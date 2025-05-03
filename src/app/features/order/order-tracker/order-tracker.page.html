@@ -1,0 +1,163 @@
+<!-- src/app/features/order/order-tracker/order-tracker.page.html -->
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/order"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Order Tracker</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <div *ngIf="isLoading" class="loading-container">
+      <ion-spinner></ion-spinner>
+      <p>Loading order details...</p>
+    </div>
+    
+    <div *ngIf="!isLoading && !order" class="error-container">
+      <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+      <h2>Order Not Found</h2>
+      <p>We couldn't find the order you're looking for.</p>
+      <ion-button routerLink="/order" expand="block">
+        View My Orders
+      </ion-button>
+    </div>
+    
+    <div *ngIf="!isLoading && order" class="order-tracker">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            Order #{{ order.id?.substring(0, 8) }}
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="order-status">
+            <div class="status-badge" [ngClass]="order.status">
+              {{ getStatusText(order.status) }}
+            </div>
+            <p *ngIf="order.status === 'pending'">Your order has been received and will be prepared soon.</p>
+            <p *ngIf="order.status === 'processing'">Baristas are preparing your order now.</p>
+            <p *ngIf="order.status === 'ready'">Your order is ready for pickup!</p>
+            <p *ngIf="order.status === 'delivered'">Your order has been delivered. Enjoy!</p>
+            <p *ngIf="order.status === 'cancelled'">This order has been cancelled.</p>
+          </div>
+          
+          <div class="progress-tracker" *ngIf="order.status !== 'cancelled'">
+            <div class="progress-steps">
+              <div class="step" [class.active]="isStepActive('pending')">
+                <div class="step-icon">
+                  <ion-icon name="receipt-outline"></ion-icon>
+                </div>
+                <div class="step-label">Ordered</div>
+                <div class="step-time" *ngIf="order.orderTime">{{ formatTime(order.orderTime) }}</div>
+              </div>
+              
+              <div class="step" [class.active]="isStepActive('processing')">
+                <div class="step-icon">
+                  <ion-icon name="cafe-outline"></ion-icon>
+                </div>
+                <div class="step-label">Preparing</div>
+                <div class="step-time" *ngIf="order.processTime">{{ formatTime(order.processTime) }}</div>
+              </div>
+              
+              <div class="step" [class.active]="isStepActive('ready')">
+                <div class="step-icon">
+                  <ion-icon name="checkmark-circle-outline"></ion-icon>
+                </div>
+                <div class="step-label">Ready</div>
+                <div class="step-time" *ngIf="order.completionTime">{{ formatTime(order.completionTime) }}</div>
+              </div>
+              
+              <div class="step" [class.active]="isStepActive('delivered')">
+                <div class="step-icon">
+                  <ion-icon name="hand-left-outline"></ion-icon>
+                </div>
+                <div class="step-label">Delivered</div>
+                <div class="step-time" *ngIf="order.deliveredBy">{{ order.deliveredBy }}</div>
+              </div>
+            </div>
+            
+            <ion-progress-bar [value]="getProgressValue()"></ion-progress-bar>
+          </div>
+          
+          <div class="estimated-time" *ngIf="order.status === 'pending' || order.status === 'processing'">
+            <h3>Estimated Ready Time</h3>
+            <div class="time-display">{{ getEstimatedReadyTime() }}</div>
+          </div>
+          
+          <div class="order-details">
+            <h3>Order Details</h3>
+            <div class="item-list">
+              <div class="order-item" *ngFor="let item of order.items">
+                <div class="item-quantity">{{ item.quantity }}x</div>
+                <div class="item-details">
+                  <div class="item-name">{{ item.name }}</div>
+                  <div class="item-customizations" *ngIf="item.customizations">
+                    <span *ngIf="item.customizations.size">{{ item.customizations.size.name }}</span>
+                    <span *ngIf="item.customizations.milk">, {{ item.customizations.milk.name }}</span>
+                    
+                    <div *ngIf="item.customizations.shots && item.customizations.shots.length > 0">
+                      <span>• Shots: </span>
+                      <span *ngFor="let shot of item.customizations.shots; let i = index">
+                        {{ shot.name }}{{ i < item.customizations.shots.length - 1 ? ', ' : '' }}
+                      </span>
+                    </div>
+                    
+                    <div *ngIf="item.customizations.syrups && item.customizations.syrups.length > 0">
+                      <span>• Syrups: </span>
+                      <span *ngFor="let syrup of item.customizations.syrups; let i = index">
+                        {{ syrup.name }}{{ i < item.customizations.syrups.length - 1 ? ', ' : '' }}
+                      </span>
+                    </div>
+                    
+                    <div *ngIf="item.customizations.toppings && item.customizations.toppings.length > 0">
+                      <span>• Toppings: </span>
+                      <span *ngFor="let topping of item.customizations.toppings; let i = index">
+                        {{ topping.name }}{{ i < item.customizations.toppings.length - 1 ? ', ' : '' }}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div class="item-levels">
+                    <span>Sugar: Level {{ item.sugarLevel }}</span>
+                    <span *ngIf="item.caffeineLevel !== undefined"> • Caffeine: Level {{ item.caffeineLevel }}</span>
+                  </div>
+                  
+                  <div class="special-instructions" *ngIf="item.specialInstructions">
+                    <strong>Note:</strong> {{ item.specialInstructions }}
+                  </div>
+                </div>
+                <div class="item-price">{{ item.itemTotal | currency }}</div>
+              </div>
+            </div>
+            
+            <div class="order-summary">
+              <div class="summary-row">
+                <span>Subtotal:</span>
+                <span>{{ order.subtotal | currency }}</span>
+              </div>
+              <div class="summary-row">
+                <span>Tax:</span>
+                <span>{{ order.tax | currency }}</span>
+              </div>
+              <div class="summary-row" *ngIf="order.tip">
+                <span>Tip:</span>
+                <span>{{ order.tip | currency }}</span>
+              </div>
+              <div class="summary-row total">
+                <span>Total:</span>
+                <span>{{ order.total | currency }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="actions" *ngIf="order.status === 'pending'">
+            <ion-button color="danger" expand="block" (click)="cancelOrder()">
+              Cancel Order
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </ion-content>

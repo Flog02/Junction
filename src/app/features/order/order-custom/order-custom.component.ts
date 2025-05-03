@@ -161,15 +161,44 @@ export class OrderCustomComponent implements OnInit, OnDestroy {
    * Creates the order form
    */
   createOrderForm(): FormGroup {
-    return this.formBuilder.group({
+    // Base fields for all products
+    const baseForm: { [key: string]: any } = {
       quantity: [1, [Validators.required, Validators.min(1)]],
-      size: ['', Validators.required],
-      milk: [''],
-      sugarLevel: [3, [Validators.required, Validators.min(0), Validators.max(5)]],
-      caffeineLevel: [3, [Validators.required, Validators.min(0), Validators.max(5)]],
       specialInstructions: ['']
-    });
+    };
+  
+    // Start with base form and add category-specific fields
+    const formConfig: { [key: string]: any } = { ...baseForm };
+  
+    // If the product is loaded, customize the form based on the category
+    if (this.product) {
+      if (this.product.category === 'coffee' || this.product.category === 'tea') {
+        // Full form for beverages
+        formConfig['size'] = ['', Validators.required];
+        formConfig['milk'] = [''];
+        formConfig['sugarLevel'] = [3, [Validators.required, Validators.min(0), Validators.max(5)]];
+        formConfig['caffeineLevel'] = [3, [Validators.required, Validators.min(0), Validators.max(5)]];
+      } else if (this.product.category === 'dessert') {
+        formConfig['sugarLevel'] = [3, [Validators.required, Validators.min(0), Validators.max(5)]];
+        if (this.product.customizationOptions?.sizes?.length > 0) {
+          formConfig['size'] = ['', Validators.required];
+        }
+      } else if (this.product.category === 'food') {
+        if (this.product.customizationOptions?.sizes?.length > 0) {
+          formConfig['size'] = ['', Validators.required];
+        }
+      }
+    } else {
+      // Include all possible fields
+      formConfig['size'] = ['', Validators.required];
+      formConfig['milk'] = [''];
+      formConfig['sugarLevel'] = [3, [Validators.required, Validators.min(0), Validators.max(5)]];
+      formConfig['caffeineLevel'] = [3, [Validators.required, Validators.min(0), Validators.max(5)]];
+    }
+  
+    return this.formBuilder.group(formConfig);
   }
+  
   
   /**
    * Loads the product details
@@ -213,34 +242,152 @@ export class OrderCustomComponent implements OnInit, OnDestroy {
    * Updates the available customization options based on the current product
    */
   updateAvailableOptions(product: Product): void {
+    console.log('Updating available options for product category:', product.category);
+    
     this.availableSizes = product.customizationOptions.sizes || [];
-    this.availableMilk = product.customizationOptions.milk || [];
     
-    // Convert shots to selectable options
-    this.availableShots = (product.customizationOptions.shots || [])
-      .map(shot => ({...shot, selected: false}));
+    // For beverages, show all customization options
+    if (product.category === 'coffee' || product.category === 'tea') {
+      this.availableMilk = product.customizationOptions.milk || [];
+      
+      // Convert shots to selectable options
+      this.availableShots = (product.customizationOptions.shots || [])
+        .map(shot => ({...shot, selected: false}));
+      
+      // Convert syrups to selectable options
+      this.availableSyrups = (product.customizationOptions.syrups || [])
+        .map(syrup => ({...syrup, selected: false}));
+      
+      // Convert toppings to selectable options
+      this.availableToppings = (product.customizationOptions.toppings || [])
+        .map(topping => ({...topping, selected: false}));
+    } else {
+      // For food and dessert, only show toppings
+      this.availableMilk = [];
+      this.availableShots = [];
+      this.availableSyrups = [];
+      
+      // Convert toppings to selectable options
+      this.availableToppings = (product.customizationOptions.toppings || [])
+        .map(topping => ({...topping, selected: false}));
+    }
     
-    // Convert syrups to selectable options
-    this.availableSyrups = (product.customizationOptions.syrups || [])
-      .map(syrup => ({...syrup, selected: false}));
-    
-    // Convert toppings to selectable options
-    this.availableToppings = (product.customizationOptions.toppings || [])
-      .map(topping => ({...topping, selected: false}));
+    // Update the form controls based on available options
+    this.updateFormControls(product);
   }
+
+  /**
+ * Update form controls based on product category
+ */
+  updateFormControls(product: Product): void {
+    // Reset the form
+    this.orderForm = this.createOrderForm();
+    
+    // If the product is a beverage
+    if (product.category === 'coffee' || product.category === 'tea') {
+      // Make sure all the necessary controls exist
+      if (!this.orderForm.get('size')) {
+        this.orderForm.addControl('size', this.formBuilder.control('', Validators.required));
+      }
+      
+      if (!this.orderForm.get('milk')) {
+        this.orderForm.addControl('milk', this.formBuilder.control(''));
+      }
+      
+      if (!this.orderForm.get('sugarLevel')) {
+        this.orderForm.addControl('sugarLevel', this.formBuilder.control(3, [
+          Validators.required, Validators.min(0), Validators.max(5)
+        ]));
+      }
+      
+      if (!this.orderForm.get('caffeineLevel')) {
+        this.orderForm.addControl('caffeineLevel', this.formBuilder.control(3, [
+          Validators.required, Validators.min(0), Validators.max(5)
+        ]));
+      }
+    } 
+    // If the product is a dessert
+    else if (product.category === 'dessert') {
+      // Remove unnecessary controls
+      if (this.orderForm.get('milk')) {
+        this.orderForm.removeControl('milk');
+      }
+      
+      if (this.orderForm.get('caffeineLevel')) {
+        this.orderForm.removeControl('caffeineLevel');
+      }
+      
+      // Add sugar level control if it doesn't exist
+      if (!this.orderForm.get('sugarLevel')) {
+        this.orderForm.addControl('sugarLevel', this.formBuilder.control(3, [
+          Validators.required, Validators.min(0), Validators.max(5)
+        ]));
+      }
+      
+      // Add size control if sizes are available
+      if (this.availableSizes.length > 0 && !this.orderForm.get('size')) {
+        this.orderForm.addControl('size', this.formBuilder.control('', Validators.required));
+      } else if (this.availableSizes.length === 0 && this.orderForm.get('size')) {
+        this.orderForm.removeControl('size');
+      }
+    }
+    // If the product is food
+    else if (product.category === 'food') {
+      // Remove unnecessary controls
+      if (this.orderForm.get('milk')) {
+        this.orderForm.removeControl('milk');
+      }
+      
+      if (this.orderForm.get('sugarLevel')) {
+        this.orderForm.removeControl('sugarLevel');
+      }
+      
+      if (this.orderForm.get('caffeineLevel')) {
+        this.orderForm.removeControl('caffeineLevel');
+      }
+      
+      // Add size control if sizes are available
+      if (this.availableSizes.length > 0 && !this.orderForm.get('size')) {
+        this.orderForm.addControl('size', this.formBuilder.control('', Validators.required));
+      } else if (this.availableSizes.length === 0 && this.orderForm.get('size')) {
+        this.orderForm.removeControl('size');
+      }
+    }
+  }
+
   
   /**
    * Set default values for the form based on the product
    */
+ 
   setDefaultValues(product: Product): void {
-    if (this.availableSizes.length > 0) {
+    // Set default size if available
+    if (this.availableSizes.length > 0 && this.orderForm.get('size')) {
       this.orderForm.get('size')?.setValue(this.availableSizes[0].id);
     }
-    
-    if (this.availableMilk.length > 0) {
+  
+    // For beverages, set default milk
+    if ((product.category === 'coffee' || product.category === 'tea') && 
+        this.availableMilk.length > 0 && 
+        this.orderForm.get('milk')) {
       this.orderForm.get('milk')?.setValue(this.availableMilk[0].id);
     }
+  
+    // Set default values for sugar and caffeine levels (already defaulted in form creation, but safe to reapply)
+    if (this.orderForm.get('sugarLevel')) {
+      this.orderForm.get('sugarLevel')?.setValue(3);
+    }
+  
+    if (this.orderForm.get('caffeineLevel')) {
+      this.orderForm.get('caffeineLevel')?.setValue(3);
+    }
+  
+    // Optionally reset selectable checkboxes (shots, syrups, toppings)
+    this.availableShots.forEach(option => option.selected = false);
+    this.availableSyrups.forEach(option => option.selected = false);
+    this.availableToppings.forEach(option => option.selected = false);
   }
+  
   
   /**
    * Updates the nutrition information and price based on current selections

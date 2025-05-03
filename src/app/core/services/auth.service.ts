@@ -104,14 +104,27 @@ async register(email: string, password: string, displayName: string, role: strin
   }
 }
 
+
+
+
+
   // Login with email/password
-  async login(email: string, password: string): Promise<any> {
+  async login(email: string, password: string): Promise<User> {
     try {
       const credential = await signInWithEmailAndPassword(this.auth, email, password);
       if (credential.user) {
+        // Wait briefly to ensure Firebase auth state is fully processed
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Make sure the user profile is loaded into the BehaviorSubject
+        await this.getUserProfile(credential.user.uid).then(profile => {
+          this.userProfile.next(profile);
+        });
+        
         this.showToast('Login successful!');
-        this.router.navigate(['/home']);
         return credential.user;
+      } else {
+        throw new Error('Login failed: No user returned');
       }
     } catch (error: any) {
       this.showToast(`Login failed: ${error.message}`);
@@ -119,35 +132,72 @@ async register(email: string, password: string, displayName: string, role: strin
     }
   }
 
+
   // Login with Google
   // In auth.service.ts, update the loginWithGoogle method
-async loginWithGoogle(role: string = 'customer'): Promise<any> {
-  try {
-    const provider = new GoogleAuthProvider();
-    const credential = await signInWithPopup(this.auth, provider);
-    
-    // Check if this is a new user
-    const isNewUser = getAdditionalUserInfo(credential)?.isNewUser;
-    
-    if (isNewUser && credential.user) {
-      // Create user profile with role
-      await this.createUserProfile(credential.user, credential.user.displayName || 'User', role);
+  async loginWithGoogle(role: string = 'customer'): Promise<User> {
+    try {
+      const provider = new GoogleAuthProvider();
+      const credential = await signInWithPopup(this.auth, provider);
       
-      // Initialize loyalty program
-      await this.initializeLoyaltyProgram(credential.user.uid);
+      // Check if this is a new user
+      const isNewUser = getAdditionalUserInfo(credential)?.isNewUser;
       
-      // Initialize nutrition tracking
-      await this.initializeNutritionTracking(credential.user.uid);
+      if (isNewUser && credential.user) {
+        // Create user profile with role
+        await this.createUserProfile(credential.user, credential.user.displayName || 'User', role);
+        
+        // Initialize loyalty program
+        await this.initializeLoyaltyProgram(credential.user.uid);
+        
+        // Initialize nutrition tracking
+        await this.initializeNutritionTracking(credential.user.uid);
+      }
+      
+      // Wait briefly to ensure Firebase auth state is fully processed
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Make sure the user profile is loaded into the BehaviorSubject
+      await this.getUserProfile(credential.user.uid).then(profile => {
+        this.userProfile.next(profile);
+      });
+      
+      this.showToast('Google login successful!');
+      return credential.user;
+    } catch (error: any) {
+      this.showToast(`Google login failed: ${error.message}`);
+      throw error;
     }
-    
-    this.showToast('Google login successful!');
-    this.router.navigate(['/home']);
-    return credential.user;
-  } catch (error: any) {
-    this.showToast(`Google login failed: ${error.message}`);
-    throw error;
   }
-}
+
+  async validateStaffAccess(uid: string): Promise<boolean> {
+    try {
+      const profile = await this.getUserProfile(uid);
+      return profile && (profile.role === 'staff' || profile.role === 'admin');
+    } catch (error) {
+      console.error('Error validating staff access:', error);
+      return false;
+    }
+  }
+
+  async updateUserRole(uid: string, newRole: string): Promise<void> {
+    try {
+      const userRef = doc(this.firestore, `users/${uid}`);
+      await updateDoc(userRef, {
+        role: newRole,
+        updatedAt: new Date()
+      });
+      
+      // Update the current userProfile BehaviorSubject
+      const updatedProfile = await this.getUserProfile(uid);
+      this.userProfile.next(updatedProfile);
+      
+      this.showToast(`Role updated to ${newRole} successfully!`);
+    } catch (error: any) {
+      this.showToast(`Failed to update role: ${error.message}`);
+      throw error;
+    }
+  }
 
   // Logout
   async logout(): Promise<void> {
@@ -278,17 +328,46 @@ async createUserProfile(user: User, displayName: string, role: string = 'custome
   await setDoc(userRef, userData);
 }
 
+
+async getUserProfileWithRetry(uid: string, maxRetries: number = 3): Promise<any> {
+  let attempts = 0;
+  let profile = null;
+  
+  while (attempts < maxRetries && !profile) {
+    profile = await this.getUserProfile(uid);
+    
+    if (!profile) {
+      // Wait 500ms between retries
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    
+    attempts++;
+  }
+  
+  return profile;
+}
+
   // Get user profile from Firestore
   async getUserProfile(uid: string): Promise<any> {
-    const userRef = doc(this.firestore, `users/${uid}`);
-    const docSnap = await getDoc(userRef);
-    
-    if (docSnap.exists()) {
-      // Update last login time
-      await updateDoc(userRef, { lastLogin: new Date() });
-      return docSnap.data();
-    } else {
-      console.log('No user profile found!');
+    try {
+      const userRef = doc(this.firestore, `users/${uid}`);
+      const docSnap = await getDoc(userRef);
+      
+      if (docSnap.exists()) {
+        // Update last login time
+        await updateDoc(userRef, { lastLogin: new Date() });
+        
+        // Cache the profile data
+        const profileData = docSnap.data();
+        this.userProfile.next(profileData);
+        
+        return profileData;
+      } else {
+        console.warn('No user profile found for UID:', uid);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error getting user profile:', error);
       return null;
     }
   }
@@ -402,8 +481,15 @@ async redirectBasedOnRole() {
     return;
   }
 
-  const profile = await this.getUserProfile(user.uid);
-  const role = profile?.role || 'customer';
+  const profile = await this.getUserProfileWithRetry(user.uid);
+  
+  if (!profile) {
+    // If we still can't get a profile, default to customer view
+    this.router.navigate(['/home']);
+    return;
+  }
+  
+  const role = profile.role || 'customer';
 
   if (role === 'staff' || role === 'admin') {
     this.router.navigate(['/staff/dashboard']);
@@ -438,7 +524,7 @@ async redirectBasedOnRole() {
   }
 
   // Helper to show toast messages
-  private async showToast(message: string): Promise<void> {
+  public async showToast(message: string): Promise<void> {
     const toast = await this.toastController.create({
       message,
       duration: 3000,

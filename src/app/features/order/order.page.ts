@@ -1,3 +1,5 @@
+// src/app/features/order/order.page.ts
+
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -5,18 +7,74 @@ import { Subject, takeUntil } from 'rxjs';
 
 import { OrderService } from '../../core/services/order.service';
 import { Order } from '../../core/models/order.model';
-import { IonIcon, IonFab, IonList, IonItemGroup, IonItemDivider, IonLabel, IonBadge, IonSpinner, IonContent, IonToolbar, IonSegment, IonSegmentButton, IonTitle, IonButtons, IonHeader, IonBackButton, IonButton } from "@ionic/angular/standalone";
+import { 
+  IonIcon, 
+  IonFab, 
+  IonFabButton,
+  IonList,
+  IonItem, 
+  IonItemGroup, 
+  IonItemDivider, 
+  IonLabel, 
+  IonBadge, 
+  IonSpinner, 
+  IonContent, 
+  IonToolbar, 
+  IonSegment, 
+  IonSegmentButton, 
+  IonTitle, 
+  IonButtons, 
+  IonHeader, 
+  IonBackButton, 
+  IonButton 
+} from "@ionic/angular/standalone";
 import { FormsModule } from '@angular/forms';
+import { addIcons } from 'ionicons';
+import { 
+  addOutline, 
+  cafeOutline, 
+  alertCircleOutline, 
+  timerOutline, 
+  bicycleOutline, 
+  starOutline,
+  checkmarkCircleOutline, 
+  documentTextOutline
+} from 'ionicons/icons';
+
 interface OrderMonth {
   month: string;
   orders: Order[];
 }
+
 @Component({
   selector: 'app-order',
-  templateUrl:'./order.page.html',
+  templateUrl: './order.page.html',
   styleUrls: ['./order.page.scss'],
   standalone: true,
-  imports: [IonButton, FormsModule,IonBackButton, IonHeader, IonButtons, IonTitle, IonSegmentButton, IonSegment, IonToolbar, IonContent, IonSpinner, IonBadge, IonLabel, IonItemDivider, IonItemGroup, IonList, IonFab, IonIcon, CommonModule, RouterModule]
+  imports: [
+    IonFabButton,
+    IonButton, 
+    FormsModule,
+    IonBackButton, 
+    IonHeader, 
+    IonButtons, 
+    IonTitle, 
+    IonSegmentButton, 
+    IonSegment, 
+    IonToolbar, 
+    IonContent, 
+    IonSpinner, 
+    IonBadge, 
+    IonLabel, 
+    IonItemDivider, 
+    IonItemGroup, 
+    IonItem,
+    IonList, 
+    IonFab, 
+    IonIcon, 
+    CommonModule, 
+    RouterModule
+  ]
 })
 export class OrderPage implements OnInit, OnDestroy {
   activeOrders: Order[] = [];
@@ -29,9 +87,22 @@ export class OrderPage implements OnInit, OnDestroy {
   
   pastOrdersByMonth: OrderMonth[] = [];
 
-  constructor(private orderService: OrderService) {}
+  constructor(private orderService: OrderService) {
+    // Add icons
+    addIcons({
+      addOutline, 
+      cafeOutline, 
+      alertCircleOutline, 
+      timerOutline, 
+      bicycleOutline, 
+      starOutline,
+      checkmarkCircleOutline, 
+      documentTextOutline
+    });
+  }
   
   ngOnInit() {
+    console.log('OrderPage initialized');
     this.loadOrders();
   }
   
@@ -42,6 +113,7 @@ export class OrderPage implements OnInit, OnDestroy {
 
   ionViewWillEnter() {
     // Refresh data each time the page is entered
+    console.log('OrderPage view entered, refreshing data');
     this.loadOrders();
   }
   
@@ -53,6 +125,7 @@ export class OrderPage implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (orders) => {
+          console.log('Active orders loaded:', orders.length);
           this.activeOrders = orders;
           this.isLoading = false;
         },
@@ -67,12 +140,19 @@ export class OrderPage implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (orders) => {
+          console.log('All orders loaded:', orders.length);
+          
           // Filter out active orders to get past orders
           this.pastOrders = orders.filter(order => 
             order.status === 'delivered' || 
             order.status === 'cancelled' || 
             order.status === 'ready'
           );
+          
+          console.log('Past orders filtered:', this.pastOrders.length);
+          
+          // Group past orders by month
+          this.groupOrdersByMonth();
         },
         error: (err) => {
           console.error('Failed to load past orders:', err);
@@ -84,7 +164,12 @@ export class OrderPage implements OnInit, OnDestroy {
     const monthMap = new Map<string, Order[]>();
     
     this.pastOrders.forEach(order => {
-      const date = new Date(order.orderTime);
+      if (!order.orderTime) {
+        console.warn('Order missing orderTime:', order.id);
+        return;
+      }
+      
+      const date = this.convertToDate(order.orderTime);
       const monthYear = date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
       
       if (!monthMap.has(monthYear)) {
@@ -102,29 +187,51 @@ export class OrderPage implements OnInit, OnDestroy {
     
     // Sort groups by date (most recent first)
     this.pastOrdersByMonth.sort((a, b) => {
-      const dateA = new Date(a.orders[0].orderTime);
-      const dateB = new Date(b.orders[0].orderTime);
-      return dateB.getTime() - dateA.getTime();
+      if (!a.orders.length || !b.orders.length) return 0;
+      
+      const getTime = (order: Order) => {
+        if (!order.orderTime) return 0;
+        return this.convertToDate(order.orderTime).getTime();
+      };
+      
+      return getTime(b.orders[0]) - getTime(a.orders[0]);
     });
+    
+    console.log('Orders grouped by month:', this.pastOrdersByMonth.length, 'groups');
   }
   
   segmentChanged(event: any) {
     this.selectedSegment = event.detail.value;
+    console.log('Segment changed to:', this.selectedSegment);
   }
   
-  formatDate(date: Date): string {
-    if (!date) return '';
+  private convertToDate(dateInput: any): Date {
+    if (!dateInput) return new Date();
     
-    if (typeof date === 'string') {
-      date = new Date(date);
+    // Check if it's a Firebase Timestamp (has toDate method)
+    if (dateInput && typeof dateInput === 'object' && 'toDate' in dateInput && typeof dateInput.toDate === 'function') {
+      return dateInput.toDate();
     }
     
-    return date.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    // If it's already a Date object or a string/number, create a new Date
+    return new Date(dateInput);
+  }
+  
+  formatDate(dateInput: any): string {
+    if (!dateInput) return '';
+    
+    try {
+      const date = this.convertToDate(dateInput);
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error, dateInput);
+      return 'Invalid date';
+    }
   }
   
   getStatusColor(status: string): string {
@@ -143,4 +250,24 @@ export class OrderPage implements OnInit, OnDestroy {
         return 'medium';
     }
   }
+  
+  cancelOrder(orderId: string) {
+    if (!orderId) return;
+    
+    console.log('Cancelling order:', orderId);
+    this.orderService.cancelOrder(orderId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          console.log('Order cancelled successfully');
+          // Refresh orders
+          this.loadOrders();
+        },
+        error: (error) => {
+          console.error('Error cancelling order:', error);
+        }
+      });
+  }
+
+  
 }

@@ -47,13 +47,14 @@ import {
 import { User } from '@angular/fire/auth';
 import { take } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
-
+import { RoleManagementComponent } from './role-management/role-management.component';
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
   standalone: true,
   imports: [
+    RoleManagementComponent,
     CommonModule,
     RouterLink,
     ReactiveFormsModule,
@@ -87,7 +88,8 @@ export class ProfilePage implements OnInit {
   
   user: User | null = null;
   userProfile: any = null;
-  
+  isAdmin = false;
+
   isLoading = true;
   isEditing = false;
   activeTab = 'profile'; // 'profile', 'security', 'preferences'
@@ -138,6 +140,10 @@ export class ProfilePage implements OnInit {
 
   ngOnInit() {
     // Load user data
+    this.authService.isAdmin().subscribe(isAdmin => {
+      this.isAdmin = isAdmin;
+    });
+  
     this.loadUserData();
   }
   

@@ -1,3 +1,5 @@
+// src/app/core/services/product.service.ts
+
 import { Injectable } from '@angular/core';
 import { 
   Firestore, 
@@ -26,6 +28,54 @@ export class ProductService {
     // Initialize with sample products
     this.localProducts = this.getSampleProducts();
     console.log('ProductService initialized with sample products:', this.localProducts.length);
+    
+    // Enhance the products with more customization options
+    this.enhanceProductCustomizations();
+  }
+  
+  /**
+   * Enhance product customization options with more detailed options
+   */
+  private enhanceProductCustomizations() {
+    this.localProducts.forEach(product => {
+      if (product.category === 'coffee' || product.category === 'tea') {
+        // Add more detailed caffeine options
+        if (!product.customizationOptions.shots.some(shot => shot.id === 'decaf')) {
+          product.customizationOptions.shots.push({
+            id: 'decaf',
+            name: 'Decaf Option',
+            priceModifier: 0
+          });
+        }
+        
+        // Add more milk options
+        const extraMilkOptions = [
+          { id: 'coconut', name: 'Coconut Milk', priceModifier: 0.75 },
+          { id: 'soy', name: 'Soy Milk', priceModifier: 0.75 },
+          { id: 'half-and-half', name: 'Half & Half', priceModifier: 0.50 }
+        ];
+        
+        extraMilkOptions.forEach(option => {
+          if (!product.customizationOptions.milk.some(milk => milk.id === option.id)) {
+            product.customizationOptions.milk.push(option);
+          }
+        });
+        
+        // Add more syrup options
+        const extraSyrups = [
+          { id: 'mocha', name: 'Mocha', priceModifier: 0.75 },
+          { id: 'peppermint', name: 'Peppermint', priceModifier: 0.75 },
+          { id: 'toffee-nut', name: 'Toffee Nut', priceModifier: 0.75 },
+          { id: 'sugar-free-vanilla', name: 'Sugar-Free Vanilla', priceModifier: 0.75 }
+        ];
+        
+        extraSyrups.forEach(option => {
+          if (!product.customizationOptions.syrups.some(syrup => syrup.id === option.id)) {
+            product.customizationOptions.syrups.push(option);
+          }
+        });
+      }
+    });
   }
   
   /**
@@ -159,95 +209,318 @@ export class ProductService {
   
   /**
    * Calculates the nutrition information for a customized product
+   * Improved and more accurate calculation
    */
-  calculateNutrition(
-    product: Product,
-    size: ProductCustomizationOption,
-    milk: ProductCustomizationOption | null,
-    shots: ProductCustomizationOption[],
-    syrups: ProductCustomizationOption[],
-    sugarLevel: number,
-    caffeineLevel: number
-  ): ProductNutritionInfo {
-    // Base nutrition from product
-    const baseNutrition = { ...product.nutritionInfo };
+  // Improved nutrition calculation method for ProductService
+
+/**
+ * Calculates the nutrition information for a customized product
+ * With special handling for food and dessert categories
+ */
+calculateNutrition(
+  product: Product,
+  size: ProductCustomizationOption,
+  milk: ProductCustomizationOption | null,
+  shots: ProductCustomizationOption[],
+  syrups: ProductCustomizationOption[],
+  sugarLevel: number,
+  caffeineLevel: number
+): ProductNutritionInfo {
+  console.log('Calculating nutrition for product:', product.name);
+  console.log('Product category:', product.category);
+  
+  // Create a fresh copy of the base nutrition to avoid mutating original
+  const baseNutrition = { ...product.nutritionInfo };
+  
+  // Special handling for food and dessert categories
+  if (product.category === 'food' || product.category === 'dessert') {
+    // For food and dessert, we don't apply the same customizations as beverages
+    // Just use the base nutrition values with minor modifications for toppings
     
-    // Size modifiers (assuming baseNutrition is for the smallest size)
-    const sizeIndex = product.customizationOptions.sizes.findIndex(s => s.id === size.id);
-    const sizeMultiplier = 1 + (sizeIndex * 0.5); // Small = 1x, Medium = 1.5x, Large = 2x
-    
-    // Apply size scaling to base nutrition
-    baseNutrition.calories *= sizeMultiplier;
-    baseNutrition.sugar *= sizeMultiplier;
-    baseNutrition.caffeine *= sizeMultiplier;
-    baseNutrition.fat *= sizeMultiplier;
-    baseNutrition.protein *= sizeMultiplier;
-    
-    // Sugar modifiers based on sugarLevel (0-5)
-    // Base sugar is level 3, so adjust accordingly
-    if (sugarLevel !== 3) {
-      const sugarFactor = sugarLevel / 3;
-      baseNutrition.sugar *= sugarFactor;
-    }
-    
-    // Caffeine modifiers based on shots
-    if (shots && shots.length > 0) {
-      // Each shot adds about 80mg of caffeine
-      baseNutrition.caffeine += shots.length * 80;
-    }
-    
-    // Caffeine level modifier (0-5)
-    // Base caffeine is level 3, so adjust accordingly
-    if (caffeineLevel !== 3) {
-      const caffeineFactor = caffeineLevel / 3;
-      baseNutrition.caffeine *= caffeineFactor;
-    }
-    
-    // Milk modifiers
-    if (milk) {
-      if (milk.name.includes('Whole')) {
-        baseNutrition.fat += 3.5 * sizeMultiplier;
-        baseNutrition.calories += 30 * sizeMultiplier;
-        baseNutrition.protein += 3 * sizeMultiplier;
-      } else if (milk.name.includes('2%')) {
-        baseNutrition.fat += 2 * sizeMultiplier;
-        baseNutrition.calories += 20 * sizeMultiplier;
-        baseNutrition.protein += 3 * sizeMultiplier;
-      } else if (milk.name.includes('Almond')) {
-        baseNutrition.fat += 1 * sizeMultiplier;
-        baseNutrition.calories += 15 * sizeMultiplier;
-        baseNutrition.protein += 1 * sizeMultiplier;
-      } else if (milk.name.includes('Oat')) {
-        baseNutrition.fat += 1.5 * sizeMultiplier;
-        baseNutrition.calories += 25 * sizeMultiplier;
-        baseNutrition.protein += 2 * sizeMultiplier;
-      }
-    }
-    
-    // Syrup modifiers
-    if (syrups && syrups.length > 0) {
-      // Each syrup pump adds about 20 calories and 5g of sugar
-      syrups.forEach(() => {
-        baseNutrition.calories += 20;
-        baseNutrition.sugar += 5;
+    // Add nutrition from toppings if applicable
+    if (product.customizationOptions.toppings && product.customizationOptions.toppings.length > 0) {
+      // Get selected toppings (those with selected = true)
+      const selectedToppings = product.customizationOptions.toppings.filter(
+        t => shots.some(s => s.id === t.id)
+      );
+      
+      // Add nutrition based on selected toppings
+      selectedToppings.forEach(topping => {
+        // Add approximate nutrition values based on topping type
+        switch (topping.id) {
+          case 'butter':
+            baseNutrition.calories += 35;
+            baseNutrition.fat += 4;
+            break;
+          case 'egg':
+            baseNutrition.calories += 70;
+            baseNutrition.protein += 6;
+            baseNutrition.fat += 5;
+            break;
+          case 'feta':
+          case 'cheese':
+            baseNutrition.calories += 50;
+            baseNutrition.fat += 4;
+            baseNutrition.protein += 3;
+            break;
+          case 'avocado':
+            baseNutrition.calories += 60;
+            baseNutrition.fat += 6;
+            baseNutrition.protein += 1;
+            break;
+          case 'bacon':
+            baseNutrition.calories += 45;
+            baseNutrition.fat += 3.5;
+            baseNutrition.protein += 3;
+            break;
+          case 'sausage':
+            baseNutrition.calories += 75;
+            baseNutrition.fat += 6;
+            baseNutrition.protein += 4;
+            break;
+          case 'whipped-cream':
+            baseNutrition.calories += 40;
+            baseNutrition.fat += 3.5;
+            baseNutrition.sugar += 2;
+            break;
+          case 'chocolate':
+          case 'chocolate-chips':
+          case 'chocolate-sauce':
+            baseNutrition.calories += 50;
+            baseNutrition.sugar += 8;
+            baseNutrition.fat += 2;
+            break;
+          case 'caramel':
+          case 'caramel-sauce':
+            baseNutrition.calories += 45;
+            baseNutrition.sugar += 10;
+            break;
+          case 'berry':
+          case 'berry-compote':
+            baseNutrition.calories += 30;
+            baseNutrition.sugar += 7;
+            break;
+          case 'warm':
+            // Warming doesn't affect nutrition
+            break;
+          default:
+            // For other toppings add a small amount
+            baseNutrition.calories += 20;
+            break;
+        }
       });
     }
     
-    // Return the calculated nutrition info
+    // Handle sugar level for desserts only
+    if (product.category === 'dessert' && sugarLevel !== 3) {
+      // Calculate sugar adjustment factor (level 3 is standard)
+      const sugarAdjustment = sugarLevel / 3;
+      
+      // Adjust sugar content based on level
+      baseNutrition.sugar = Math.round(baseNutrition.sugar * sugarAdjustment);
+      
+      // Also adjust calories from sugar
+      // Rough approximation: 4 calories per gram of sugar
+      const originalSugarCalories = product.nutritionInfo.sugar * 4;
+      const newSugarCalories = baseNutrition.sugar * 4;
+      const calorieDifference = newSugarCalories - originalSugarCalories;
+      
+      baseNutrition.calories += calorieDifference;
+    }
+    
+    // Return rounded nutrition values for food/dessert
     return {
-      calories: Math.round(baseNutrition.calories),
-      sugar: Math.round(baseNutrition.sugar),
-      caffeine: Math.round(baseNutrition.caffeine),
-      fat: Math.round(baseNutrition.fat),
-      protein: Math.round(baseNutrition.protein),
+      calories: Math.max(0, Math.round(baseNutrition.calories)),
+      sugar: Math.max(0, Math.round(baseNutrition.sugar)),
+      caffeine: Math.max(0, Math.round(baseNutrition.caffeine)),
+      fat: Math.max(0, Math.round(baseNutrition.fat)),
+      protein: Math.max(0, Math.round(baseNutrition.protein)),
       allergies: baseNutrition.allergies
     };
   }
   
-  /**
+  // For coffee and tea, use the existing calculation logic
+  // Size modifiers (assuming baseNutrition is for the smallest size)
+  const sizeIndex = product.customizationOptions.sizes.findIndex(s => s.id === size.id);
+  let sizeMultiplier = 1;
+  
+  // Size multiplier calculation
+  if (sizeIndex === 0) {
+    sizeMultiplier = 1; // Small
+  } else if (sizeIndex === 1) {
+    sizeMultiplier = 1.5; // Medium
+  } else if (sizeIndex === 2) {
+    sizeMultiplier = 2; // Large
+  }
+  
+  console.log('Size multiplier:', sizeMultiplier);
+  
+  // Apply size scaling to base nutrition
+  baseNutrition.calories = Math.round(baseNutrition.calories * sizeMultiplier);
+  baseNutrition.sugar = Math.round(baseNutrition.sugar * sizeMultiplier);
+  baseNutrition.fat = Math.round(baseNutrition.fat * sizeMultiplier);
+  baseNutrition.protein = Math.round(baseNutrition.protein * sizeMultiplier);
+  
+  // Handle caffeine level
+  let caffeineMultiplier = 1;
+  
+  if (caffeineLevel === 0) {
+    caffeineMultiplier = 0.05; // 5% for decaf
+  } else if (caffeineLevel === 1) {
+    caffeineMultiplier = 0.25; // 25% for very low caffeine
+  } else if (caffeineLevel === 2) {
+    caffeineMultiplier = 0.5; // 50% for low caffeine
+  } else if (caffeineLevel === 3) {
+    caffeineMultiplier = 1.0; // 100% for regular
+  } else if (caffeineLevel === 4) {
+    caffeineMultiplier = 1.25; // 125% for high caffeine
+  } else if (caffeineLevel === 5) {
+    caffeineMultiplier = 1.5; // 150% for very high caffeine
+  }
+  
+  // Check for decaf shot
+  const hasDecafShot = shots.some(shot => shot.id === 'decaf');
+  if (hasDecafShot) {
+    caffeineMultiplier = 0.05; // 5% for decaf
+  }
+  
+  // Apply caffeine multiplier
+  baseNutrition.caffeine = Math.round(baseNutrition.caffeine * sizeMultiplier * caffeineMultiplier);
+  
+  // Rest of the beverage calculation code...
+  // Add caffeine for extra shots (80mg per shot)
+  if (!hasDecafShot) {
+    const extraShotCount = shots.filter(shot => shot.id !== 'decaf').length;
+    if (extraShotCount > 0) {
+      baseNutrition.caffeine += extraShotCount * 80;
+      baseNutrition.calories += extraShotCount * 5;
+      baseNutrition.protein += extraShotCount * 0.5;
+    }
+  }
+  
+  // Sugar modifiers based on sugarLevel (0-5)
+  let sugarMultiplier = 1;
+  
+  if (sugarLevel === 0) {
+    sugarMultiplier = 0; // No sugar
+  } else if (sugarLevel === 1) {
+    sugarMultiplier = 0.33; // 1/3 sugar
+  } else if (sugarLevel === 2) {
+    sugarMultiplier = 0.67; // 2/3 sugar
+  } else if (sugarLevel === 3) {
+    sugarMultiplier = 1.0; // Regular sugar
+  } else if (sugarLevel === 4) {
+    sugarMultiplier = 1.33; // Extra sugar
+  } else if (sugarLevel === 5) {
+    sugarMultiplier = 1.67; // Very sweet
+  }
+  
+  baseNutrition.sugar = Math.round(baseNutrition.sugar * sugarMultiplier);
+  
+  // Milk modifiers
+  if (milk) {
+    // Calculate milk nutrition based on milk type
+    // (existing milk calculation code...)
+    let milkFat = 0;
+    let milkProtein = 0;
+    let milkSugar = 0;
+    let milkCalories = 0;
+    
+    // Calculate milk volume based on size
+    const milkVolumeMl = sizeIndex === 0 ? 120 : sizeIndex === 1 ? 180 : 240;
+    
+    // Milk type specific calculations per 100ml
+    if (milk.id === 'whole') {
+      milkFat = 3.25 * (milkVolumeMl / 100);
+      milkProtein = 3.2 * (milkVolumeMl / 100);
+      milkSugar = 4.8 * (milkVolumeMl / 100);
+      milkCalories = 61 * (milkVolumeMl / 100);
+    } else if (milk.id === 'skim' || milk.id === '2%') {
+      milkFat = 2.0 * (milkVolumeMl / 100);
+      milkProtein = 3.2 * (milkVolumeMl / 100);
+      milkSugar = 4.8 * (milkVolumeMl / 100);
+      milkCalories = 50 * (milkVolumeMl / 100);
+    } else if (milk.id === 'almond') {
+      milkFat = 1.1 * (milkVolumeMl / 100);
+      milkProtein = 0.5 * (milkVolumeMl / 100);
+      milkSugar = 0.3 * (milkVolumeMl / 100);
+      milkCalories = 13 * (milkVolumeMl / 100);
+    } else if (milk.id === 'oat') {
+      milkFat = 1.5 * (milkVolumeMl / 100);
+      milkProtein = 1.0 * (milkVolumeMl / 100);
+      milkSugar = 2.5 * (milkVolumeMl / 100);
+      milkCalories = 40 * (milkVolumeMl / 100);
+    } else if (milk.id === 'coconut') {
+      milkFat = 2.2 * (milkVolumeMl / 100);
+      milkProtein = 0.2 * (milkVolumeMl / 100);
+      milkSugar = 1.0 * (milkVolumeMl / 100);
+      milkCalories = 31 * (milkVolumeMl / 100);
+    } else if (milk.id === 'soy') {
+      milkFat = 1.8 * (milkVolumeMl / 100);
+      milkProtein = 3.0 * (milkVolumeMl / 100);
+      milkSugar = 1.0 * (milkVolumeMl / 100);
+      milkCalories = 33 * (milkVolumeMl / 100);
+    } else if (milk.id === 'half-and-half') {
+      milkFat = 11.5 * (milkVolumeMl / 100);
+      milkProtein = 3.0 * (milkVolumeMl / 100);
+      milkSugar = 4.3 * (milkVolumeMl / 100);
+      milkCalories = 130 * (milkVolumeMl / 100);
+    }
+    
+    // Add milk nutrition to the base
+    baseNutrition.fat += Math.round(milkFat);
+    baseNutrition.protein += Math.round(milkProtein);
+    baseNutrition.sugar += Math.round(milkSugar * sugarMultiplier);
+    baseNutrition.calories += Math.round(milkCalories);
+    
+    // Add allergies
+    if (milk.id === 'whole' || milk.id === 'skim' || milk.id === '2%' || milk.id === 'half-and-half') {
+      if (!baseNutrition.allergies.includes('milk')) {
+        baseNutrition.allergies.push('milk');
+      }
+    }
+    
+    if (milk.id === 'almond') {
+      if (!baseNutrition.allergies.includes('nuts')) {
+        baseNutrition.allergies.push('nuts');
+      }
+    }
+  }
+  
+  // Syrup modifiers
+  if (syrups && syrups.length > 0) {
+    let syrupCalories = 0;
+    let syrupSugar = 0;
+    
+    syrups.forEach(syrup => {
+      if (syrup.id.includes('sugar-free')) {
+        syrupCalories += 2;
+        syrupSugar += 0;
+      } else {
+        syrupCalories += 20;
+        syrupSugar += 5;
+      }
+    });
+    
+    baseNutrition.calories += syrupCalories;
+    baseNutrition.sugar += Math.round(syrupSugar * sugarMultiplier);
+  }
+  
+  // Return rounded values
+  return {
+    calories: Math.max(0, Math.round(baseNutrition.calories)),
+    sugar: Math.max(0, Math.round(baseNutrition.sugar)),
+    caffeine: Math.max(0, Math.round(baseNutrition.caffeine)),
+    fat: Math.max(0, Math.round(baseNutrition.fat)),
+    protein: Math.max(0, Math.round(baseNutrition.protein)),
+    allergies: baseNutrition.allergies
+  };
+}
+  
+   /**
    * Get sample products for testing or when Firestore is not available
    */
-  private getSampleProducts(): Product[] {
+   private getSampleProducts(): Product[] {
     // Coffee products
     const coffeeProducts: Product[] = [
       {
@@ -921,4 +1194,7 @@ export class ProductService {
     ...dessertProducts
   ];
 }
-} 
+}
+  
+
+

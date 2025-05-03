@@ -83,7 +83,7 @@ export class CoffeeOriginComponent implements OnInit {
       process: 'Washed',
       flavor: ['Floral', 'Citrus', 'Bergamot', 'Jasmine'],
       description: 'Ethiopia is the birthplace of coffee, with a rich history dating back to the 9th century. The Yirgacheffe region produces some of the world\'s most distinct coffees with bright acidity, floral aromatics, and exceptional clarity.',
-      imageUrl: 'assets/origins/ethiopia.jpg'
+      imageUrl: '/assets/origins/ethiopia.jpg'
     },
     'colombia': {
       country: 'Colombia',
@@ -92,7 +92,7 @@ export class CoffeeOriginComponent implements OnInit {
       process: 'Washed',
       flavor: ['Chocolate', 'Caramel', 'Red Fruits', 'Citrus'],
       description: 'Colombia is known for producing consistently excellent coffee. The Huila region\'s rich volcanic soil, high altitude, and ideal climate create beans with a perfect balance of sweetness, acidity, and body.',
-      imageUrl: 'assets/origins/colombia.jpg'
+      imageUrl: '/assets/origins/colombia.jpg'
     },
     'guatemala': {
       country: 'Guatemala',
@@ -101,7 +101,7 @@ export class CoffeeOriginComponent implements OnInit {
       process: 'Washed',
       flavor: ['Chocolate', 'Spice', 'Apple', 'Caramel'],
       description: 'Guatemala\'s Antigua region is surrounded by three volcanoes that create a unique microclimate. The mineral-rich soil produces coffees with complex flavor profiles and a full body with elegant acidity.',
-      imageUrl: 'assets/origins/guatemala.jpg'
+      imageUrl: '/assets/origins/guatemala.jpg'
     },
     'kenya': {
       country: 'Kenya',
@@ -110,7 +110,7 @@ export class CoffeeOriginComponent implements OnInit {
       process: 'Washed',
       flavor: ['Blackcurrant', 'Blackberry', 'Tomato', 'Winey'],
       description: 'Kenya is famous for its distinctive, bright, and fruit-forward coffees. The SL28 and SL34 varietals grown in the nutrient-rich volcanic soil of Nyeri produce incredibly complex and vibrant flavor profiles.',
-      imageUrl: 'assets/origins/kenya.jpg'
+      imageUrl: '/assets/origins/kenya.jpg'
     }
   };
   

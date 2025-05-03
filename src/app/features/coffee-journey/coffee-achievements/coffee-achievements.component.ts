@@ -67,7 +67,7 @@ export class CoffeeAchievementsComponent implements OnInit, OnDestroy {
       id: 'first-order',
       name: 'First Order',
       description: 'Placed your first order at Digital Café',
-      iconURL: 'assets/achievements/first-order.png',
+      iconURL: '/assets/achievements/first-order.png',
       pointsAwarded: 10,
       unlocked: false
     },
@@ -75,7 +75,7 @@ export class CoffeeAchievementsComponent implements OnInit, OnDestroy {
       id: 'coffee-explorer',
       name: 'Coffee Explorer',
       description: 'Tried 5 different coffee drinks',
-      iconURL: 'assets/achievements/coffee-explorer.png',
+      iconURL: '/assets/achievements/coffee-explorer.png',
       pointsAwarded: 25,
       unlocked: false
     },
@@ -83,7 +83,7 @@ export class CoffeeAchievementsComponent implements OnInit, OnDestroy {
       id: 'early-bird',
       name: 'Early Bird',
       description: 'Ordered coffee before 7 AM',
-      iconURL: 'assets/achievements/early-bird.png',
+      iconURL: '/assets/achievements/early-bird.png',
       pointsAwarded: 15,
       unlocked: false
     },
@@ -91,7 +91,7 @@ export class CoffeeAchievementsComponent implements OnInit, OnDestroy {
       id: 'loyal-customer',
       name: 'Loyal Customer',
       description: 'Placed orders on 10 different days',
-      iconURL: 'assets/achievements/loyal-customer.png',
+      iconURL: '/assets/achievements/loyal-customer.png',
       pointsAwarded: 50,
       unlocked: false
     },
@@ -99,7 +99,7 @@ export class CoffeeAchievementsComponent implements OnInit, OnDestroy {
       id: 'customization-king',
       name: 'Customization King',
       description: 'Created a drink with at least 5 customizations',
-      iconURL: 'assets/achievements/customization-king.png',
+      iconURL: '/assets/achievements/customization-king.png',
       pointsAwarded: 20,
       unlocked: false
     },
@@ -107,7 +107,7 @@ export class CoffeeAchievementsComponent implements OnInit, OnDestroy {
       id: 'origin-master',
       name: 'Origin Master',
       description: 'Learned about all coffee origins',
-      iconURL: 'assets/achievements/origin-master.png',
+      iconURL: '/assets/achievements/origin-master.png',
       pointsAwarded: 30,
       unlocked: false
     },
@@ -115,7 +115,7 @@ export class CoffeeAchievementsComponent implements OnInit, OnDestroy {
       id: 'social-butterfly',
       name: 'Social Butterfly',
       description: 'Shared the app with a friend',
-      iconURL: 'assets/achievements/social-butterfly.png',
+      iconURL: '/assets/achievements/social-butterfly.png',
       pointsAwarded: 15,
       unlocked: false
     },
@@ -123,7 +123,7 @@ export class CoffeeAchievementsComponent implements OnInit, OnDestroy {
       id: 'perfect-barista',
       name: 'Perfect Barista',
       description: 'Got 100% accuracy in the Coffee Game',
-      iconURL: 'assets/achievements/perfect-barista.png',
+      iconURL: '/assets/achievements/perfect-barista.png',
       pointsAwarded: 40,
       unlocked: false
     }

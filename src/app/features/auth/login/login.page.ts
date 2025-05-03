@@ -94,67 +94,156 @@ export class LoginPage implements OnInit {
 // Add this property to your LoginPage class
 isStaffMode = false;
 
-// src/app/features/auth/login/login.page.ts
+// Updated login.page.ts with enhanced logging
 
-// Update the onSubmit method
 async onSubmit() {
   if (this.loginForm.valid) {
     this.isLoading = true;
     try {
       const { email, password } = this.loginForm.value;
       
+      console.log('🔐 Login attempt:', email);
+      console.log('🔄 Is Staff Mode:', this.isStaffMode);
+      
       // Log in the user
       const user = await this.authService.login(email, password);
+      console.log('👤 User logged in successfully:', user.uid);
       
       if (this.isStaffMode) {
-        // Get the user profile to check role
-        const userProfile = await this.authService.getUserProfile(user.uid);
+        console.log('🔍 Checking staff privileges for user:', user.uid);
         
-        // Check if user has staff or admin role
-        if (userProfile && (userProfile.role === 'staff' || userProfile.role === 'admin')) {
-          // Navigate directly to staff dashboard
-          this.router.navigate(['/staff/dashboard']);
+        // Get the user profile to check role
+        // Add a retry mechanism with delay to ensure Firestore data is loaded
+        let attempts = 0;
+        let userProfile = null;
+        
+        while (attempts < 3 && !userProfile) {
+          try {
+            console.log(`🔄 Profile fetch attempt ${attempts + 1}`);
+            userProfile = await this.authService.getUserProfile(user.uid);
+            console.log('📋 Profile data:', userProfile);
+            
+            if (!userProfile) {
+              console.log('⏳ Profile not found, waiting before retry...');
+              // Wait 500ms before trying again
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+          } catch (error) {
+            console.error('❌ Error fetching profile:', error);
+          }
+          attempts++;
+        }
+        
+        // Now check if the profile exists and has a staff role
+        if (userProfile) {
+          console.log('🔑 User role:', userProfile.role);
+          
+          if (userProfile.role === 'staff' || userProfile.role === 'admin') {
+            console.log('✅ Staff privileges confirmed, redirecting to staff dashboard');
+            // Navigate directly to staff dashboard
+            this.router.navigate(['/staff/dashboard']);
+          } else {
+            console.log('⛔ Not a staff account. Current role:', userProfile.role);
+            // User doesn't have staff role
+            this.showError('Access denied: You do not have staff privileges');
+            await this.authService.logout(); // Log them out
+          }
         } else {
-          // User doesn't have staff role
-          this.showError('Access denied: You do not have staff privileges');
-          this.authService.logout(); // Log them out
+          console.error('❌ Failed to fetch user profile after multiple attempts');
+          this.showError('Could not verify staff privileges. Please try again.');
+          await this.authService.logout();
         }
       } else {
+        console.log('🏠 Regular customer login, redirecting to:', this.returnUrl);
         // Regular customer login - go to home or return URL
         this.router.navigateByUrl(this.returnUrl);
       }
     } catch (error:any) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
       this.showError('Login failed: ' + (error.message || 'Please check your credentials'));
     } finally {
       this.isLoading = false;
     }
   } else {
+    console.log('📝 Form validation failed');
     this.loginForm.markAllAsTouched();
   }
 }
 
-// Add this helper method
+async loginWithGoogle() {
+  this.isLoading = true;
+  try {
+    console.log('🔐 Google login attempt');
+    console.log('🔄 Is Staff Mode:', this.isStaffMode);
+    
+    const result = await this.authService.loginWithGoogle();
+    console.log('👤 Google login successful for user:', result.uid);
+    
+    if (this.isStaffMode) {
+      console.log('🔍 Checking staff privileges for Google user:', result.uid);
+      
+      // Add retry mechanism for Google login too
+      let attempts = 0;
+      let userProfile = null;
+      
+      while (attempts < 3 && !userProfile) {
+        try {
+          console.log(`🔄 Profile fetch attempt ${attempts + 1} for Google user`);
+          userProfile = await this.authService.getUserProfile(result.uid);
+          console.log('📋 Google user profile data:', userProfile);
+          
+          if (!userProfile) {
+            console.log('⏳ Profile not found, waiting before retry...');
+            // Wait 500ms before trying again
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        } catch (error) {
+          console.error('❌ Error fetching profile after Google login:', error);
+        }
+        attempts++;
+      }
+      
+      // Check if user has staff or admin role
+      if (userProfile) {
+        console.log('🔑 Google user role:', userProfile.role);
+        
+        if (userProfile.role === 'staff' || userProfile.role === 'admin') {
+          console.log('✅ Staff privileges confirmed for Google user, redirecting to staff dashboard');
+          // Navigate directly to staff dashboard
+          this.router.navigate(['/staff/dashboard']);
+        } else {
+          console.log('⛔ Not a staff account. Current role:', userProfile.role);
+          // User doesn't have staff role
+          this.showError('Access denied: You do not have staff privileges');
+          await this.authService.logout(); // Log them out
+        }
+      } else {
+        console.error('❌ Failed to fetch Google user profile after multiple attempts');
+        this.showError('Could not verify staff privileges. Please try again.');
+        await this.authService.logout();
+      }
+    } else {
+      console.log('🏠 Regular Google user login, redirecting to:', this.returnUrl);
+      // Regular customer login - go to home or return URL
+      this.router.navigateByUrl(this.returnUrl);
+    }
+  } catch (error:any) {
+    console.error('❌ Google login error:', error);
+    this.showError('Google login failed: ' + (error.message || 'Authentication error'));
+  } finally {
+    this.isLoading = false;
+  }
+}
+
 private showError(message: string) {
-  // You can implement this with a toast or alert
   console.error(message);
-  // Example with alert:
-  alert(message);
+  
+  // Use the toast controller for a better UX
+  this.authService.showToast(message);
 }
 
 
 
-  async loginWithGoogle() {
-    this.isLoading = true;
-    try {
-      await this.authService.loginWithGoogle();
-      this.router.navigateByUrl(this.returnUrl);
-    } catch (error) {
-      console.error('Google login error:', error);
-    } finally {
-      this.isLoading = false;
-    }
-  }
 
   togglePasswordVisibility() {
     this.showPassword = !this.showPassword;
