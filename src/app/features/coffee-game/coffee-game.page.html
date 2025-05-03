@@ -29,59 +29,130 @@
         <div class="stat-value">{{ completedGames }}</div>
       </div>
     </div>
-    
+
     <div class="game-container" #gameContainer>
-      <!-- The React game component will be mounted here -->
-      <div id="coffee-game-root"></div>
-      
-      <!-- Loading state -->
+      <canvas id="coffee-game-canvas"></canvas>
+
+      <!-- Current Order Info Card (non-overlay style) -->
+      <!-- <div class="order-info-card" *ngIf="currentOrder && !isLoading">
+        <h3>{{ currentOrder.name }}</h3>
+        <div class="mini-requirements">
+          <div class="mini-requirement">
+            <span>Grind:</span>
+            <div class="mini-bar">
+              <div
+                class="target-mark"
+                [style.left]="currentOrder.grind + '%'"
+              ></div>
+              <div class="player-mark" [style.left]="grindLevel + '%'"></div>
+            </div>
+          </div>
+          <div class="mini-requirement">
+            <span>Temp:</span>
+            <div class="mini-bar">
+              <div
+                class="target-mark"
+                [style.left]="(currentOrder.temp - 65) * 2.85 + '%'"
+              ></div>
+              <div
+                class="player-mark"
+                [style.left]="(tempLevel - 65) * 2.85 + '%'"
+              ></div>
+            </div>
+          </div>
+          <div class="mini-requirement">
+            <span>Milk:</span>
+            <div class="mini-bar">
+              <div
+                class="target-mark"
+                [style.left]="currentOrder.milk + '%'"
+              ></div>
+              <div class="player-mark" [style.left]="milkLevel + '%'"></div>
+            </div>
+          </div>
+          <div class="accuracy-display">
+            Accuracy: {{ getAccuracyDisplay() }}
+          </div>
+        </div>
+      </div> -->
+
       <div *ngIf="isLoading" class="loading-overlay">
         <ion-spinner name="crescent"></ion-spinner>
         <p>Loading Barista Challenge...</p>
       </div>
-      
-      <!-- Game canvas - This is what was missing! -->
-      <canvas *ngIf="!isLoading" id="coffee-game-canvas" width="800" height="600"></canvas>
     </div>
-    
+
     <div class="game-instructions">
       <h2>How to Play</h2>
-      <p>Take on the role of a barista and create the perfect coffee drinks based on customer orders!</p>
-      <ul>
-        <li>Select an order from the list to start making it</li>
-        <li>Control the grinding, temperature, and milk levels</li>
-        <li>Try to match the target values for each parameter</li>
-        <li>Complete as many orders as possible to earn points</li>
-        <li>Earn loyalty points based on your score!</li>
-      </ul>
+      <p>
+        Test your barista skills by preparing coffee drinks according to
+        customer orders!
+      </p>
+      <ol>
+        <li>
+          Each order shows target values for <strong>grind</strong>,
+          <strong>temperature</strong>, and <strong>milk froth</strong>
+        </li>
+        <li>
+          Use the sliders below to adjust your coffee parameters to match the
+          order
+        </li>
+        <li>
+          The <strong>accuracy meter</strong> shows how close you are to a
+          perfect match
+        </li>
+        <li>
+          Click <strong>Serve Drink</strong> when you're ready to deliver the
+          coffee
+        </li>
+        <li>
+          Your score is based on how accurately you match the requirements
+        </li>
+        <li>Complete orders with high accuracy to earn loyalty points!</li>
+      </ol>
     </div>
-    
+
     <!-- Game controls for mobile -->
     <div class="game-controls" *ngIf="!isLoading">
       <div class="control-group">
         <h3>Grind Control</h3>
-        <ion-range min="0" max="100" [(ngModel)]="grindLevel" (ionChange)="onGrindChange($event)">
+        <ion-range
+          min="0"
+          max="100"
+          [(ngModel)]="grindLevel"
+          (ionChange)="onGrindChange($event)"
+        >
           <ion-icon slot="start" name="cafe-outline"></ion-icon>
           <ion-icon slot="end" name="cafe"></ion-icon>
         </ion-range>
       </div>
-      
+
       <div class="control-group">
         <h3>Temperature</h3>
-        <ion-range min="65" max="100" [(ngModel)]="tempLevel" (ionChange)="onTempChange($event)">
+        <ion-range
+          min="65"
+          max="100"
+          [(ngModel)]="tempLevel"
+          (ionChange)="onTempChange($event)"
+        >
           <ion-icon slot="start" name="thermometer-outline"></ion-icon>
           <ion-icon slot="end" name="thermometer"></ion-icon>
         </ion-range>
       </div>
-      
+
       <div class="control-group">
         <h3>Milk Froth</h3>
-        <ion-range min="0" max="100" [(ngModel)]="milkLevel" (ionChange)="onMilkChange($event)">
+        <ion-range
+          min="0"
+          max="100"
+          [(ngModel)]="milkLevel"
+          (ionChange)="onMilkChange($event)"
+        >
           <ion-icon slot="start" name="water-outline"></ion-icon>
           <ion-icon slot="end" name="water"></ion-icon>
         </ion-range>
       </div>
-      
+
       <ion-button expand="block" class="serve-button" (click)="serveDrink()">
         Serve Drink
         <ion-icon name="checkmark-circle-outline" slot="end"></ion-icon>

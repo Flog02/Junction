@@ -13,7 +13,7 @@
 //     children: STAFF_ROUTES,
 //     canActivate: [authGuard, RoleNavigationGuard]
 //   },
-  
+
 //   {
 //     path: 'home',
 //     loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
@@ -24,7 +24,7 @@
 //     redirectTo: 'home',
 //     pathMatch: 'full',
 //   },
-  
+
 //   {
 //     path: 'auth',
 //     loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
@@ -70,10 +70,7 @@
 //     canActivate: [authGuard, RoleNavigationGuard]
 //   },
 //   // This should be the LAST route
- 
- 
- 
- 
+
 //   {
 //     path: '**',
 //     component: WildcardRedirectComponent
@@ -90,72 +87,97 @@ export const routes: Routes = [
   {
     path: 'staff',
     children: STAFF_ROUTES,
-    canActivate: [authGuard] // Only check if authenticated, role check is in app component
+    canActivate: [authGuard], // Only check if authenticated, role check is in app component
   },
-  
+
   // Customer routes
   {
     path: 'home',
     loadComponent: () => import('./home/home.page').then((m) => m.HomePage),
-    canActivate: [authGuard] // Only check if authenticated
+    canActivate: [authGuard], // Only check if authenticated
   },
   {
     path: '',
     redirectTo: 'home',
     pathMatch: 'full',
   },
-  
+
   // Auth routes (no guard needed)
   {
     path: 'auth',
-    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
+    loadChildren: () =>
+      import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
-  
+
   // Other routes
   {
     path: 'menu',
-    loadComponent: () => import('./features/menu/menu.page').then(m => m.MenuPage),
-    canActivate: [authGuard]
+    loadComponent: () =>
+      import('./features/menu/menu.page').then((m) => m.MenuPage),
+    canActivate: [authGuard],
   },
   {
     path: 'order',
-    loadChildren: () => import('./features/order/order.routes').then(m => m.ORDER_ROUTES),
-    canActivate: [authGuard]
+    loadChildren: () =>
+      import('./features/order/order.routes').then((m) => m.ORDER_ROUTES),
+    canActivate: [authGuard],
   },
   {
     path: 'loyalty',
-    loadComponent: () => import('./features/loyalty/loyalty.page').then(m => m.LoyaltyPage),
-    canActivate: [authGuard]
+    loadComponent: () =>
+      import('./features/loyalty/loyalty.page').then((m) => m.LoyaltyPage),
+    canActivate: [authGuard],
   },
   {
     path: 'nutrition',
-    loadComponent: () => import('./features/nutrition/nutrition.page').then(m => m.NutritionPage),
-    canActivate: [authGuard]
+    loadComponent: () =>
+      import('./features/nutrition/nutrition.page').then(
+        (m) => m.NutritionPage
+      ),
+    canActivate: [authGuard],
   },
   {
     path: 'gift-cards',
-    loadChildren: () => import('./features/gift-cards/gift-cards.routes').then(m => m.GIFT_CARD_ROUTES),
-    canActivate: [authGuard]
+    loadChildren: () =>
+      import('./features/gift-cards/gift-cards.routes').then(
+        (m) => m.GIFT_CARD_ROUTES
+      ),
+    canActivate: [authGuard],
   },
   {
     path: 'table-service',
-    loadChildren: () => import('./features/table-service/table-service.routes').then(m => m.TABLE_SERVICE_ROUTES),
-    canActivate: [authGuard]
+    loadChildren: () =>
+      import('./features/table-service/table-service.routes').then(
+        (m) => m.TABLE_SERVICE_ROUTES
+      ),
+    canActivate: [authGuard],
   },
   {
     path: 'coffee-journey',
-    loadComponent: () => import('./features/coffee-journey/coffee-journey.page').then(m => m.CoffeeJourneyPage),
-    canActivate: [authGuard]
+    loadComponent: () =>
+      import('./features/coffee-journey/coffee-journey.page').then(
+        (m) => m.CoffeeJourneyPage
+      ),
+    canActivate: [authGuard],
   },
   {
     path: 'profile',
-    loadComponent: () => import('./features/profile/profile.page').then(m => m.ProfilePage),
-    canActivate: [authGuard]
+    loadComponent: () =>
+      import('./features/profile/profile.page').then((m) => m.ProfilePage),
+    canActivate: [authGuard],
   },
-  
+  {
+    path: 'coffee-game',
+    loadComponent: () =>
+      import('./features/coffee-game/coffee-game.page').then(
+        (m) => m.CoffeeGamePage
+      ),
+    canActivate: [authGuard],
+  },
+
   // Catch-all route - redirects handled in app component
   {
     path: '**',
-    redirectTo: 'home'
-  }
+    redirectTo: 'home',
+  },
 ];
