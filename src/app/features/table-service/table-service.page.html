@@ -1,128 +1,162 @@
 <!-- src/app/features/table-service/table-service.page.html -->
 <ion-header>
-    <ion-toolbar color="primary">
-      <ion-title>Table Service</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  
-  <ion-content class="ion-padding">
-    <div class="hero-section">
-      <h1>Scan. Order. Enjoy.</h1>
-      <p>No more waiting in line. Order directly from your table using your phone.</p>
-      
-      <div class="scan-button-container">
-        <ion-button size="large" expand="block" (click)="isLoggedIn ? navigateToScanner() : navigateToLogin()">
-          <ion-icon name="qr-code-outline" slot="start"></ion-icon>
-          {{ isLoggedIn ? 'Scan Table QR Code' : 'Login to Scan Table' }}
-        </ion-button>
-        
-        <p class="scan-note" *ngIf="!isLoggedIn">
-          You need to be logged in to place a table order
-        </p>
-      </div>
+  <ion-toolbar color="primary">
+    <ion-back-button
+      class="back-button"
+      defaultHref="./gift-card-view.html"
+    ></ion-back-button>
+    <ion-title>Table Service</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="hero-section">
+    <h1>Scan. Order. Enjoy.</h1>
+    <p>
+      No more waiting in line. Order directly from your table using your phone.
+    </p>
+
+    <div class="scan-button-container">
+      <ion-button
+        size="large"
+        expand="block"
+        (click)="isLoggedIn ? navigateToScanner() : navigateToLogin()"
+      >
+        <ion-icon name="qr-code-outline" slot="start"></ion-icon>
+        {{ isLoggedIn ? 'Scan Table QR Code' : 'Login to Scan Table' }}
+      </ion-button>
+
+      <p class="scan-note" *ngIf="!isLoggedIn">
+        You need to be logged in to place a table order
+      </p>
     </div>
-    
-    <div class="section">
-      <h2>How It Works</h2>
-      
-      <ion-grid>
-        <ion-row>
-          <ion-col size="12" size-md="4">
-            <div class="step-card">
-              <div class="step-number">1</div>
-              <ion-icon name="qr-code-outline"></ion-icon>
-              <h3>Scan QR Code</h3>
-              <p>Scan the QR code on your table with your phone's camera</p>
-            </div>
-          </ion-col>
-          
-          <ion-col size="12" size-md="4">
-            <div class="step-card">
-              <div class="step-number">2</div>
-              <ion-icon name="cafe-outline"></ion-icon>
-              <h3>Place Your Order</h3>
-              <p>Browse the menu and customize your coffee and food items</p>
-            </div>
-          </ion-col>
-          
-          <ion-col size="12" size-md="4">
-            <div class="step-card">
-              <div class="step-number">3</div>
-              <ion-icon name="restaurant-outline"></ion-icon>
-              <h3>Enjoy Your Order</h3>
-              <p>No need to wait in line. We'll bring your order to your table</p>
-            </div>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
-    </div>
-    
-    <div class="section">
-      <h2>Featured Locations</h2>
-      
-      <div class="store-list">
-        <ion-card *ngFor="let store of featuredStores" class="store-card">
-          <ion-card-header>
-            <ion-card-title>{{ store.name }}</ion-card-title>
-          </ion-card-header>
-          
-          <ion-card-content>
-            <p class="store-address">{{ store.address }}</p>
-            
-            <div class="store-details">
-              <div class="store-detail">
-                <ion-icon name="people-outline"></ion-icon>
-                <span>{{ store.tableCount }} Tables</span>
-              </div>
-              
-              <div class="store-detail">
-                <ion-icon name="time-outline"></ion-icon>
-                <span [class]="getWaitTimeClass(store.waitTime)">
-                  {{ store.waitTime === 0 ? 'No Wait' : store.waitTime + ' min wait' }}
-                </span>
-              </div>
-              
-              <div class="store-detail">
-                <ion-icon name="walk-outline"></ion-icon>
-                <span>Table Service</span>
-              </div>
-            </div>
-            
-            <ion-button expand="block" fill="outline" [disabled]="!store.isOpen" class="visit-btn">
-              <ng-container *ngIf="store.isOpen">Visit This Location</ng-container>
-              <ng-container *ngIf="!store.isOpen">Currently Closed</ng-container>
-              <ion-icon name="arrow-forward-outline" slot="end" *ngIf="store.isOpen"></ion-icon>
-            </ion-button>
-          </ion-card-content>
-        </ion-card>
-      </div>
-    </div>
-    
-    <div class="section faq-section">
-      <h2>Frequently Asked Questions</h2>
-      
-      <ion-card>
+  </div>
+
+  <div class="section">
+    <h2>How It Works</h2>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="4">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <ion-icon name="qr-code-outline"></ion-icon>
+            <h3>Scan QR Code</h3>
+            <p>Scan the QR code on your table with your phone's camera</p>
+          </div>
+        </ion-col>
+
+        <ion-col size="12" size-md="4">
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <ion-icon name="cafe-outline"></ion-icon>
+            <h3>Place Your Order</h3>
+            <p>Browse the menu and customize your coffee and food items</p>
+          </div>
+        </ion-col>
+
+        <ion-col size="12" size-md="4">
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <ion-icon name="restaurant-outline"></ion-icon>
+            <h3>Enjoy Your Order</h3>
+            <p>No need to wait in line. We'll bring your order to your table</p>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <div class="section">
+    <h2>Featured Locations</h2>
+
+    <div class="store-list">
+      <ion-card *ngFor="let store of featuredStores" class="store-card">
+        <ion-card-header>
+          <ion-card-title>{{ store.name }}</ion-card-title>
+        </ion-card-header>
+
         <ion-card-content>
-          <div class="faq-item">
-            <h3>Do I need to create an account?</h3>
-            <p>Yes, you need to be logged in to place a table order. This helps us track your order and provide a better experience.</p>
+          <p class="store-address">{{ store.address }}</p>
+
+          <div class="store-details">
+            <div class="store-detail">
+              <ion-icon name="people-outline"></ion-icon>
+              <span>{{ store.tableCount }} Tables</span>
+            </div>
+
+            <div class="store-detail">
+              <ion-icon name="time-outline"></ion-icon>
+              <span [class]="getWaitTimeClass(store.waitTime)">
+                {{ store.waitTime === 0 ? 'No Wait' : store.waitTime + ' min
+                wait' }}
+              </span>
+            </div>
+
+            <div class="store-detail">
+              <ion-icon name="walk-outline"></ion-icon>
+              <span>Table Service</span>
+            </div>
           </div>
-          
-          <div class="faq-item">
-            <h3>How do I pay for my order?</h3>
-            <p>You can pay securely through the app using a credit card, gift card, or loyalty points.</p>
-          </div>
-          
-          <div class="faq-item">
-            <h3>Can I customize my order?</h3>
-            <p>Absolutely! You can customize your coffee just like you would at the counter.</p>
-          </div>
-          
-          <div class="faq-item">
-            <h3>What if I need to change my order?</h3>
-            <p>You can modify your order before it's prepared. Once it's being prepared, please speak with our staff.</p>
-          </div>
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            [disabled]="!store.isOpen"
+            class="visit-btn"
+          >
+            <ng-container *ngIf="store.isOpen"
+              >Visit This Location</ng-container
+            >
+            <ng-container *ngIf="!store.isOpen">Currently Closed</ng-container>
+            <ion-icon
+              name="arrow-forward-outline"
+              slot="end"
+              *ngIf="store.isOpen"
+            ></ion-icon>
+          </ion-button>
         </ion-card-content>
       </ion-card>
     </div>
-  </ion-content>
+  </div>
+
+  <div class="section faq-section">
+    <h2>Frequently Asked Questions</h2>
+
+    <ion-card>
+      <ion-card-content>
+        <div class="faq-item">
+          <h3>Do I need to create an account?</h3>
+          <p>
+            Yes, you need to be logged in to place a table order. This helps us
+            track your order and provide a better experience.
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3>How do I pay for my order?</h3>
+          <p>
+            You can pay securely through the app using a credit card, gift card,
+            or loyalty points.
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3>Can I customize my order?</h3>
+          <p>
+            Absolutely! You can customize your coffee just like you would at the
+            counter.
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3>What if I need to change my order?</h3>
+          <p>
+            You can modify your order before it's prepared. Once it's being
+            prepared, please speak with our staff.
+          </p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

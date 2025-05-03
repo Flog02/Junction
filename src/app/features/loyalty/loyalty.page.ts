@@ -3,7 +3,7 @@
 
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonNote,IonList,IonSpinner,IonProgressBar,IonButton,IonSegment,IonSegmentButton,IonLabel,IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent } from '@ionic/angular/standalone';
+import { IonNote,IonList,IonSpinner,IonBackButton,IonProgressBar,IonButton,IonSegment,IonSegmentButton,IonLabel,IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent } from '@ionic/angular/standalone';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,7 @@ import { AlertController, ToastController } from '@ionic/angular/standalone';
   selector: 'app-loyalty',
   template:`<ion-header>
   <ion-toolbar>
+      <ion-back-button class="back-button" defaultHref="./gift-card-view.html"></ion-back-button>
     <ion-title>Loyalty Program</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -240,6 +241,10 @@ import { AlertController, ToastController } from '@ionic/angular/standalone';
     margin: 24px 0 16px 0;
     color: var(--ion-color-primary);
   }
+
+  .back-button{
+    float: left;
+  }
   
   .empty-state {
     display: flex;
@@ -288,7 +293,7 @@ import { AlertController, ToastController } from '@ionic/angular/standalone';
     --background: rgba(var(--ion-color-danger-rgb), 0.1);
   }`,
   standalone: true,
-  imports: [IonNote,IonList,IonSpinner,IonProgressBar,IonButton,IonSegment,IonSegmentButton,IonLabel,CommonModule, IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent, RouterModule,FormsModule]
+  imports: [IonNote,IonList,IonSpinner,IonBackButton,IonProgressBar,IonButton,IonSegment,IonSegmentButton,IonLabel,CommonModule, IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent, RouterModule,FormsModule]
 })
 export class LoyaltyPage implements OnInit, OnDestroy {
   // User loyalty data

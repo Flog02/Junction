@@ -15,7 +15,7 @@ import { LoadingController, ToastController } from '@ionic/angular/standalone';
   template: `<ion-header>
   <ion-toolbar>
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/gift-cards"></ion-back-button>
+      <ion-back-button defaultHref="./gift-card-view.html"></ion-back-button>
     </ion-buttons>
     <ion-title>Redeem Gift Card</ion-title>
   </ion-toolbar>
