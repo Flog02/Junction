@@ -17,8 +17,9 @@ import {
   DocumentReference
 } from '@angular/fire/firestore';
 import { Auth, user } from '@angular/fire/auth';
-import { Observable, from, of, map, switchMap } from 'rxjs';
+import { Observable, from, of, map, switchMap, tap } from 'rxjs';
 import { UserLoyalty, LoyaltyHistory, LoyaltyReward } from '../models/loyalty.model';
+import { NotificationService } from './notification.service';
 
 // Define tier thresholds and benefits
 interface LoyaltyTier {
@@ -110,7 +111,8 @@ export class LoyaltyService {
   
   constructor(
     private firestore: Firestore,
-    private auth: Auth
+    private auth: Auth,
+    private notificationService: NotificationService
   ) {}
   
   /**
@@ -158,6 +160,14 @@ export class LoyaltyService {
       streakDays: 0,
       lastStreakDate: new Date()
     };
+
+    // Add the welcome notification
+    this.notificationService.createNotification({
+      userId,
+      title: 'Welcome to our Loyalty Program!',
+      message: 'Start earning points with every purchase and unlock exciting rewards.',
+      type: 'loyalty'
+    }).subscribe();
     
     return from(setDoc(userLoyaltyRef, this.prepareForFirestore(initialLoyalty)));
   }
@@ -220,11 +230,53 @@ export class LoyaltyService {
       lastPointsEarnedDate: new Date(),
       history: arrayUnion(historyEntry)
     })).pipe(
+      tap(() => {
+        // Send notification about earned points
+        this.notificationService.createNotification({
+          userId,
+          title: 'Points Earned',
+          message: `You've earned ${pointsToAdd} loyalty points${orderId ? ' from your order' : ''}!`,
+          type: 'loyalty',
+          targetId: orderId
+        }).subscribe();
+        
+        // Check if the user has enough points for any rewards
+        return from(getDoc(userLoyaltyRef)).pipe(
+          switchMap(docSnap => {
+            if (!docSnap.exists()) return of(null);
+            const userData = docSnap.data() as UserLoyalty;
+            
+            // Check automatic reward thresholds
+            if (userData.points >= 100 && !this.hasRewardOfType(userData, 'Free Coffee')) {
+              this.addReward('Free Coffee', userId).subscribe();
+            }
+            
+            if (userData.points >= 150 && !this.hasRewardOfType(userData, 'Free Specialty Drink')) {
+              this.addReward('Free Specialty Drink', userId).subscribe();
+            }
+            
+            if (userData.points >= 200 && !this.hasRewardOfType(userData, 'Free Breakfast Item')) {
+              this.addReward('Free Breakfast Item', userId).subscribe();
+            }
+            
+            return of(null);
+          })
+        ).subscribe();
+      }),
       switchMap(() => {
         // Check if tier upgrade is needed
         return this.checkAndUpdateTier(userId);
       }),
       map(() => pointsToAdd)
+    );
+  }
+  
+  /**
+   * Checks if user already has a specific reward
+   */
+  private hasRewardOfType(userData: UserLoyalty, rewardName: string): boolean {
+    return userData.rewards.some(
+      reward => reward.name === rewardName && reward.status === 'available'
     );
   }
   
@@ -286,7 +338,17 @@ export class LoyaltyService {
               points: increment(-reward.pointsCost),
               rewards: updatedRewards,
               history: arrayUnion(historyEntry)
-            }));
+            })).pipe(
+              tap(() => {
+                // Send notification for redeemed reward
+                this.notificationService.createNotification({
+                  userId: user.uid,
+                  title: 'Reward Redeemed',
+                  message: `You've successfully redeemed your ${reward.name} reward.`,
+                  type: 'loyalty'
+                }).subscribe();
+              })
+            );
           })
         );
       })
@@ -338,7 +400,24 @@ export class LoyaltyService {
                 ? (userData.totalPointsEarned / this.loyaltyTiers[i + 1].threshold) * 100
                 : 100,
               history: arrayUnion(historyEntry)
-            }));
+            })).pipe(
+              tap(() => {
+                // Send notification for tier upgrade
+                this.notificationService.createLoyaltyTierNotification(
+                  userId, 
+                  this.capitalizeFirstLetter(newTier.name)
+                ).subscribe();
+                
+                // Add special tier reward if applicable
+                if (newTier.name === 'silver') {
+                  this.addReward('Free Add-ons', userId).subscribe();
+                } else if (newTier.name === 'gold') {
+                  this.addReward('Skip the Line', userId).subscribe();
+                } else if (newTier.name === 'platinum') {
+                  this.addReward('Free Specialty Drink', userId).subscribe();
+                }
+              })
+            );
           }
         }
         
@@ -400,10 +479,12 @@ export class LoyaltyService {
   /**
    * Adds an available reward to the user's account
    */
-  addReward(rewardName: string): Observable<void> {
+  addReward(rewardName: string, userId?: string): Observable<void> {
     return user(this.auth).pipe(
-      switchMap(user => {
-        if (!user) throw new Error('User not authenticated');
+      switchMap(currentUser => {
+        const uid = userId || (currentUser ? currentUser.uid : null);
+        
+        if (!uid) throw new Error('User not authenticated');
         
         // Find reward template
         const rewardTemplate = this.availableRewards.find(r => r.name === rewardName);
@@ -424,10 +505,19 @@ export class LoyaltyService {
         };
         
         // Add to user's rewards
-        const userLoyaltyRef = doc(this.firestore, `userLoyalty/${user.uid}`);
+        const userLoyaltyRef = doc(this.firestore, `userLoyalty/${uid}`);
         return from(updateDoc(userLoyaltyRef, {
           rewards: arrayUnion(reward)
-        }));
+        })).pipe(
+          tap(() => {
+            // Send notification for new reward
+            this.notificationService.createLoyaltyRewardNotification(
+              uid,
+              reward.name,
+              reward.pointsCost
+            ).subscribe();
+          })
+        );
       })
     );
   }
@@ -560,6 +650,16 @@ export class LoyaltyService {
               }
               
               return from(updateDoc(userLoyaltyRef, updates)).pipe(
+                tap(() => {
+                  // Notify user of streak milestone if applicable
+                  if (bonusPoints > 0) {
+                    this.notificationService.createStreakBonusNotification(
+                      user.uid,
+                      newStreak,
+                      bonusPoints
+                    ).subscribe();
+                  }
+                }),
                 map(() => newStreak)
               );
             } else {
@@ -638,6 +738,17 @@ export class LoyaltyService {
             }
             
             return from(updateDoc(userLoyaltyRef, updates)).pipe(
+              tap(() => {
+                // Notify user of coffee count milestone if applicable
+                if (bonusPoints > 0) {
+                  this.notificationService.createNotification({
+                    userId: user.uid,
+                    title: 'Coffee Milestone Reached!',
+                    message: `You've ordered ${newCount} coffees this month and earned ${bonusPoints} bonus points!`,
+                    type: 'loyalty'
+                  }).subscribe();
+                }
+              }),
               map(() => newCount)
             );
           })
@@ -718,6 +829,12 @@ export class LoyaltyService {
     return Math.random().toString(36).substring(2, 15) + 
       Math.random().toString(36).substring(2, 15);
   }
+  
+  /**
+   * Helper to capitalize first letter
+   */
+  private capitalizeFirstLetter(string: string): string {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
 }
-
-export { UserLoyalty, LoyaltyReward, LoyaltyHistory };

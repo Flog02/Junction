@@ -47,7 +47,7 @@ import { filter } from 'rxjs/operators';
       <ion-menu contentId="main-content" type="overlay" *ngIf="currentRole === 'staff' || currentRole === 'admin'">
         <ion-header>
           <ion-toolbar color="primary">
-            <ion-title>Digital Café</ion-title>
+            <ion-title>Lazy Café</ion-title>
           </ion-toolbar>
         </ion-header>
         <ion-content>
@@ -153,7 +153,7 @@ import { filter } from 'rxjs/operators';
   ]
 })
 export class AppLayoutComponent implements OnInit {
-  appTitle: string = 'Digital Café';
+  appTitle: string = 'Lazy Café';
   userName: string = 'User';
   currentRole: string = 'customer';
   visibleTabs: TabConfig[] = [];

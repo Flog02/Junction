@@ -192,35 +192,35 @@ export class OrderTrackerComponent implements OnInit, OnDestroy {
     return readyTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
   
-  cancelOrder() {
-    if (!this.order || !this.order.id) return;
-    
-    this.orderService.cancelOrder(this.order.id)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          // Create a notification
-          this.notificationService.createNotification({
-            userId: this.order!.userId,
-            title: 'Order Cancelled',
-            body: `Your order #${this.order!.id!.substring(0, 8)} has been cancelled.`,
-            type: 'order',
-            data: {
-              orderId: this.order!.id
-            },
-            priority: 'high'
-          }).subscribe();
-          
-          // Refresh order data
-          this.orderService.getOrder(this.order!.id!)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(order => {
-              this.order = order;
-            });
-        },
-        error: (error) => {
-          console.error('Error cancelling order:', error);
-        }
-      });
-  }
+  // Fix for the cancelOrder method in order-tracker.page.ts
+
+cancelOrder() {
+  if (!this.order || !this.order.id) return;
+  
+  this.orderService.cancelOrder(this.order.id)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: () => {
+        // Create a notification with correct properties
+        this.notificationService.createNotification({
+          userId: this.order!.userId,
+          title: 'Order Cancelled',
+          message: `Your order #${this.order!.id!.substring(0, 8)} has been cancelled.`, // Changed 'body' to 'message'
+          type: 'order',
+          targetId: this.order!.id, // Use targetId instead of nested data object
+          // Remove 'priority' property as it's not in your interface
+        }).subscribe();
+        
+        // Refresh order data
+        this.orderService.getOrder(this.order!.id!)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(order => {
+            this.order = order;
+          });
+      },
+      error: (error) => {
+        console.error('Error cancelling order:', error);
+      }
+    });
+}
 }

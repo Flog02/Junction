@@ -30,6 +30,7 @@ export interface CustomizationOption {
       protein: number;
     };
     preparationTime?: number; // Added this property as optional
+    category?: string;
 
   }
   

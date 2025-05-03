@@ -66,7 +66,7 @@ export class CoffeeAchievementsComponent implements OnInit, OnDestroy {
     {
       id: 'first-order',
       name: 'First Order',
-      description: 'Placed your first order at Digital Café',
+      description: 'Placed your first order at Lazy Café',
       iconURL: '/assets/achievements/first-order.png',
       pointsAwarded: 10,
       unlocked: false

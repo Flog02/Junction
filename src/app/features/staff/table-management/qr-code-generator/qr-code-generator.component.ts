@@ -23,7 +23,7 @@ import {
   IonCol,
   IonIcon,
   IonAlert,
-  AlertController
+  AlertController,IonButtons,IonBackButton
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { printOutline, downloadOutline, qrCodeOutline, refreshOutline } from 'ionicons/icons';
@@ -36,6 +36,9 @@ import { TableService } from '../../../../core/services/table.service';
   template: `
     <ion-header>
       <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/"></ion-back-button>
+      </ion-buttons>
         <ion-title>Table QR Code Generator</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -281,6 +284,7 @@ import { TableService } from '../../../../core/services/table.service';
   standalone: true,
   imports: [
     CommonModule,
+    IonButtons,IonBackButton,
     FormsModule,
     IonHeader,
     IonToolbar,

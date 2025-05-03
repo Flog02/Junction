@@ -1,26 +1,25 @@
-// src/app/app.component.ts
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Platform } from '@ionic/angular';
 import { Router, NavigationEnd, NavigationStart } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter, distinctUntilChanged, map } from 'rxjs/operators';
 import { AuthService } from './core/services/auth.service';
-import { IonApp, IonRouterOutlet } from "@ionic/angular/standalone";
+import { IonApp, IonRouterOutlet,ModalController, IonToolbar, IonTitle, IonButtons } from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
+import { NotificationDrawerComponent } from './shared/components/notification/notification-drawer/notification-drawer.component';
+import { NotificationBadgeComponent } from "./shared/components/notification/notification-badge/notification-badge.component";
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   standalone: true,
-  imports: [
+  imports: [IonButtons, IonTitle, IonToolbar,
     CommonModule,
     RouterOutlet,
     IonApp,
-    IonRouterOutlet
-  ]
+    IonRouterOutlet, NotificationBadgeComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private routerSubscription: Subscription | undefined;
@@ -33,7 +32,8 @@ export class AppComponent implements OnInit, OnDestroy {
   constructor(
     private platform: Platform,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private modalController: ModalController
   ) {
     this.initializeApp();
     console.log('App Component initialized');
@@ -137,6 +137,15 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
   }
+  async openNotificationDrawer() {
+    const modal = await this.modalController.create({
+      component: NotificationDrawerComponent,
+      cssClass: 'notification-drawer-modal'
+    });
+    
+    await modal.present();
+  }
+
   
   ngOnDestroy() {
     // Clean up subscriptions

@@ -152,6 +152,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/profile/profile.page').then(m => m.ProfilePage),
     canActivate: [authGuard]
   },
+  {
+    path: 'notifications',
+    loadComponent: () => import('./shared/components/notification/notification.page').then(m=>m.NotificationsPage)
+  },
   
   // Catch-all route - redirects handled in app component
   {

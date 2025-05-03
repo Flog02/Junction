@@ -35,7 +35,7 @@ bootstrapApplication(AppComponent, {
 });
 
 import { addIcons } from 'ionicons';
-import {home, location,addCircleOutline,cardOutline , addOutline, arrowForward, barChartOutline, cafeOutline, calendarOutline, cartOutline, chatbubbleOutline, checkmarkCircle, checkmarkCircleOutline, chevronForward, cubeOutline, fastFoodOutline, flame, flameOutline, giftOutline, iceCreamOutline, leafOutline, locationOutline, logoInstagram, mapOutline, notificationsOutline, optionsOutline, personCircleOutline, refreshOutline, restaurantOutline, star, starOutline, add, alertCircleOutline, barbellOutline, timeOutline, walkOutline, timerOutline, colorWandOutline, fingerPrintOutline, flaskOutline, gitMergeOutline, hammerOutline, scanOutline, snowOutline, thermometerOutline, waterOutline, mailOutline, paperPlaneOutline, businessOutline, checkmarkOutline, handLeftOutline } from 'ionicons/icons';
+import {home, location,addCircleOutline,cardOutline , addOutline, arrowForward, barChartOutline, cafeOutline, calendarOutline, cartOutline, chatbubbleOutline, checkmarkCircle, checkmarkCircleOutline, chevronForward, cubeOutline, fastFoodOutline, flame, flameOutline, giftOutline, iceCreamOutline, leafOutline, locationOutline, logoInstagram, mapOutline, notificationsOutline, optionsOutline, personCircleOutline, refreshOutline, restaurantOutline, star, starOutline, add, alertCircleOutline, barbellOutline, timeOutline, walkOutline, timerOutline, colorWandOutline, fingerPrintOutline, flaskOutline, gitMergeOutline, hammerOutline, scanOutline, snowOutline, thermometerOutline, waterOutline, mailOutline, paperPlaneOutline, businessOutline, checkmarkOutline, handLeftOutline, gridOutline } from 'ionicons/icons';
 addIcons({ 
   'walkoutline':walkOutline,
 'gift-outline':giftOutline,
@@ -89,5 +89,6 @@ addIcons({
 'paper-plane-outline':paperPlaneOutline,
 'hand-left-outline':handLeftOutline,
 'business-outline':businessOutline,
-'checkmark-outline':checkmarkOutline
+'checkmark-outline':checkmarkOutline,
+'grid-outline':gridOutline
 });
