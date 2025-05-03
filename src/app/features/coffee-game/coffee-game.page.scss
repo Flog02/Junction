@@ -98,14 +98,14 @@ ion-content {
   justify-content: center;
   background: rgba(255, 255, 255, 0.9);
   z-index: 10;
-  
+
   ion-spinner {
     width: 48px;
     height: 48px;
     margin-bottom: 16px;
     color: var(--game-accent-color);
   }
-  
+
   p {
     font-size: 18px;
     font-weight: 500;
@@ -120,7 +120,7 @@ ion-content {
   margin-bottom: 20px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   animation: slideUp 0.6s ease-out forwards;
-  
+
   h2 {
     font-size: 20px;
     font-weight: 700;
@@ -128,9 +128,9 @@ ion-content {
     margin-top: 0;
     margin-bottom: 12px;
     position: relative;
-    
+
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       bottom: -4px;
       left: 0;
@@ -140,24 +140,24 @@ ion-content {
       border-radius: 3px;
     }
   }
-  
+
   p {
     font-size: 16px;
     line-height: 1.5;
     margin-bottom: 12px;
     color: var(--ion-color-dark);
   }
-  
+
   ul {
     padding-left: 20px;
     margin-bottom: 0;
-    
+
     li {
       font-size: 15px;
       line-height: 1.6;
       margin-bottom: 8px;
       color: var(--ion-color-dark);
-      
+
       &:last-child {
         margin-bottom: 0;
       }
@@ -185,10 +185,10 @@ ion-content {
   animation-delay: 0.2s;
   opacity: 0;
   animation-fill-mode: forwards;
-  
+
   .control-group {
     margin-bottom: 20px;
-    
+
     h3 {
       font-size: 16px;
       font-weight: 600;
@@ -196,7 +196,7 @@ ion-content {
       margin-top: 0;
       margin-bottom: 8px;
     }
-    
+
     ion-range {
       --bar-background: #e0e0e0;
       --bar-background-active: var(--game-accent-color);
@@ -207,7 +207,7 @@ ion-content {
       padding: 0;
     }
   }
-  
+
   .serve-button {
     --background: var(--game-accent-color);
     --color: white;
@@ -219,12 +219,12 @@ ion-content {
     font-size: 16px;
     transform: translateY(0);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    
+
     &:hover {
       --box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
       transform: translateY(-2px);
     }
-    
+
     ion-icon {
       margin-left: 8px;
       font-size: 20px;
@@ -243,8 +243,76 @@ ion-content {
   .game-container {
     height: 320px;
   }
-  
+
   .stat-value {
     font-size: 18px;
   }
+}
+
+.order-info-card {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 180px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+
+  h3 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: #795548;
+    text-align: center;
+  }
+}
+
+.mini-requirements {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mini-requirement {
+  display: flex;
+  align-items: center;
+
+  span {
+    width: 45px;
+    font-size: 12px;
+    color: #555;
+  }
+}
+
+.mini-bar {
+  position: relative;
+  height: 12px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  flex-grow: 1;
+  overflow: visible;
+}
+
+.target-mark {
+  position: absolute;
+  height: 12px;
+  width: 3px;
+  background: #f44336;
+  transform: translateX(-50%);
+}
+
+.player-mark {
+  position: absolute;
+  height: 12px;
+  width: 3px;
+  background: #4caf50;
+  transform: translateX(-50%);
+}
+
+.accuracy-display {
+  text-align: center;
+  margin-top: 8px;
+  font-weight: bold;
+  color: #795548;
 }
