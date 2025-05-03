@@ -1,0 +1,46 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/gift-cards"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Redeem Gift Card</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="redeemForm" (ngSubmit)="onSubmit()">
+    <h2 class="step-title">Enter Your Gift Card Code</h2>
+    <p class="step-description">
+      Type in your 19-character gift card code to redeem it.
+    </p>
+
+    <ion-item>
+      <ion-label position="stacked">Gift Card Code</ion-label>
+      <ion-input
+        formControlName="code"
+        placeholder="XXXX-XXXX-XXXX-XXXX-XXX"
+        (ionInput)="formatCode($event)"
+        maxlength="23"
+      >
+      </ion-input>
+      <ion-note
+        slot="error"
+        *ngIf="
+          redeemForm.get('code')?.touched && redeemForm.get('code')?.invalid
+        "
+      >
+        Code must be exactly 19 characters.
+      </ion-note>
+    </ion-item>
+
+    <ion-button
+      type="submit"
+      expand="block"
+      class="ion-margin-top"
+      [disabled]="redeemForm.invalid || isSubmitting"
+    >
+      Redeem Now
+      <ion-icon name="card" slot="end"></ion-icon>
+    </ion-button>
+  </form>
+</ion-content>

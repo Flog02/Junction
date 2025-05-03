@@ -5,16 +5,63 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { IonNote,IonList,IonItem,IonBackButton,IonButtons,IonSpinner,IonProgressBar,IonButton,IonSegment,IonSegmentButton,IonLabel,IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent } from '@ionic/angular/standalone';
 
 import { GiftCardService } from '../../../core/services/gift-card.service';
 import { LoadingController, ToastController } from '@ionic/angular/standalone';
 
 @Component({
   selector: 'app-gift-card-redeemer',
-  template: './gift-card-redeemer.component.html',
+  template: `<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/gift-cards"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Redeem Gift Card</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <form [formGroup]="redeemForm" (ngSubmit)="onSubmit()">
+    <h2 class="step-title">Enter Your Gift Card Code</h2>
+    <p class="step-description">
+      Type in your 19-character gift card code to redeem it.
+    </p>
+
+    <ion-item>
+      <ion-label position="stacked">Gift Card Code</ion-label>
+      <ion-input
+        formControlName="code"
+        placeholder="XXXX-XXXX-XXXX-XXXX-XXX"
+        (ionInput)="formatCode($event)"
+        maxlength="23"
+      >
+      </ion-input>
+      <ion-note
+        slot="error"
+        *ngIf="
+          redeemForm.get('code')?.touched && redeemForm.get('code')?.invalid
+        "
+      >
+        Code must be exactly 19 characters.
+      </ion-note>
+    </ion-item>
+
+    <ion-button
+      type="submit"
+      expand="block"
+      class="ion-margin-top"
+      [disabled]="redeemForm.invalid || isSubmitting"
+    >
+      Redeem Now
+      <ion-icon name="card" slot="end"></ion-icon>
+    </ion-button>
+  </form>
+</ion-content>
+`,
 //   styleUrls: ['./gift-card-redeemer.component.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule]
+  imports: [CommonModule,IonItem,IonBackButton,IonButtons, ReactiveFormsModule,IonNote,IonList,IonSpinner,IonProgressBar,IonButton,IonSegment,IonSegmentButton,IonLabel,IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent]
 })
 export class GiftCardRedeemerComponent implements OnInit, OnDestroy {
   redeemForm: FormGroup;
