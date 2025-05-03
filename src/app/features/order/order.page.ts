@@ -1,12 +1,11 @@
-// src/app/features/order/order.page.ts
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-
+import { LoadingController, ToastController } from '@ionic/angular/standalone';
 import { OrderService } from '../../core/services/order.service';
 import { Order } from '../../core/models/order.model';
+import { Router } from '@angular/router';
 import { 
   IonIcon, 
   IonFab, 
@@ -38,8 +37,7 @@ import {
   bicycleOutline, 
   starOutline,
   checkmarkCircleOutline, 
-  documentTextOutline
-} from 'ionicons/icons';
+  documentTextOutline, helpCircleOutline, arrowForward, closeCircleOutline, timeOutline, calendarOutline, repeatOutline,add,star} from 'ionicons/icons';
 
 interface OrderMonth {
   month: string;
@@ -87,18 +85,9 @@ export class OrderPage implements OnInit, OnDestroy {
   
   pastOrdersByMonth: OrderMonth[] = [];
 
-  constructor(private orderService: OrderService) {
+  constructor(private route :Router , private orderService: OrderService, private loadingController :LoadingController , private toastController:ToastController) {
     // Add icons
-    addIcons({
-      addOutline, 
-      cafeOutline, 
-      alertCircleOutline, 
-      timerOutline, 
-      bicycleOutline, 
-      starOutline,
-      checkmarkCircleOutline, 
-      documentTextOutline
-    });
+    addIcons({helpCircleOutline,cafeOutline,arrowForward,closeCircleOutline,timeOutline,documentTextOutline,calendarOutline,timerOutline,star,checkmarkCircleOutline,bicycleOutline,repeatOutline,add,addOutline,alertCircleOutline,starOutline});
   }
   
   ngOnInit() {
@@ -269,5 +258,139 @@ export class OrderPage implements OnInit, OnDestroy {
       });
   }
 
+  // Add these methods to your OrderPage class
+
+/**
+ * Checks if an order was placed recently (within the last 5 minutes)
+ */
+isNewOrder(order: Order): boolean {
+  if (!order.orderTime) return false;
   
+  const orderTime = typeof order.orderTime === 'string' 
+    ? new Date(order.orderTime) 
+    : order.orderTime;
+    
+  const currentTime = new Date();
+  const timeDiff = currentTime.getTime() - orderTime.getTime();
+  
+  // Return true if order was placed within the last 5 minutes
+  return timeDiff < 5 * 60 * 1000;
+}
+
+/**
+ * Gets the estimated time until the order is ready
+ */
+getEstimatedReadyTime(order: Order): string {
+  if (!order.processTime || order.status !== 'processing') return '';
+  
+  const processTime = typeof order.processTime === 'string' 
+    ? new Date(order.processTime) 
+    : order.processTime;
+    
+  // Calculate estimated preparation time based on items
+  let totalPrepTime = 0;
+  order.items.forEach(item => {
+    // You can implement more sophisticated logic here based on your data model
+    // For now, we'll use a default value
+    totalPrepTime += 5; // 5 minutes per item
+  });
+  
+  // Minimum prep time of 5 minutes
+  totalPrepTime = Math.max(5, totalPrepTime);
+  
+  // Calculate estimated completion time
+  const estimatedCompletionTime = new Date(processTime.getTime() + totalPrepTime * 60 * 1000);
+  const currentTime = new Date();
+  
+  // If the estimated time has passed, show "Any moment now"
+  if (estimatedCompletionTime <= currentTime) {
+    return "Any moment now";
+  }
+  
+  // Calculate minutes remaining
+  const minutesRemaining = Math.round((estimatedCompletionTime.getTime() - currentTime.getTime()) / (60 * 1000));
+  
+  if (minutesRemaining < 1) {
+    return "Less than a minute";
+  } else if (minutesRemaining === 1) {
+    return "1 minute";
+  } else {
+    return `${minutesRemaining} minutes`;
+  }
+}
+
+/**
+ * Checks if an order can be reordered
+ */
+canReorder(order: Order): boolean {
+  // Only delivered or ready orders can be reordered
+  // Change 'completed' to 'delivered' or 'ready' to match your Order model's status type
+  return order.status === 'delivered' || order.status === 'ready';
+}
+
+/**
+ * Reorders items from a previous order
+ */
+reorderItems(order: Order, event: Event): void {
+  // Stop propagation to prevent navigation
+  event.stopPropagation();
+  
+  // Show loading indicator
+  this.presentLoading('Adding items to cart...');
+  
+  // You would implement the actual reordering logic here
+  // For example:
+  // this.orderService.reorderItems(order.items).then(() => {
+  //   this.dismissLoading();
+  //   this.presentToast('Items added to cart!', 'success');
+  //   this.router.navigate(['/cart']);
+  // }).catch(error => {
+  //   this.dismissLoading();
+  //   this.presentToast(`Error: ${error.message}`, 'danger');
+  // });
+  
+  // For this demo, we'll just simulate the reordering
+  setTimeout(() => {
+    this.presentToast('Items added to cart!', 'success');
+    // Navigate to cart page
+    this.route.navigate(['/cart']);
+  }, 1500);
+}
+
+/**
+ * Presents a loading indicator
+ */
+async presentLoading(message: string): Promise<void> {
+  const loading = await this.loadingController.create({
+    message,
+    spinner: 'crescent'
+  });
+  await loading.present();
+}
+
+/**
+ * Dismisses the loading indicator
+ */
+async dismissLoading(): Promise<void> {
+  await this.loadingController.dismiss();
+}
+
+/**
+ * Presents a toast message
+ */
+async presentToast(message: string, color: 'success' | 'danger' | 'warning' = 'success'): Promise<void> {
+  const toast = await this.toastController.create({
+    message,
+    duration: 2000,
+    position: 'bottom',
+    color,
+    buttons: [
+      {
+        icon: 'close-outline',
+        role: 'cancel'
+      }
+    ]
+  });
+  await toast.present();
+}
 }

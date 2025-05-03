@@ -217,6 +217,9 @@ export class ProductService {
  * Calculates the nutrition information for a customized product
  * With special handling for food and dessert categories
  */
+// In the ProductService class (paste-4.txt), 
+// replace the calculateNutrition method with this corrected version:
+
 calculateNutrition(
   product: Product,
   size: ProductCustomizationOption,
@@ -238,14 +241,9 @@ calculateNutrition(
     // Just use the base nutrition values with minor modifications for toppings
     
     // Add nutrition from toppings if applicable
-    if (product.customizationOptions.toppings && product.customizationOptions.toppings.length > 0) {
-      // Get selected toppings (those with selected = true)
-      const selectedToppings = product.customizationOptions.toppings.filter(
-        t => shots.some(s => s.id === t.id)
-      );
-      
-      // Add nutrition based on selected toppings
-      selectedToppings.forEach(topping => {
+    if (shots && shots.length > 0) {
+      // For food and dessert, toppings are passed in the shots parameter
+      shots.forEach(topping => {
         // Add approximate nutrition values based on topping type
         switch (topping.id) {
           case 'butter':
@@ -339,7 +337,7 @@ calculateNutrition(
     };
   }
   
-  // For coffee and tea, use the existing calculation logic
+  // Rest of the method for coffee and tea remains unchanged
   // Size modifiers (assuming baseNutrition is for the smallest size)
   const sizeIndex = product.customizationOptions.sizes.findIndex(s => s.id === size.id);
   let sizeMultiplier = 1;
@@ -387,7 +385,6 @@ calculateNutrition(
   // Apply caffeine multiplier
   baseNutrition.caffeine = Math.round(baseNutrition.caffeine * sizeMultiplier * caffeineMultiplier);
   
-  // Rest of the beverage calculation code...
   // Add caffeine for extra shots (80mg per shot)
   if (!hasDecafShot) {
     const extraShotCount = shots.filter(shot => shot.id !== 'decaf').length;
@@ -420,7 +417,6 @@ calculateNutrition(
   // Milk modifiers
   if (milk) {
     // Calculate milk nutrition based on milk type
-    // (existing milk calculation code...)
     let milkFat = 0;
     let milkProtein = 0;
     let milkSugar = 0;

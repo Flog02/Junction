@@ -1,14 +1,21 @@
 <!-- src/app/features/order/order.page.html -->
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/home"></ion-back-button>
+      <ion-back-button defaultHref="/home" text=""></ion-back-button>
     </ion-buttons>
-    <ion-title>My Orders</ion-title>
+    <ion-title>
+      <strong>My Orders</strong>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button>
+        <ion-icon slot="icon-only" name="help-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
   
   <ion-toolbar>
-    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)">
+    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)" mode="md">
       <ion-segment-button value="active">
         <ion-label>Active</ion-label>
       </ion-segment-button>
@@ -19,11 +26,11 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
+<ion-content [fullscreen]="true">
   <!-- Loading Indicator -->
   <div *ngIf="isLoading" class="loading-container">
-    <ion-spinner name="circles"></ion-spinner>
-    <p>Loading orders...</p>
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Fetching your orders...</p>
   </div>
   
   <!-- Active Orders -->
@@ -31,15 +38,16 @@
     <div *ngIf="!isLoading && activeOrders.length === 0" class="empty-state">
       <ion-icon name="cafe-outline"></ion-icon>
       <h3>No Active Orders</h3>
-      <p>Place a new order to enjoy our delicious coffee!</p>
+      <p>Ready for a coffee break? Place a new order to enjoy our delicious coffee and treats!</p>
       <ion-button routerLink="/menu" expand="block">
         Order Now
+        <ion-icon name="arrow-forward" slot="end"></ion-icon>
       </ion-button>
     </div>
     
     <ion-list *ngIf="activeOrders.length > 0">
-      <ion-item *ngFor="let order of activeOrders" [routerLink]="['/order/tracker', order.id]" detail>
-        <div class="order-item">
+      <ion-item *ngFor="let order of activeOrders" [routerLink]="['/order/tracker', order.id]" detail="false" lines="none">
+        <div class="order-item" [class.new-order]="isNewOrder(order)">
           <div class="order-header">
             <div class="order-number">#{{ order.id?.substring(0, 8) }}</div>
             <ion-badge [color]="getStatusColor(order.status)">
@@ -52,11 +60,14 @@
             
             <div class="order-items">
               <div *ngFor="let item of order.items.slice(0, 2)" class="item-detail">
-                <span class="item-quantity">{{ item.quantity }}x</span>
+                <span class="item-quantity">{{ item.quantity }}</span>
                 <span class="item-name">{{ item.name }}</span>
+                <span class="item-custom" *ngIf="item.customizations?.size">
+                  {{ item.customizations.size.name }}
+                </span>
               </div>
               <div *ngIf="order.items.length > 2" class="more-items">
-                +{{ order.items.length - 2 }} more items
+                {{ order.items.length - 2 }} more items
               </div>
             </div>
           </div>
@@ -71,7 +82,8 @@
             
             <div class="order-actions" *ngIf="order.status === 'pending' || order.status === 'processing'">
               <ion-button size="small" fill="clear" color="danger">
-                Cancel
+                <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+                Cancel Order
               </ion-button>
             </div>
           </div>
@@ -87,6 +99,11 @@
               <ion-icon name="document-text-outline"></ion-icon>
               <span>Notes: {{ order.notes }}</span>
             </div>
+            
+            <div class="detail-item" *ngIf="getEstimatedReadyTime(order)">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <span>Ready in: {{ getEstimatedReadyTime(order) }}</span>
+            </div>
           </div>
         </div>
       </ion-item>
@@ -98,9 +115,10 @@
     <div *ngIf="!isLoading && pastOrders.length === 0" class="empty-state">
       <ion-icon name="timer-outline"></ion-icon>
       <h3>No Order History</h3>
-      <p>Your past orders will appear here once you've completed an order.</p>
+      <p>Your past orders will appear here once you've completed an order. Why not try something delicious today?</p>
       <ion-button routerLink="/menu" expand="block">
         Place Your First Order
+        <ion-icon name="arrow-forward" slot="end"></ion-icon>
       </ion-button>
     </div>
     
@@ -110,7 +128,7 @@
           <ion-label>{{ group.month }}</ion-label>
         </ion-item-divider>
         
-        <ion-item *ngFor="let order of group.orders" [routerLink]="['/order/tracker', order.id]" detail>
+        <ion-item *ngFor="let order of group.orders" [routerLink]="['/order/tracker', order.id]" detail="false" lines="none">
           <div class="order-item">
             <div class="order-header">
               <div class="order-number">#{{ order.id?.substring(0, 8) }}</div>
@@ -129,14 +147,14 @@
               
               <div class="order-items">
                 <div *ngFor="let item of order.items.slice(0, 2)" class="item-detail">
-                  <span class="item-quantity">{{ item.quantity }}x</span>
+                  <span class="item-quantity">{{ item.quantity }}</span>
                   <span class="item-name">{{ item.name }}</span>
                   <span class="item-custom" *ngIf="item.customizations?.size">
                     {{ item.customizations.size.name }}
                   </span>
                 </div>
                 <div *ngIf="order.items.length > 2" class="more-items">
-                  +{{ order.items.length - 2 }} more items
+                  {{ order.items.length - 2 }} more items
                 </div>
               </div>
             </div>
@@ -144,9 +162,11 @@
             <div class="order-footer">
               <div class="payment-info">
                 <span class="order-total">{{ order.total | currency }}</span>
-                <span class="order-subtotal">Subtotal: {{ order.subtotal | currency }}</span>
-                <span class="order-tax" *ngIf="order.tax">Tax: {{ order.tax | currency }}</span>
-                <span class="order-tip" *ngIf="order.tip">Tip: {{ order.tip | currency }}</span>
+                <div class="order-breakdown">
+                  <span class="order-subtotal">Subtotal: {{ order.subtotal | currency }}</span>
+                  <span class="order-tax" *ngIf="order.tax">Tax: {{ order.tax | currency }}</span>
+                  <span class="order-tip" *ngIf="order.tip">Tip: {{ order.tip | currency }}</span>
+                </div>
               </div>
               
               <div class="loyalty-info" *ngIf="order.loyaltyPointsEarned">
@@ -165,6 +185,19 @@
                 <ion-icon name="bicycle-outline"></ion-icon>
                 <span>Delivered by: {{ order.deliveredBy }}</span>
               </div>
+              
+              <div class="detail-item" *ngIf="canReorder(order)">
+                <ion-icon name="repeat-outline"></ion-icon>
+                <span>Can be reordered</span>
+              </div>
+            </div>
+            
+            <!-- Reorder button -->
+            <div class="reorder-action" *ngIf="canReorder(order)">
+              <ion-button size="small" fill="outline" color="primary" (click)="reorderItems(order, $event)">
+                <ion-icon name="repeat-outline" slot="start"></ion-icon>
+                Reorder
+              </ion-button>
             </div>
           </div>
         </ion-item>

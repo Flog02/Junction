@@ -1,0 +1,49 @@
+<ion-header class="ion-no-border">
+    <ion-toolbar>
+      <ion-title>{{ capitalizeFirstLetter(tier?.name || 'bronze') }} Tier Benefits</ion-title>
+      <ion-button slot="end" fill="clear" (click)="close()">
+        <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <div class="tier-container" [ngClass]="getTierColorClass(tier?.name)">
+      <div class="tier-icon">
+        <ion-icon name="trophy-outline"></ion-icon>
+      </div>
+      
+      <h2 class="tier-title">{{ capitalizeFirstLetter(tier?.name || 'bronze') }} Tier</h2>
+      
+      <div class="benefits-list">
+        <h3>Benefits:</h3>
+        <ion-list lines="none" *ngIf="tier?.benefits && tier.benefits.length > 0">
+          <ion-item *ngFor="let benefit of tier.benefits">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            <ion-label>{{ benefit }}</ion-label>
+          </ion-item>
+        </ion-list>
+        
+        <div class="empty-benefits" *ngIf="!tier?.benefits || tier.benefits.length === 0">
+          <p>No benefits available for this tier.</p>
+        </div>
+      </div>
+      
+      <div class="multiplier-badge">
+        <span class="multiplier-value">{{ tier?.pointsMultiplier || 1 }}x</span>
+        <span class="multiplier-label">Points Multiplier</span>
+      </div>
+      
+      <div class="next-tier-info" *ngIf="tier?.name !== 'platinum'">
+        <p>Keep earning points to reach the next tier!</p>
+      </div>
+      
+      <div class="max-tier-info" *ngIf="tier?.name === 'platinum'">
+        <p>You've reached our highest tier. Enjoy your premium benefits!</p>
+      </div>
+      
+      <ion-button expand="block" (click)="close()" class="close-btn">
+        Close
+      </ion-button>
+    </div>
+  </ion-content>

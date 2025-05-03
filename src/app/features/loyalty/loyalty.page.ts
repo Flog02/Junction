@@ -1,301 +1,94 @@
-// Now, let's create the Loyalty Page Component
-// src/app/features/loyalty/loyalty.page.ts
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonNote,IonList,IonSpinner,IonProgressBar,IonButton,IonSegment,IonSegmentButton,IonLabel,IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent } from '@ionic/angular/standalone';
+import { 
+  IonNote, 
+  IonList, 
+  IonItem,
+  IonSpinner, 
+  IonProgressBar, 
+  IonButton, 
+  IonSegment, 
+  IonSegmentButton, 
+  IonLabel, 
+  IonHeader, 
+  IonIcon, 
+  IonToolbar, 
+  IonTitle, 
+  IonContent, 
+  IonCard, 
+  IonCardHeader, 
+  IonCardTitle, 
+  IonCardSubtitle, 
+  IonCardContent,
+  IonBadge,
+  IonRippleEffect,
+  IonItemDivider,
+  IonAvatar,
+  ModalController ,
+  NavController, IonButtons, IonBackButton } from '@ionic/angular/standalone';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { LoyaltyService,UserLoyalty,LoyaltyReward,LoyaltyHistory } from 'src/app/core/services/loyalty.service'; 
+import { LoyaltyService } from 'src/app/core/services/loyalty.service';
+import { UserLoyalty, LoyaltyReward, LoyaltyHistory } from 'src/app/core/models/loyalty.model';
 import { AlertController, ToastController } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { 
+  
+  giftOutline, 
+  timeOutline, 
+  addCircleOutline, 
+  removeCircleOutline, 
+  checkmarkCircleOutline,
+  checkmarkCircle,
+  alertCircleOutline,
+  trophyOutline,
+  calendarOutline,
+  flameOutline,
+  starOutline,
+  ribbonOutline,
+  pulseOutline, refreshOutline, cafeOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-loyalty',
-  template:`<ion-header>
-  <ion-toolbar>
-    <ion-title>Loyalty Program</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content class="ion-padding">
-  <div *ngIf="isLoading" class="loading-container">
-    <ion-spinner></ion-spinner>
-    <p>Loading loyalty data...</p>
-  </div>
-  
-  <div *ngIf="!isLoading && userLoyalty">
-    <!-- Loyalty Card -->
-    <ion-card class="loyalty-card" [ngClass]="'tier-' + userLoyalty.tier">
-      <ion-card-header>
-        <ion-card-subtitle>Your Loyalty Card</ion-card-subtitle>
-        <ion-card-title>{{ capitalizeFirstLetter(userLoyalty.tier) }} Member</ion-card-title>
-      </ion-card-header>
-      
-      <ion-card-content>
-        <div class="points-container">
-          <div class="points">
-            <span class="points-value">{{ userLoyalty.points }}</span>
-            <span class="points-label">Points</span>
-          </div>
-          
-          <div class="streak">
-            <span class="streak-value">{{ userLoyalty.streakDays }}</span>
-            <span class="streak-label">Day Streak</span>
-          </div>
-        </div>
-        
-        <div *ngIf="nextTier" class="next-tier">
-          <p class="next-tier-text">
-            {{ userLoyalty.totalPointsEarned }}/{{ nextTier.threshold }} points to {{ capitalizeFirstLetter(nextTier.name) }}
-          </p>
-          <ion-progress-bar [value]="userLoyalty.nextTierProgress / 100"></ion-progress-bar>
-        </div>
-        
-        <ion-button expand="block" (click)="showTierBenefits(currentTier)" class="view-benefits-btn">
-          View {{ capitalizeFirstLetter(userLoyalty.tier) }} Benefits
-        </ion-button>
-      </ion-card-content>
-    </ion-card>
-    
-    <!-- Segment for Rewards/History -->
-    <ion-segment [(ngModel)]="selectedSegment" (ionChange)="segmentChanged($event)">
-      <ion-segment-button value="rewards">
-        <ion-label>Rewards</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="history">
-        <ion-label>History</ion-label>
-      </ion-segment-button>
-    </ion-segment>
-    
-    <!-- Rewards Section -->
-    <div *ngIf="selectedSegment === 'rewards'">
-      <h2 class="section-title">Available Rewards</h2>
-      
-      <div *ngIf="availableRewards.length === 0" class="empty-state">
-        <ion-icon name="gift-outline"></ion-icon>
-        <p>No rewards available yet. Earn more points!</p>
-      </div>
-      
-      <ion-card *ngFor="let reward of availableRewards" class="reward-card">
-        <ion-card-header>
-          <ion-card-subtitle>{{ reward.pointsCost }} Points</ion-card-subtitle>
-          <ion-card-title>{{ reward.name }}</ion-card-title>
-        </ion-card-header>
-        
-        <ion-card-content>
-          <p>{{ reward.description }}</p>
-          <ion-button 
-            expand="block" 
-            [disabled]="userLoyalty.points < reward.pointsCost"
-            (click)="redeemReward(reward)">
-            
-            <span *ngIf="userLoyalty.points >= reward.pointsCost">Redeem Now</span>
-            <span *ngIf="userLoyalty.points < reward.pointsCost">
-              Need {{ reward.pointsCost - userLoyalty.points }} more points
-            </span>
-          </ion-button>
-        </ion-card-content>
-      </ion-card>
-      
-      <h2 class="section-title">Redeemed Rewards</h2>
-      
-      <div *ngIf="redeemedRewards.length === 0" class="empty-state">
-        <ion-icon name="checkmark-circle-outline"></ion-icon>
-        <p>No redeemed rewards yet.</p>
-      </div>
-      
-      <ion-card *ngFor="let reward of redeemedRewards" class="reward-card redeemed">
-        <ion-card-header>
-          <ion-card-subtitle>
-          Redeemed on {{ reward.redeemedDate ? formatDate(reward.redeemedDate) : 'N/A' }}          </ion-card-subtitle>
-          <ion-card-title>{{ reward.name }}</ion-card-title>
-        </ion-card-header>
-        
-        <ion-card-content>
-          <p>{{ reward.description }}</p>
-          <div class="redeemed-badge">
-            <ion-icon name="checkmark-circle"></ion-icon>
-            <span>Redeemed</span>
-          </div>
-        </ion-card-content>
-      </ion-card>
-    </div>
-    
-    <!-- History Section -->
-    <div *ngIf="selectedSegment === 'history'">
-      <h2 class="section-title">Points History</h2>
-      
-      <div *ngIf="loyaltyHistory.length === 0" class="empty-state">
-        <ion-icon name="time-outline"></ion-icon>
-        <p>No loyalty history yet.</p>
-      </div>
-      
-      <ion-card class="history-card">
-        <ion-list>
-          <ion-item *ngFor="let item of loyaltyHistory" [ngClass]="{'positive': item.points > 0, 'negative': item.points < 0}">
-            <ion-icon 
-              [name]="item.points > 0 ? 'add-circle-outline' : 'remove-circle-outline'"
-              slot="start" 
-              [color]="item.points > 0 ? 'success' : 'danger'">
-            </ion-icon>
-            
-            <ion-label>
-              <h2>{{ item.description }}</h2>
-              <p>{{ formatDate(item.date) }}</p>
-            </ion-label>
-            
-            <ion-note slot="end" [color]="item.points > 0 ? 'success' : 'danger'">
-              {{ item.points > 0 ? '+' : '' }}{{ item.points }}
-            </ion-note>
-          </ion-item>
-        </ion-list>
-      </ion-card>
-    </div>
-  </div>
-  
-  <div *ngIf="!isLoading && !userLoyalty" class="empty-state">
-    <ion-icon name="alert-circle-outline"></ion-icon>
-    <p>No loyalty account found. Make your first purchase to join!</p>
-  </div>
-</ion-content>`,
-  styles:`  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 200px;
-  }
-  
-  .loyalty-card {
-    margin-bottom: 20px;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  
-  .tier-bronze {
-    background: linear-gradient(135deg, #cd7f32, #e8b27d);
-    color: white;
-  }
-  
-  .tier-silver {
-    background: linear-gradient(135deg, #c0c0c0, #e6e6e6);
-    color: #333;
-  }
-  
-  .tier-gold {
-    background: linear-gradient(135deg, #ffd700, #ffecb3);
-    color: #333;
-  }
-  
-  .tier-platinum {
-    background: linear-gradient(135deg, #8e8e8e, #e5e5e5);
-    color: #333;
-  }
-  
-  .loyalty-card ion-card-title, 
-  .loyalty-card ion-card-subtitle {
-    color: inherit;
-  }
-  
-  .points-container {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  
-  .points, .streak {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .points-value, .streak-value {
-    font-size: 36px;
-    font-weight: bold;
-  }
-  
-  .points-label, .streak-label {
-    font-size: 14px;
-    opacity: 0.8;
-  }
-  
-  .next-tier {
-    margin-bottom: 20px;
-  }
-  
-  .next-tier-text {
-    font-size: 14px;
-    margin-bottom: 8px;
-    text-align: center;
-  }
-  
-  .view-benefits-btn {
-    margin-top: 10px;
-  }
-  
-  .section-title {
-    font-size: 20px;
-    font-weight: bold;
-    margin: 24px 0 16px 0;
-    color: var(--ion-color-primary);
-  }
-  
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 0;
-    color: var(--ion-color-medium);
-  }
-  
-  .empty-state ion-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
-  }
-  
-  .reward-card {
-    margin-bottom: 16px;
-    border-radius: 12px;
-  }
-  
-  .reward-card.redeemed {
-    opacity: 0.7;
-  }
-  
-  .redeemed-badge {
-    display: flex;
-    align-items: center;
-    color: var(--ion-color-success);
-    margin-top: 10px;
-  }
-  
-  .redeemed-badge ion-icon {
-    margin-right: 8px;
-  }
-  
-  .history-card {
-    margin-bottom: 16px;
-    border-radius: 12px;
-  }
-  
-  ion-item.positive {
-    --background: rgba(var(--ion-color-success-rgb), 0.1);
-  }
-  
-  ion-item.negative {
-    --background: rgba(var(--ion-color-danger-rgb), 0.1);
-  }`,
+  templateUrl: './loyalty.page.html',
+  styleUrls: ['./loyalty.page.scss'],
   standalone: true,
-  imports: [IonNote,IonList,IonSpinner,IonProgressBar,IonButton,IonSegment,IonSegmentButton,IonLabel,CommonModule, IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent, RouterModule,FormsModule]
+  imports: [IonBackButton, IonButtons, 
+    CommonModule,
+    IonNote, 
+    IonList, 
+    IonItem,
+    IonSpinner, 
+    IonProgressBar, 
+    IonButton, 
+    IonSegment, 
+    IonSegmentButton, 
+    IonLabel, 
+    IonHeader, 
+    IonIcon, 
+    IonToolbar, 
+    IonTitle, 
+    IonContent, 
+    IonCard, 
+    IonCardHeader, 
+    IonCardTitle, 
+    IonCardSubtitle, 
+    IonCardContent,
+    IonBadge,
+    IonRippleEffect,
+    IonItemDivider,
+    IonAvatar,
+    RouterModule,
+    FormsModule
+  ]
 })
 export class LoyaltyPage implements OnInit, OnDestroy {
   // User loyalty data
-  userLoyalty!: UserLoyalty;
+  userLoyalty: UserLoyalty | null = null;
   
   // Loyalty tiers
-  loyaltyTiers!: any[];
+  loyaltyTiers: any[] = [];
   currentTier: any;
   nextTier: any;
   
@@ -312,14 +105,22 @@ export class LoyaltyPage implements OnInit, OnDestroy {
   // Selected segment
   selectedSegment = 'rewards';
   
+  // Animation flags
+  animateCard = false;
+  animateRewards = false;
+  
   // For cleanup
   private destroy$ = new Subject<void>();
   
   constructor(
     private loyaltyService: LoyaltyService,
     private alertController: AlertController,
-    private toastController: ToastController
-  ) {}
+    private toastController: ToastController,
+    private navController: NavController,
+    private modalController:ModalController 
+  ) {
+    addIcons({starOutline,refreshOutline,trophyOutline,giftOutline,timeOutline,checkmarkCircleOutline,checkmarkCircle,cafeOutline,addCircleOutline,removeCircleOutline,alertCircleOutline,calendarOutline,flameOutline,ribbonOutline,pulseOutline});
+  }
   
   ngOnInit() {
     // Get loyalty tiers
@@ -336,6 +137,15 @@ export class LoyaltyPage implements OnInit, OnDestroy {
     
     // Update streak
     this.updateStreak();
+    
+    // Trigger animations after data is loaded
+    setTimeout(() => {
+      this.animateCard = true;
+      
+      setTimeout(() => {
+        this.animateRewards = true;
+      }, 300);
+    }, 500);
   }
   
   ngOnDestroy() {
@@ -352,7 +162,7 @@ export class LoyaltyPage implements OnInit, OnDestroy {
     this.loyaltyService.getUserLoyalty()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (data:any) => {
+        next: (data) => {
           this.userLoyalty = data;
           this.isLoading = false;
           
@@ -362,6 +172,7 @@ export class LoyaltyPage implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Error loading loyalty data:', error);
           this.isLoading = false;
+          this.presentToast('Unable to load loyalty data', 'danger');
         }
       });
   }
@@ -370,6 +181,8 @@ export class LoyaltyPage implements OnInit, OnDestroy {
    * Loads tier information
    */
   loadTierInfo() {
+    if (!this.userLoyalty) return;
+    
     // Get current tier
     this.loyaltyService.getCurrentTierInfo()
       .pipe(takeUntil(this.destroy$))
@@ -433,7 +246,7 @@ export class LoyaltyPage implements OnInit, OnDestroy {
    */
   async redeemReward(reward: LoyaltyReward) {
     // Check if user has enough points
-    if (this.userLoyalty.points < reward.pointsCost) {
+    if (!this.userLoyalty || this.userLoyalty.points < reward.pointsCost) {
       this.presentToast('Not enough points to redeem this reward', 'danger');
       return;
     }
@@ -453,17 +266,14 @@ export class LoyaltyPage implements OnInit, OnDestroy {
               .pipe(takeUntil(this.destroy$))
               .subscribe({
                 next: () => {
+                  // Show success animation 
+                  this.presentSuccessAnimation(reward.name);
+                  
                   // Update loyalty data
                   this.loadUserLoyalty();
                   
                   // Update rewards
                   this.loadRewards();
-                  
-                  // Show success message
-                  this.presentToast(`${reward.name} redeemed successfully!`);
-                },
-                error: (error) => {
-                  this.presentToast(`Failed to redeem reward: ${error.message}`, 'danger');
                 }
               });
           }
@@ -475,6 +285,27 @@ export class LoyaltyPage implements OnInit, OnDestroy {
   }
   
   /**
+   * Shows a success animation for reward redemption
+   */
+  async presentSuccessAnimation(rewardName: string) {
+    const alert = await this.alertController.create({
+      header: 'Reward Redeemed!',
+      subHeader: rewardName,
+      message: '<div class="success-animation"><ion-icon name="checkmark-circle"></ion-icon></div>',
+      cssClass: 'reward-success-alert',
+      buttons: ['OK']
+    });
+    
+    await alert.present();
+    
+    // Auto-dismiss after 2 seconds
+    setTimeout(() => {
+      alert.dismiss();
+      this.presentToast(`${rewardName} redeemed successfully!`);
+    }, 2000);
+  }
+  
+  /**
    * Formats a date for display
    */
   formatDate(date: Date): string {
@@ -482,7 +313,7 @@ export class LoyaltyPage implements OnInit, OnDestroy {
     
     if (typeof date === 'string') {
       date = new Date(date);
-    } else if (date instanceof Date === false) {
+    } else if (!(date instanceof Date)) {
       date = new Date();
     }
     
@@ -491,6 +322,36 @@ export class LoyaltyPage implements OnInit, OnDestroy {
       month: 'short',
       day: 'numeric'
     });
+  }
+  
+  /**
+   * Formats a date relative to today
+   */
+  formatRelativeDate(date: Date): string {
+    if (!date) return '';
+    
+    if (typeof date === 'string') {
+      date = new Date(date);
+    } else if (!(date instanceof Date)) {
+      date = new Date();
+    }
+    
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return 'Today';
+    } else if (diffDays === 1) {
+      return 'Yesterday';
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
+    } else {
+      return this.formatDate(date);
+    }
   }
   
   /**
@@ -503,24 +364,70 @@ export class LoyaltyPage implements OnInit, OnDestroy {
   /**
    * Shows tier benefits
    */
-  async showTierBenefits(tier: any) {
-    const alert = await this.alertController.create({
-      header: `${this.capitalizeFirstLetter(tier.name)} Tier Benefits`,
-      message: `
-        <ul>
-          ${tier.benefits.map((benefit:any) => `<li>${benefit}</li>`).join('')}
-        </ul>
-      `,
-      buttons: ['OK']
-    });
-    
-    await alert.present();
+ /**
+ * Shows tier benefits
+ */
+/**
+ * Shows tier benefits
+ */
+/**
+ * Shows tier benefits
+ */
+async showTierBenefits(tier: any) {
+  if (!tier) return;
+  
+  // Import the modal dynamically to prevent circular dependencies
+  const { TierBenefitsModalComponent } = await import('./tier-benefits-modal/tier-benefits-modal.modal');
+  
+  const modal = await this.modalController.create({
+    component: TierBenefitsModalComponent,
+    componentProps: {
+      tier: tier
+    },
+    cssClass: 'tier-benefits-modal'
+  });
+  
+  await modal.present();
+}
+  
+  /**
+   * Gets tier icon based on tier name
+   */
+  getTierIcon(tierName: string): string {
+    switch (tierName) {
+      case 'bronze': return 'ribbon-outline';
+      case 'silver': return 'star-outline';
+      case 'gold': return 'trophy-outline';
+      case 'platinum': return 'flame-outline';
+      default: return 'ribbon-outline';
+    }
+  }
+  
+  /**
+   * Gets tier color based on tier name
+   */
+  getTierColor(tierName: string): string {
+    switch (tierName) {
+      case 'bronze': return '#cd7f32';
+      case 'silver': return '#c0c0c0';
+      case 'gold': return '#ffd700';
+      case 'platinum': return '#b9f2ff';
+      default: return '#cd7f32';
+    }
+  }
+  
+  /**
+   * Gets tier color class based on tier name
+   */
+  getTierColorClass(tierName: string): string {
+    return `tier-${tierName}`;
   }
   
   /**
    * Helper to capitalize first letter
    */
   capitalizeFirstLetter(string: string): string {
+    if (!string) return '';
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
   
@@ -536,5 +443,55 @@ export class LoyaltyPage implements OnInit, OnDestroy {
     });
     
     await toast.present();
+  }
+  
+  /**
+   * Refreshes loyalty data
+   */
+  refreshData() {
+    this.isLoading = true;
+    this.loadUserLoyalty();
+    this.loadRewards();
+    this.loadLoyaltyHistory();
+    this.updateStreak();
+  }
+  
+  /**
+   * Gets the background gradient for the current tier
+   */
+  getTierGradient(): string {
+    if (!this.userLoyalty) return '';
+    
+    switch (this.userLoyalty.tier) {
+      case 'bronze':
+        return 'linear-gradient(135deg, #cd7f32, #e8b27d)';
+      case 'silver':
+        return 'linear-gradient(135deg, #c0c0c0, #e6e6e6)';
+      case 'gold':
+        return 'linear-gradient(135deg, #ffd700, #ffecb3)';
+      case 'platinum':
+        return 'linear-gradient(135deg, #8e8e8e, #e5e5e5)';
+      default:
+        return 'linear-gradient(135deg, #cd7f32, #e8b27d)';
+    }
+  }
+  
+  /**
+   * Gets history icon based on type
+   */
+  getHistoryIcon(type: string): string {
+    switch (type) {
+      case 'earned': return 'add-circle-outline';
+      case 'redeemed': return 'remove-circle-outline';
+      case 'adjustment': return 'pulse-outline';
+      default: return 'time-outline';
+    }
+  }
+  
+  /**
+   * Gets history icon color based on type
+   */
+  getHistoryIconColor(points: number): string {
+    return points > 0 ? 'success' : 'danger';
   }
 }
