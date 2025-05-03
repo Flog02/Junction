@@ -1,20 +1,20 @@
 <!-- src/app/features/coffee-game/coffee-game.page.html -->
-
 <ion-header>
-    <ion-toolbar>
-      <ion-buttons slot="start">
-        <ion-back-button defaultHref="/home"></ion-back-button>
-      </ion-buttons>
-      <ion-title>Barista Challenge</ion-title>
-      <ion-buttons slot="end">
-        <ion-button (click)="resetGame()">
-          <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
-  
-  <ion-content>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Barista Challenge</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="resetGame()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="game-wrapper">
     <div class="game-stats-bar">
       <div class="stat-item">
         <div class="stat-label">Score</div>
@@ -39,6 +39,9 @@
         <ion-spinner name="crescent"></ion-spinner>
         <p>Loading Barista Challenge...</p>
       </div>
+      
+      <!-- Game canvas - This is what was missing! -->
+      <canvas *ngIf="!isLoading" id="coffee-game-canvas" width="800" height="600"></canvas>
     </div>
     
     <div class="game-instructions">
@@ -52,4 +55,37 @@
         <li>Earn loyalty points based on your score!</li>
       </ul>
     </div>
-  </ion-content>
+    
+    <!-- Game controls for mobile -->
+    <div class="game-controls" *ngIf="!isLoading">
+      <div class="control-group">
+        <h3>Grind Control</h3>
+        <ion-range min="0" max="100" [(ngModel)]="grindLevel" (ionChange)="onGrindChange($event)">
+          <ion-icon slot="start" name="cafe-outline"></ion-icon>
+          <ion-icon slot="end" name="cafe"></ion-icon>
+        </ion-range>
+      </div>
+      
+      <div class="control-group">
+        <h3>Temperature</h3>
+        <ion-range min="65" max="100" [(ngModel)]="tempLevel" (ionChange)="onTempChange($event)">
+          <ion-icon slot="start" name="thermometer-outline"></ion-icon>
+          <ion-icon slot="end" name="thermometer"></ion-icon>
+        </ion-range>
+      </div>
+      
+      <div class="control-group">
+        <h3>Milk Froth</h3>
+        <ion-range min="0" max="100" [(ngModel)]="milkLevel" (ionChange)="onMilkChange($event)">
+          <ion-icon slot="start" name="water-outline"></ion-icon>
+          <ion-icon slot="end" name="water"></ion-icon>
+        </ion-range>
+      </div>
+      
+      <ion-button expand="block" class="serve-button" (click)="serveDrink()">
+        Serve Drink
+        <ion-icon name="checkmark-circle-outline" slot="end"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

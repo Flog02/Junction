@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule ,Router} from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { 
   IonHeader, 
   IonToolbar, 
@@ -30,6 +31,7 @@ import { Product } from '../core/models/product.model';
   styleUrls: ['./home.page.scss'],
   standalone: true,
   imports: [
+    RouterLink,
     CommonModule,
     RouterModule,
     IonHeader,
@@ -95,7 +97,8 @@ export class HomePage implements OnInit, OnDestroy {
     private authService: AuthService,
     private loyaltyService: LoyaltyService,
     private orderService: OrderService,
-    private productService: ProductService
+    private productService: ProductService,
+    private router: Router
   ) {}
   
   ngOnInit() {
@@ -309,4 +312,9 @@ export class HomePage implements OnInit, OnDestroy {
       this.heroImage.nativeElement.style.transform = `translateY(${translateY}px)`;
     }
   }
+
+linkmenu(){
+this.router.navigateByUrl('/menu')
+}
+
 }

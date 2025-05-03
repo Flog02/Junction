@@ -211,28 +211,28 @@
     }
   }
   
-  /* Dark Mode Adjustments */
-  @media (prefers-color-scheme: dark) {
-    .section-title {
-      color: var(--ion-color-light);
-      border-bottom-color: var(--ion-color-dark-shade);
-    }
+  // /* Dark Mode Adjustments */
+  // @media (prefers-color-scheme: dark) {
+  //   .section-title {
+  //     color: var(--ion-color-light);
+  //     border-bottom-color: var(--ion-color-dark-shade);
+  //   }
     
-    .empty-state {
-      background-color: var(--ion-background-color-step-50);
-    }
+  //   .empty-state {
+  //     background-color: var(--ion-background-color-step-50);
+  //   }
     
-    .achievement-card {
-      &.locked {
-        opacity: 0.5;
+  //   .achievement-card {
+  //     &.locked {
+  //       opacity: 0.5;
         
-        .achievement-icon.locked {
-          background-color: var(--ion-background-color-step-100);
-        }
-      }
+  //       .achievement-icon.locked {
+  //         background-color: var(--ion-background-color-step-100);
+  //       }
+  //     }
       
-      .achievement-content h3 {
-        color: var(--ion-color-light);
-      }
-    }
-  }
+  //     .achievement-content h3 {
+  //       color: var(--ion-color-light);
+  //     }
+  //   }
+  // }

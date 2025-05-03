@@ -181,22 +181,22 @@
   }
   
   // Dark mode adjustments
-  @media (prefers-color-scheme: dark) {
-    .spec-item {
-      background-color: rgba(255, 255, 255, 0.05);
-    }
+  // @media (prefers-color-scheme: dark) {
+  //   .spec-item {
+  //     background-color: rgba(255, 255, 255, 0.05);
+  //   }
     
-    .tips-card {
-      --background: rgba(47, 223, 117, 0.1);
+  //   .tips-card {
+  //     --background: rgba(47, 223, 117, 0.1);
       
-      ion-card-title {
-        color: var(--ion-color-success);
-      }
-    }
+  //     ion-card-title {
+  //       color: var(--ion-color-success);
+  //     }
+  //   }
     
-    .method-steps {
-      h3 {
-        border-bottom-color: rgba(255, 255, 255, 0.1);
-      }
-    }
-  }
+  //   .method-steps {
+  //     h3 {
+  //       border-bottom-color: rgba(255, 255, 255, 0.1);
+  //     }
+  //   }
+  // }

@@ -200,19 +200,19 @@
   }
   
   /* Dark mode adjustments */
-  @media (prefers-color-scheme: dark) {
-    .hero-section {
-      h1 {
-        color: var(--ion-color-primary-tint);
-      }
-    }
+  // @media (prefers-color-scheme: dark) {
+  //   .hero-section {
+  //     h1 {
+  //       color: var(--ion-color-primary-tint);
+  //     }
+  //   }
     
-    .section h2 {
-      border-bottom-color: var(--ion-color-dark-shade);
-      color: var(--ion-color-light);
-    }
+  //   .section h2 {
+  //     border-bottom-color: var(--ion-color-dark-shade);
+  //     color: var(--ion-color-light);
+  //   }
     
-    .step-card {
-      background-color: var(--ion-card-background);
-    }
-  }
+  //   .step-card {
+  //     background-color: var(--ion-card-background);
+  //   }
+  // }

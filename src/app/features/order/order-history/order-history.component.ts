@@ -64,7 +64,10 @@ export class OrderHistoryComponent implements OnInit {
   isLoading = true;
   activeOrders: Order[] = [];
   pastOrders: Order[] = [];
-  
+  ionViewWillEnter() {
+    // Refresh data each time the page is entered
+    this.loadOrders();
+  }
   constructor(
     private orderService: OrderService,
     private authService: AuthService,
@@ -113,7 +116,8 @@ export class OrderHistoryComponent implements OnInit {
   }
   
   trackOrder(orderId: string) {
-    this.router.navigate(['/order/confirmation', orderId]);
+    // Update to go to tracker, not confirmation
+    this.router.navigate(['/order/tracker', orderId]);
   }
   
   reorder(order: Order) {

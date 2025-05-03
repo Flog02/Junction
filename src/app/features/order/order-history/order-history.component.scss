@@ -152,13 +152,13 @@
   }
   
   /* Dark Mode Adjustments */
-  @media (prefers-color-scheme: dark) {
-    .order-section h2 {
-      color: var(--ion-color-light);
-      border-bottom-color: var(--ion-color-dark-shade);
-    }
+  // @media (prefers-color-scheme: dark) {
+  //   .order-section h2 {
+  //     color: var(--ion-color-light);
+  //     border-bottom-color: var(--ion-color-dark-shade);
+  //   }
     
-    .order-items {
-      background-color: var(--ion-color-step-100);
-    }
-  }
+  //   .order-items {
+  //     background-color: var(--ion-color-step-100);
+  //   }
+  // }

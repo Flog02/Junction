@@ -1,6 +1,7 @@
 // src/app/app.routes.ts
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { STAFF_ROUTES } from './features/staff/staff.routes';
 
 export const routes: Routes = [
   {
@@ -70,5 +71,9 @@ export const routes: Routes = [
   {
     path: '**',
     redirectTo: 'home'
-  }
+  },
+  {
+    path: 'staff',
+    children: STAFF_ROUTES  // This includes all your defined staff routes
+  },
 ];

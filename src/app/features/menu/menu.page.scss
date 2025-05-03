@@ -284,11 +284,11 @@
   }
   
   // Dark mode adjustments
-  @media (prefers-color-scheme: dark) {
-    .category-nav {
-      border-bottom-color: rgba(255, 255, 255, 0.1);
-    }
-  }
+  // @media (prefers-color-scheme: dark) {
+  //   .category-nav {
+  //     border-bottom-color: rgba(255, 255, 255, 0.1);
+  //   }
+  // }
   
   // Badge styling for cart
   ion-badge {

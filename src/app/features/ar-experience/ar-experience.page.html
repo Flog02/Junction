@@ -1,0 +1,157 @@
+<!-- src/app/features/ar-experience/ar-experience.page.html -->
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/home"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Coffee AR Experience</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content>
+    <div class="ar-container">
+      <!-- AR View -->
+      <div class="ar-view">
+        <div class="ar-canvas-container">
+          <canvas id="ar-canvas"></canvas>
+          
+          <!-- Loading indicator -->
+          <div *ngIf="isLoading" class="loading-overlay">
+            <ion-spinner name="dots"></ion-spinner>
+            <p>Initializing AR Experience...</p>
+          </div>
+          
+          <!-- Instructions overlay -->
+          <div *ngIf="!isLoading && showInstructions" class="instructions-overlay">
+            <div class="instruction-card">
+              <h2>AR Coffee Experience</h2>
+              <p>Point your camera at a flat surface to place a virtual coffee.</p>
+              <ul>
+                <li>Move around to view from different angles</li>
+                <li>Pinch to resize the model</li>
+                <li>Tap to place the coffee cup</li>
+              </ul>
+              <ion-button expand="block" (click)="hideInstructions()">
+                Get Started
+                <ion-icon name="arrow-forward" slot="end"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+          <!-- Camera permissions warning -->
+        <div *ngIf="!isLoading && !cameraPermissionGranted" class="permission-overlay">
+            <div class="permission-card">
+              <ion-icon name="camera-outline" class="permission-icon"></ion-icon>
+              <h2>Camera Access Required</h2>
+              <p>We need permission to access your camera to enable the AR experience.</p>
+              <ion-button expand="block" (click)="requestCameraPermission()">
+                Grant Camera Access
+              </ion-button>
+            </div>
+          </div>
+          
+          <!-- AR placement guide -->
+          <div *ngIf="!isLoading && isScanning" class="placement-guide">
+            <div class="scan-indicator">
+              <div class="scan-ring"></div>
+              <p>Move your device to detect surfaces</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Coffee Selection Controls -->
+      <div class="coffee-controls" *ngIf="!isLoading && cameraPermissionGranted && !isScanning">
+        <h3>Choose Your Coffee</h3>
+        
+        <div class="coffee-selector">
+          <div *ngFor="let coffee of coffeeOptions" 
+               class="coffee-option" 
+               [class.selected]="selectedCoffee === coffee.id"
+               (click)="selectCoffee(coffee.id)">
+            <img [src]="coffee.thumbnail" [alt]="coffee.name">
+            <span>{{ coffee.name }}</span>
+          </div>
+        </div>
+        
+        <h3>Customizations</h3>
+        
+        <div class="customization-controls">
+          <div class="control-group">
+            <label>Cup Size</label>
+            <div class="size-buttons">
+              <button 
+                *ngFor="let size of cupSizes" 
+                [class.active]="selectedSize === size.id"
+                (click)="selectSize(size.id)">
+                {{ size.name }}
+              </button>
+            </div>
+          </div>
+          
+          <div class="control-group">
+            <label>Cup Color</label>
+            <div class="color-picker">
+              <div *ngFor="let color of cupColors" 
+                   class="color-option"
+                   [style.background-color]="color.value"
+                   [class.selected]="selectedColor === color.id"
+                   (click)="selectColor(color.id)">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <ion-button expand="block" class="place-button" (click)="placeCoffee()">
+          Place Coffee in AR
+          <ion-icon name="cube-outline" slot="end"></ion-icon>
+        </ion-button>
+        
+        <ion-button expand="block" fill="outline" class="menu-button" routerLink="/menu">
+          Order This Coffee
+          <ion-icon name="cart-outline" slot="end"></ion-icon>
+        </ion-button>
+      </div>
+      
+      <!-- Information panel -->
+      <div class="coffee-info-panel" *ngIf="!isLoading && coffeeInfoVisible">
+        <div class="info-header">
+          <h2>{{ getSelectedCoffeeName() }}</h2>
+          <ion-button fill="clear" (click)="hideCoffeeInfo()">
+            <ion-icon name="close-outline"></ion-icon>
+          </ion-button>
+        </div>
+        
+        <div class="info-content">
+          <div class="info-image">
+            <img [src]="getSelectedCoffeeImage()" [alt]="getSelectedCoffeeName()">
+          </div>
+          
+          <div class="info-details">
+            <p class="description">{{ getSelectedCoffeeDescription() }}</p>
+            
+            <div class="info-stats">
+              <div class="stat">
+                <ion-icon name="flame-outline"></ion-icon>
+                <span>{{ getSelectedCoffeeCalories() }} cal</span>
+              </div>
+              
+              <div class="stat">
+                <ion-icon name="cafe-outline"></ion-icon>
+                <span>{{ getSelectedCoffeeCaffeine() }} mg</span>
+              </div>
+              
+              <div class="stat">
+                <ion-icon name="cash-outline"></ion-icon>
+                <span>{{ getSelectedCoffeePrice() | currency }}</span>
+              </div>
+            </div>
+            
+            <ion-button expand="block" routerLink="/menu" class="order-button">
+              Order Now
+              <ion-icon name="cart-outline" slot="end"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ion-content>

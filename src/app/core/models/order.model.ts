@@ -29,6 +29,8 @@ export interface CustomizationOption {
       fat: number;
       protein: number;
     };
+    preparationTime?: number; // Added this property as optional
+
   }
   
   export interface Order {

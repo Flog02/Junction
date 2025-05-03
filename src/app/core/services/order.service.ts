@@ -17,10 +17,11 @@ import {
   collectionData
 } from '@angular/fire/firestore';
 import { Auth, user } from '@angular/fire/auth';
-import { Observable, from, of, switchMap, map, take } from 'rxjs';
+import { Observable, from, of, switchMap, map, take, BehaviorSubject } from 'rxjs';
 import { Order, OrderItem } from '../models/order.model';
 import { LoyaltyService } from './loyalty.service';
 import { NutritionService } from './nutrition.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +31,7 @@ export class OrderService {
 
   constructor(
     private firestore: Firestore,
+    private authService : AuthService,
     private auth: Auth,
     private loyaltyService: LoyaltyService,
     private nutritionService: NutritionService
@@ -91,9 +93,12 @@ export class OrderService {
    * Gets all orders for the current user
    */
   getUserOrders(): Observable<Order[]> {
-    return user(this.auth).pipe(
+    // Change currentUser$ to user$ which is the correct property name
+    return this.authService.user$.pipe(
       switchMap(user => {
         if (!user) return of([]);
+        
+        console.log('Getting orders for user:', user.uid); // Add logging for debugging
         
         const ordersRef = collection(this.firestore, 'orders');
         const userOrdersQuery = query(
@@ -102,10 +107,14 @@ export class OrderService {
           orderBy('orderTime', 'desc')
         );
         
-        return collectionData(userOrdersQuery).pipe(
-          map(orders => orders.map(order => 
-            this.convertFromFirestore(order as Order, (order as any).id)
-          ))
+        return collectionData(userOrdersQuery, { idField: 'id' }).pipe(
+          map(orders => {
+            console.log('Orders found:', orders.length); // Add logging for debugging
+            return orders.map(order => {
+              // Pass both the order data and the ID to convertFromFirestore
+              return this.convertFromFirestore(order as any, order['id'] as string);
+            }) as Order[];
+          })
         );
       })
     );
@@ -232,28 +241,28 @@ export class OrderService {
     return orderForFirestore;
   }
 
-  /**
-   * Convert Firestore data to our Order model
-   */
-  private convertFromFirestore(order: Order, id: string): Order {
-    // Assign ID to the order
-    order.id = id;
-    
-    // Convert Firestore timestamps to JS Date objects
-    if ((order.orderTime as any)?.toDate) {
-      order.orderTime = (order.orderTime as any).toDate();
-    }
-    
-    if ((order.processTime as any)?.toDate) {
-      order.processTime = (order.processTime as any).toDate();
-    }
-    
-    if ((order.completionTime as any)?.toDate) {
-      order.completionTime = (order.completionTime as any).toDate();
-    }
-    
-    return order;
+ /**
+ * Convert Firestore data to our Order model
+ */
+convertFromFirestore(order: any, id: string): Order {
+  // Assign ID to the order
+  order.id = id;
+  
+  // Convert Firestore timestamps to JS Date objects
+  if ((order.orderTime as any)?.toDate) {
+    order.orderTime = (order.orderTime as any).toDate();
   }
+  
+  if ((order.processTime as any)?.toDate) {
+    order.processTime = (order.processTime as any).toDate();
+  }
+  
+  if ((order.completionTime as any)?.toDate) {
+    order.completionTime = (order.completionTime as any).toDate();
+  }
+  
+  return order as Order;
+}
 
   /**
    * Updates user nutrition data from order
@@ -288,17 +297,19 @@ export class OrderService {
 
 private cartItemsSource: OrderItem[] = [];
 
-/**
- * Gets the current cart items
- */
+private cartItemsSubject = new BehaviorSubject<OrderItem[]>([]);
+public cartItems$ = this.cartItemsSubject.asObservable();
+
 getCartItems(): OrderItem[] {
-  // Try to get cart items from localStorage first
+  // Keep existing functionality for backward compatibility
   const storedCart = localStorage.getItem('cartItems');
   if (storedCart) {
     try {
       const parsedCart = JSON.parse(storedCart);
       if (Array.isArray(parsedCart) && parsedCart.length > 0) {
         this.cartItemsSource = parsedCart;
+        // Update the subject
+        this.cartItemsSubject.next(parsedCart);
       }
     } catch (e) {
       console.error('Error parsing cart items from localStorage:', e);
@@ -308,11 +319,10 @@ getCartItems(): OrderItem[] {
   return this.cartItemsSource;
 }
 
-/**
- * Sets the cart items
- */
 setCartItems(items: OrderItem[]): void {
   this.cartItemsSource = items;
+  // Update the subject
+  this.cartItemsSubject.next(items);
   
   // Save to localStorage for persistence
   try {
@@ -352,6 +362,12 @@ addToCart(item: OrderItem): void {
  */
 clearCart(): void {
   this.cartItemsSource = [];
+  
+  // Also update the BehaviorSubject if you implemented it
+  if (this.cartItemsSubject) {
+    this.cartItemsSubject.next([]);
+  }
+  
   localStorage.removeItem('cartItems');
 }
 }

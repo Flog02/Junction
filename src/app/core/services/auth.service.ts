@@ -42,6 +42,9 @@ export class AuthService {
   private user = new BehaviorSubject<User | null>(null);
   user$ = this.user.asObservable();
   
+  // Add a public currentUser property that provides easy access to the current user
+  public currentUser: User | null = null;
+  
   private userProfile = new BehaviorSubject<any>(null);
   userProfile$ = this.userProfile.asObservable();
   
@@ -59,6 +62,9 @@ export class AuthService {
     // Initialize auth state listener
     this.authState$.subscribe((user) => {
       this.user.next(user);
+      // Update the currentUser property
+      this.currentUser = user;
+      
       if (user) {
         this.getUserProfile(user.uid).then(profile => {
           this.userProfile.next(profile);
@@ -359,6 +365,48 @@ export class AuthService {
       }
     });
   }
+  // src/app/core/services/auth.service.ts
+
+// Add to the existing AuthService class
+  
+// Check user role
+getUserRole(): Observable<string> {
+  return this.userProfile$.pipe(
+    map(profile => profile?.role || 'customer')
+  );
+}
+
+// Check if user is staff
+isStaff(): Observable<boolean> {
+  return this.getUserRole().pipe(
+    map(role => role === 'staff' || role === 'admin')
+  );
+}
+
+// Check if user is admin
+isAdmin(): Observable<boolean> {
+  return this.getUserRole().pipe(
+    map(role => role === 'admin')
+  );
+}
+
+// Redirect based on role
+async redirectBasedOnRole() {
+  const user = await this.getCurrentUser();
+  if (!user) {
+    this.router.navigate(['/auth/login']);
+    return;
+  }
+
+  const profile = await this.getUserProfile(user.uid);
+  const role = profile?.role || 'customer';
+
+  if (role === 'staff' || role === 'admin') {
+    this.router.navigate(['/staff/dashboard']);
+  } else {
+    this.router.navigate(['/home']);
+  }
+}
 
   // Get current auth state
   getAuthState(): Observable<User | null> {

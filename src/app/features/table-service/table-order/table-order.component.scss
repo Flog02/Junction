@@ -216,20 +216,20 @@
   }
   
   /* Dark Mode Adjustments */
-  @media (prefers-color-scheme: dark) {
-    .cart-summary {
-      .summary-line {
-        color: var(--ion-color-medium-tint);
+  // @media (prefers-color-scheme: dark) {
+  //   .cart-summary {
+  //     .summary-line {
+  //       color: var(--ion-color-medium-tint);
         
-        &.total {
-          color: var(--ion-color-light);
-          border-top-color: var(--ion-color-dark-shade);
-        }
-      }
-    }
+  //       &.total {
+  //         color: var(--ion-color-light);
+  //         border-top-color: var(--ion-color-dark-shade);
+  //       }
+  //     }
+  //   }
     
-    .menu-section h2 {
-      color: var(--ion-color-light);
-      border-bottom-color: var(--ion-color-dark-shade);
-    }
-  }
+  //   .menu-section h2 {
+  //     color: var(--ion-color-light);
+  //     border-bottom-color: var(--ion-color-dark-shade);
+  //   }
+  // }

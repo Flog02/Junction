@@ -38,7 +38,7 @@
     </div>
     
     <ion-list *ngIf="activeOrders.length > 0">
-      <ion-item *ngFor="let order of activeOrders" [routerLink]="['/orders', order.id]" detail>
+      <ion-item *ngFor="let order of activeOrders" [routerLink]="['/order/tracker', order.id]" detail>
         <div class="order-item">
           <div class="order-header">
             <div class="order-number">#{{ order.id?.substring(0, 8) }}</div>
@@ -110,7 +110,7 @@
           <ion-label>{{ group.month }}</ion-label>
         </ion-item-divider>
         
-        <ion-item *ngFor="let order of group.orders" [routerLink]="['/orders', order.id]" detail>
+        <ion-item *ngFor="let order of group.orders" [routerLink]="['/order/tracker', order.id]" detail>
           <div class="order-item">
             <div class="order-header">
               <div class="order-number">#{{ order.id?.substring(0, 8) }}</div>

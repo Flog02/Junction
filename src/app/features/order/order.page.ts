@@ -39,6 +39,11 @@ export class OrderPage implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
   }
+
+  ionViewWillEnter() {
+    // Refresh data each time the page is entered
+    this.loadOrders();
+  }
   
   loadOrders() {
     this.isLoading = true;

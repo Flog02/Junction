@@ -229,35 +229,35 @@ ion-card-title {
 }
 
 // Dark mode adjustments
-@media (prefers-color-scheme: dark) {
-  .spec-item {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
+// @media (prefers-color-scheme: dark) {
+//   .spec-item {
+//     background-color: rgba(255, 255, 255, 0.05);
+//   }
   
-  .flavor-tag {
-    background-color: rgba(106, 100, 255, 0.2);
-    color: var(--ion-color-tertiary);
-  }
+//   .flavor-tag {
+//     background-color: rgba(106, 100, 255, 0.2);
+//     color: var(--ion-color-tertiary);
+//   }
   
-  .education-card {
-    --background: rgba(255, 196, 9, 0.1);
+//   .education-card {
+//     --background: rgba(255, 196, 9, 0.1);
     
-    ion-card-title {
-      color: var(--ion-color-warning);
-    }
-  }
+//     ion-card-title {
+//       color: var(--ion-color-warning);
+//     }
+//   }
   
-  .map-card {
-    --background: rgba(47, 223, 117, 0.1);
+//   .map-card {
+//     --background: rgba(47, 223, 117, 0.1);
     
-    ion-card-title {
-      color: var(--ion-color-success);
-    }
-  }
+//     ion-card-title {
+//       color: var(--ion-color-success);
+//     }
+//   }
   
-  .flavor-profile {
-    h3 {
-      border-bottom-color: rgba(255, 255, 255, 0.1);
-    }
-  }
-}
+//   .flavor-profile {
+//     h3 {
+//       border-bottom-color: rgba(255, 255, 255, 0.1);
+//     }
+//   }
+// }

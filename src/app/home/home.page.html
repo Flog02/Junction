@@ -4,7 +4,7 @@
   <ion-toolbar>
     <ion-title>
       <div class="logo-container">
-        <img src="assets/logo.svg" alt="Digital Café" class="logo-image">
+        <img src="/assets/logo.svg" alt="Digital Café" class="logo-image">
         <span class="logo-text">Digital Café</span>
       </div>
     </ion-title>
@@ -31,7 +31,7 @@
       </ion-button>
     </div>
     <div class="hero-image-container">
-      <img #heroImage src="assets/coffee-cup.svg" alt="Coffee Cup" class="hero-image">
+      <img #heroImage src="/assets/coffee-cup.svg" alt="Coffee Cup" class="hero-image">
     </div>
   </div>
   
@@ -62,12 +62,12 @@
     <ion-card class="loyalty-card">
       <ion-card-content>
         <div class="loyalty-header">
-          <div class="tier-badge" [ngClass]="'tier-' + userLoyalty?.tier">
-            {{ userLoyalty?.tier | titlecase }}
+          <div class="tier-badge" [ngClass]="'tier-' + userLoyalty.tier">
+            {{ userLoyalty.tier | titlecase }}
           </div>
           <div class="points-display">
             <ion-icon name="star"></ion-icon>
-            <span>{{ userLoyalty?.points || 0 }} Points</span>
+            <span>{{ userLoyalty.points || 0 }} Points</span>
           </div>
         </div>
         
@@ -80,7 +80,7 @@
         
         <div class="streak-display">
           <ion-icon name="flame"></ion-icon>
-          <span>{{ userLoyalty?.streakDays || 0 }} Day Streak</span>
+          <span>{{ userLoyalty.streakDays || 0 }} Day Streak</span>
         </div>
       </ion-card-content>
     </ion-card>
@@ -154,8 +154,8 @@
       </ion-button>
     </div>
     <div class="products-scroll">
-      <ion-card *ngFor="let product of featuredProducts" [routerLink]="['/menu', product.id]" class="product-card">
-        <div class="product-image-container">
+      <ion-card  *ngFor="let product of featuredProducts"  [routerLink]="['/menu', product.id]" class="product-card" >
+        <div class="product-image-container" >
           <img [src]="product.imageURL" [alt]="product.name" class="product-image">
           <div class="product-price">{{ product.price | currency }}</div>
         </div>
@@ -178,7 +178,7 @@
         </ion-button>
       </div>
       <div class="promo-image-container">
-        <img src="assets/coffee-game.svg" alt="Coffee Game" class="promo-image">
+        <img src="/assets/coffee-game-pattern.svg" alt="Coffee Game" class="promo-image">
       </div>
     </ion-card>
   </div>
@@ -194,7 +194,7 @@
         </ion-button>
       </div>
       <div class="promo-image-container">
-        <img src="assets/coffee-journey.svg" alt="Coffee Journey" class="promo-image">
+        <img src="/assets/coffee-journey.svg" alt="Coffee Journey" class="promo-image">
       </div>
     </ion-card>
   </div>
@@ -250,7 +250,7 @@
         </ion-button>
       </div>
       <div class="promo-image-container">
-        <img src="assets/table-service.svg" alt="Table Service" class="promo-image">
+        <img src="/assets/table-service.svg" alt="Table Service" class="promo-image">
       </div>
     </ion-card>
   </div>

@@ -13,13 +13,23 @@
       <ion-row class="ion-justify-content-center">
         <ion-col size-md="6" size-lg="5" size-xs="12">
           <div class="logo-container">
-            <img src="assets/icons/cafe-logo.png" alt="Café Logo" class="logo">
+            <img src="/assets/logo.svg" alt="Café Logo" class="logo">
             <h1 class="ion-text-center">Digital Café</h1>
             <p class="ion-text-center">Sign in to your account</p>
           </div>
           
           <ion-card>
             <ion-card-content>
+              <div class="mode-toggle ion-margin-bottom ion-text-center">
+                <ion-segment [(ngModel)]="isStaffMode">
+                  <ion-segment-button [value]="false">
+                    <ion-label>Customer</ion-label>
+                  </ion-segment-button>
+                  <ion-segment-button [value]="true">
+                    <ion-label>Staff</ion-label>
+                  </ion-segment-button>
+                </ion-segment>
+              </div>
               <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                 <ion-item class="ion-margin-bottom">
                   <ion-icon name="mail-outline" slot="start"></ion-icon>
@@ -51,10 +61,12 @@
                   <a (click)="forgotPassword()" class="forgot-password">Forgot Password?</a>
                 </div>
                 
-                <ion-button type="submit" expand="block" color="primary" [disabled]="loginForm.invalid || isLoading">
-                  <ng-container *ngIf="!isLoading">Login</ng-container>
-                  <ion-spinner name="dots" *ngIf="isLoading"></ion-spinner>
-                </ion-button>
+<ion-button type="submit" expand="block" color="primary" [disabled]="loginForm.invalid || isLoading">
+  <ng-container *ngIf="!isLoading">{{ isStaffMode ? 'Staff Login' : 'Login' }}</ng-container>
+  <ion-spinner name="dots" *ngIf="isLoading"></ion-spinner>
+</ion-button>
+
+                
               </form>
               
               <div class="divider ion-margin-vertical">

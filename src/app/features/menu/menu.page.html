@@ -1,133 +1,174 @@
 <!-- src/app/features/menu/menu.page.html -->
-<ion-header>
-    <ion-toolbar color="primary">
-      <ion-buttons slot="start">
-        <ion-back-button defaultHref="/home"></ion-back-button>
-      </ion-buttons>
-      <ion-title>Menu</ion-title>
-      
-      <ion-buttons slot="end" *ngIf="orderService.getCartItems().length">
-        <ion-button routerLink="/cart">
-          <ion-icon name="cart-outline" slot="icon-only"></ion-icon>
-          <ion-badge color="danger" *ngIf="orderService.getCartItems().length">
-            {{ orderService.getCartItems().length }}
-          </ion-badge>
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
+<ion-header class="menu-header">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Menu</ion-title>
     
-    <!-- Table order indicator -->
-    <div class="table-order-banner" *ngIf="isTableOrder">
-      <ion-icon name="restaurant-outline"></ion-icon>
-      <span>Table Order: #{{ tableNumber }}</span>
-    </div>
-  </ion-header>
+    <ion-buttons slot="end" *ngIf="orderService.getCartItems().length">
+      <ion-button routerLink="/order/cart" class="cart-button">
+        <ion-icon name="cart-outline" slot="icon-only"></ion-icon>
+        <ion-badge color="danger" *ngIf="orderService.getCartItems().length" class="cart-badge">
+          {{ orderService.getCartItems().length }}
+        </ion-badge>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
   
-  <ion-content>
-    <!-- Category Navigation -->
-    <div class="category-nav">
-      <div 
-        *ngFor="let category of categories" 
-        class="category-item" 
-        [class.active]="selectedCategory === category.id"
-        (click)="onCategorySelect(category.id)"
-      >
-        <ion-icon [name]="category.icon"></ion-icon>
-        <span>{{ category.name }}</span>
-      </div>
+  <!-- Table order indicator -->
+  <div class="table-order-banner" *ngIf="isTableOrder">
+    <ion-icon name="restaurant-outline"></ion-icon>
+    <span>Table Order: #{{ tableNumber }}</span>
+  </div>
+</ion-header>
+
+<ion-content>
+  <!-- Category Navigation -->
+  <div class="category-nav">
+    <div 
+      *ngFor="let category of categories" 
+      class="category-item" 
+      [class.active]="selectedCategory === category.id"
+      (click)="onCategorySelect(category.id)"
+    >
+      <ion-icon [name]="category.icon"></ion-icon>
+      <span>{{ category.name }}</span>
+    </div>
+  </div>
+  
+  <!-- Featured Section (only show on coffee category) -->
+  <div *ngIf="selectedCategory === 'coffee' && featuredProducts.length > 0" class="featured-section">
+    <div class="section-header">
+      <h2 class="section-title">Featured Drinks</h2>
+      <div class="section-line"></div>
     </div>
     
-    <!-- Featured Section (only show on coffee category) -->
-    <div *ngIf="selectedCategory === 'coffee' && featuredProducts.length > 0" class="featured-section">
-      <h2 class="section-title">Featured Drinks</h2>
-      
-      <div class="featured-scroll">
-        <div *ngFor="let product of featuredProducts" class="featured-item">
-          <div class="product-image-container">
-            <img [src]="product.imageURL" [alt]="product.name" class="product-image">
-            <div class="featured-badge">Featured</div>
-          </div>
-          <div class="featured-content">
-            <h3>{{ product.name }}</h3>
-            <p class="product-description">{{ product.description }}</p>
-            <div class="featured-footer">
-              <span class="product-price">{{ product.price | currency }}</span>
-              <ion-button fill="clear" (click)="onCustomize(product)">
-                Customize
-              </ion-button>
-            </div>
+    <div class="featured-scroll">
+      <div *ngFor="let product of featuredProducts" class="featured-item" [routerLink]="['/order/custom', product.id]" [queryParams]="{tableOrder: isTableOrder ? 'true' : 'false', storeId: storeId, tableNumber: tableNumber}">
+        <div class="product-image-container">
+          <img [src]="product.imageURL" [alt]="product.name" class="product-image">
+          <div class="featured-badge pulse-animation">Featured</div>
+        </div>
+        <div class="featured-content">
+          <h3>{{ product.name }}</h3>
+          <p class="product-description">{{ product.description | slice:0:80 }}{{ product.description.length > 80 ? '...' : '' }}</p>
+          <div class="featured-footer">
+            <span class="product-price">{{ product.price | currency }}</span>
+            <ion-button fill="clear" (click)="onCustomize(product); $event.stopPropagation()">
+              <ion-icon name="options-outline" slot="start"></ion-icon>
+              Customize
+            </ion-button>
           </div>
         </div>
       </div>
     </div>
-    
-    <!-- Main Menu Section -->
-    <div class="menu-section">
+  </div>
+  
+  <!-- Main Menu Section -->
+  <div class="menu-section">
+    <div class="section-header">
       <h2 class="section-title">{{ selectedCategory | titlecase }}</h2>
-      
-      <!-- Loading indicator -->
-      <div *ngIf="isLoading" class="loading-container">
-        <ion-spinner name="circles"></ion-spinner>
-        <p>Loading menu items...</p>
-      </div>
-      
-      <!-- Empty state -->
-      <div *ngIf="!isLoading && products.length === 0" class="empty-state">
-        <ion-icon [name]="getCategoryIcon(selectedCategory)"></ion-icon>
-        <p>No items available in this category at the moment.</p>
-      </div>
-      
-      <!-- Product grid -->
-      <div *ngIf="!isLoading && products.length > 0" class="product-grid">
-        <ion-card *ngFor="let product of products" class="product-card">
-          <div class="product-image-container">
-            <img [src]="product.imageURL" [alt]="product.name" class="product-image">
-            <div *ngIf="product.featured" class="product-badge featured">Featured</div>
-          </div>
-          
-          <ion-card-header>
-            <ion-card-title>{{ product.name }}</ion-card-title>
-            <ion-card-subtitle *ngIf="product.category === 'coffee'">{{ product.category }}</ion-card-subtitle>
-          </ion-card-header>
-          
-          <ion-card-content>
-            <p class="product-description">{{ product.description }}</p>
-            
-            <div class="nutrition-info" *ngIf="product.nutritionInfo">
-              <span class="nutrition-item">
-                <ion-icon name="flame-outline"></ion-icon>
-                {{ product.nutritionInfo.calories }} cal
-              </span>
-              
-              <span class="nutrition-item" *ngIf="product.category === 'coffee'">
-                <ion-icon name="cafe-outline"></ion-icon>
-                {{ product.nutritionInfo.caffeine }}mg
-              </span>
-            </div>
-            
-            <div class="product-footer">
-              <span class="product-price">{{ product.price | currency }}</span>
-              
-              <div class="product-actions">
-                <ion-button fill="clear" (click)="onCustomize(product)">
-                  <ion-icon name="options-outline" slot="start"></ion-icon>
-                  Customize
-                </ion-button>
-                
-                <ion-button (click)="onAddToCart(product)">
-                  <ion-icon name="add" slot="icon-only"></ion-icon>
-                </ion-button>
-              </div>
-            </div>
-          </ion-card-content>
-        </ion-card>
-      </div>
+      <div class="section-line"></div>
     </div>
     
-    <!-- FAB for cart -->
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="orderService.getCartItems().length">
-      <ion-fab-button routerLink="/cart">
-        <ion-icon name="cart-outline"></ion-icon>
-      </ion-fab-button>
-    </ion-fab>
-  </ion-content>
+    <!-- Loading indicator -->
+    <div *ngIf="isLoading" class="loading-container">
+      <div class="loader-animation">
+        <ion-spinner name="circles"></ion-spinner>
+      </div>
+      <p>Loading menu items...</p>
+    </div>
+    
+    <!-- Empty state -->
+    <div *ngIf="!isLoading && products.length === 0" class="empty-state">
+      <ion-icon [name]="getCategoryIcon(selectedCategory)"></ion-icon>
+      <p>No items available in this category at the moment.</p>
+      <ion-button fill="outline" (click)="onCategorySelect('coffee')" *ngIf="selectedCategory !== 'coffee'">
+        View Coffee Menu
+      </ion-button>
+    </div>
+    
+    <!-- Product grid -->
+    <div *ngIf="!isLoading && products.length > 0" class="product-grid">
+      <ion-card *ngFor="let product of products" class="product-card" [class.out-of-stock]="!product.available">
+        <div class="product-image-container" [routerLink]="['/order/custom', product.id]" [queryParams]="{tableOrder: isTableOrder ? 'true' : 'false', storeId: storeId, tableNumber: tableNumber}">
+          <img [src]="product.imageURL" [alt]="product.name" class="product-image">
+          <div *ngIf="product.featured" class="product-badge featured">Featured</div>
+          <div *ngIf="!product.available" class="product-badge out-of-stock">Unavailable</div>
+          <div class="preparation-time" *ngIf="product.preparationTime">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>{{ product.preparationTime }} min</span>
+          </div>
+        </div>
+        
+        <ion-card-header>
+          <div class="card-header-content">
+            <ion-card-title>{{ product.name }}</ion-card-title>
+            <div class="allergens" *ngIf="product.nutritionInfo && product.nutritionInfo.allergies && product.nutritionInfo.allergies.length > 0">
+              <ion-icon name="alert-circle-outline" class="allergen-icon"></ion-icon>
+              <div class="allergen-tooltip">
+                <span>Contains: {{ product.nutritionInfo.allergies.join(', ') }}</span>
+              </div>
+            </div>
+          </div>
+          <ion-card-subtitle *ngIf="product.category === 'coffee'">
+            <ion-icon name="cafe-outline"></ion-icon>
+            {{ product.category | titlecase }}
+          </ion-card-subtitle>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <p class="product-description">{{ product.description | slice:0:90 }}{{ product.description.length > 90 ? '...' : '' }}</p>
+          
+          <div class="nutrition-info" *ngIf="product.nutritionInfo">
+            <span class="nutrition-item">
+              <ion-icon name="flame-outline"></ion-icon>
+              {{ product.nutritionInfo.calories }} cal
+            </span>
+            
+            <span class="nutrition-item" *ngIf="(product.category === 'coffee' || product.category === 'tea') && product.nutritionInfo.caffeine">
+              <ion-icon name="cafe-outline"></ion-icon>
+              {{ product.nutritionInfo.caffeine }}mg
+            </span>
+            
+            <span class="nutrition-item" *ngIf="product.nutritionInfo.protein && product.nutritionInfo.protein > 0">
+              <ion-icon name="barbell-outline"></ion-icon>
+              {{ product.nutritionInfo.protein }}g protein
+            </span>
+          </div>
+          
+          <div class="customization-preview" *ngIf="product.customizationOptions && product.customizationOptions.sizes && product.customizationOptions.sizes.length > 0">
+            <span class="size-option" *ngFor="let size of product.customizationOptions.sizes.slice(0, 3)">
+              {{ size.name }}
+            </span>
+            <span *ngIf="product.customizationOptions.sizes.length > 3">+{{ product.customizationOptions.sizes.length - 3 }} more</span>
+          </div>
+          
+          <div class="product-footer">
+            <span class="product-price">{{ product.price | currency }}</span>
+            
+            <div class="product-actions">
+              <ion-button fill="clear" class="customize-btn" (click)="onCustomize(product)" [disabled]="!product.available">
+                <ion-icon name="options-outline" slot="start"></ion-icon>
+                Customize
+              </ion-button>
+              
+              <ion-button class="add-btn" (click)="onAddToCart(product)" [disabled]="!product.available">
+                <ion-icon name="add" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+  
+  <!-- FAB for cart -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="orderService.getCartItems().length">
+    <ion-fab-button routerLink="/order/cart" class="cart-fab">
+      <ion-icon name="cart-outline"></ion-icon>
+      <span class="fab-badge">{{ orderService.getCartItems().length }}</span>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

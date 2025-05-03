@@ -238,16 +238,16 @@
   }
   
   // Dark mode adjustments
-  @media (prefers-color-scheme: dark) {
-    ion-card {
-      background: var(--ion-background-color-step-50);
-    }
+  // @media (prefers-color-scheme: dark) {
+  //   ion-card {
+  //     background: var(--ion-background-color-step-50);
+  //   }
     
-    .loyalty-badge {
-      background-color: rgba(var(--ion-color-primary-rgb), 0.2) !important;
-    }
+  //   .loyalty-badge {
+  //     background-color: rgba(var(--ion-color-primary-rgb), 0.2) !important;
+  //   }
     
-    .tab-navigation {
-      border-bottom: 1px solid var(--ion-color-dark);
-    }
-  }
+  //   .tab-navigation {
+  //     border-bottom: 1px solid var(--ion-color-dark);
+  //   }
+  // }

@@ -1,29 +1,44 @@
-// src/app/features/coffee-game/coffee-game.page.ts
-
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonSpinner,IonButton,IonIcon,IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton } from '@ionic/angular/standalone';
+import { 
+  IonHeader, 
+  IonToolbar, 
+  IonTitle, 
+  IonContent, 
+  IonButtons, 
+  IonBackButton,
+  IonButton,
+  IonIcon,
+  IonSpinner,
+  IonRange,
+  RangeCustomEvent
+} from '@ionic/angular/standalone';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { addIcons } from 'ionicons';
+import { 
+  refreshOutline, 
+  cafeOutline, 
+  cafe, 
+  thermometerOutline, 
+  thermometer, 
+  waterOutline, 
+  water,
+  checkmarkCircleOutline
+} from 'ionicons/icons';
 
 import { AuthService } from '../../core/services/auth.service';
 import { LoyaltyService } from '../../core/services/loyalty.service';
 import { LoadingController, ToastController } from '@ionic/angular/standalone';
-
-interface GameScoreEvent extends Event {
-  detail: {
-    score: number;
-  };
+declare global {
+  interface WindowEventMap {
+    'game-score-updated': CustomEvent<{score: number}>;
+    'game-completed': CustomEvent<{score: number}>;
+    'reset-coffee-game': CustomEvent<any>;
+  }
 }
-
-interface GameCompletedEvent extends Event {
-  detail: {
-    score: number;
-    level: number;
-  };
-}
-
 @Component({
   selector: 'app-coffee-game',
   templateUrl: './coffee-game.page.html',
@@ -31,15 +46,20 @@ interface GameCompletedEvent extends Event {
   standalone: true,
   imports: [
     CommonModule,
-    IonHeader,
-    IonToolbar,
-    IonTitle,
-    IonContent,
-    IonButtons,
+    FormsModule,
+    IonHeader, 
+    IonToolbar, 
+    IonTitle, 
+    IonContent, 
+    IonButtons, 
     IonBackButton,
-    IonSpinner,IonButton,IonIcon,
+    IonButton,
+    IonIcon,
+    IonSpinner,
+    IonRange
   ]
 })
+
 export class CoffeeGamePage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('gameContainer') gameContainer!: ElementRef;
   
@@ -48,11 +68,16 @@ export class CoffeeGamePage implements OnInit, AfterViewInit, OnDestroy {
   highScore = 0;
   completedGames = 0;
   
-  private destroy$ = new Subject<void>();
+  // Game control values
+  grindLevel = 50;
+  tempLevel = 85;
+  milkLevel = 50;
   
-  // Bound event handlers to ensure they can be properly removed
-  private boundScoreUpdateHandler: (event: Event) => void;
-  private boundGameCompletedHandler: (event: Event) => void;
+  // Current game state
+  currentOrder: any = null;
+  
+  private destroy$ = new Subject<void>();
+  private gameInstance: any = null;
   
   constructor(
     private authService: AuthService,
@@ -61,9 +86,16 @@ export class CoffeeGamePage implements OnInit, AfterViewInit, OnDestroy {
     private loadingController: LoadingController,
     private toastController: ToastController
   ) {
-    // Initialize bound handlers
-    this.boundScoreUpdateHandler = this.handleScoreUpdate.bind(this);
-    this.boundGameCompletedHandler = this.handleGameCompleted.bind(this);
+    addIcons({
+      refreshOutline, 
+      cafeOutline, 
+      cafe, 
+      thermometerOutline, 
+      thermometer, 
+      waterOutline, 
+      water,
+      checkmarkCircleOutline
+    });
   }
   
   ngOnInit() {
@@ -110,33 +142,291 @@ export class CoffeeGamePage implements OnInit, AfterViewInit, OnDestroy {
     
     await loading.present();
     
-    // Use the React-based CoffeeGame component
-    // Note: In an actual implementation, this would use a more elegant
-    // integration approach like a custom element or Angular component
-    
-    // Simplified integration for example purposes
-    this.isLoading = false;
+    try {
+      // Initialize game canvas
+      const canvas = document.getElementById('coffee-game-canvas') as HTMLCanvasElement;
+      if (canvas) {
+        // Initialize game engine
+        this.setupGameCanvas(canvas);
+        
+        // Start with a new order
+        this.generateNewOrder();
+      }
+    } catch (err) {
+      console.error('Error initializing game:', err);
+    } finally {
+      // Hide loading after a minimum time to prevent flashing
+      setTimeout(() => {
+        this.isLoading = false;
+      }, 1000);
+    }
     
     // Listen for game events
-    window.addEventListener('game-score-updated', this.boundScoreUpdateHandler);
-    window.addEventListener('game-completed', this.boundGameCompletedHandler);
+    window.addEventListener('game-score-updated', this.handleScoreUpdate.bind(this));
+    window.addEventListener('game-completed', this.handleGameCompleted.bind(this));
+  }
+  
+  /**
+   * Sets up the game canvas with a basic game
+   */
+  setupGameCanvas(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Set up the game background
+    ctx.fillStyle = '#f8f3e9';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw coffee shop environment
+    this.drawCoffeeShopBackground(ctx, canvas.width, canvas.height);
+    
+    // Store game instance for future reference
+    this.gameInstance = {
+      canvas,
+      ctx,
+      lastFrameTime: 0,
+      animationFrameId: 0
+    };
+    
+    // Start game loop
+    this.startGameLoop();
+  }
+  
+  /**
+   * Draws the coffee shop background
+   */
+  drawCoffeeShopBackground(ctx: CanvasRenderingContext2D, width: number, height: number) {
+    // Counter background
+    ctx.fillStyle = '#8d6e63';
+    ctx.fillRect(0, height - 150, width, 150);
+    
+    // Counter top
+    ctx.fillStyle = '#d7ccc8';
+    ctx.fillRect(0, height - 150, width, 20);
+    
+    // Coffee machine
+    ctx.fillStyle = '#5d4037';
+    ctx.fillRect(width / 2 - 100, height - 300, 200, 150);
+    
+    // Machine details
+    ctx.fillStyle = '#3e2723';
+    ctx.fillRect(width / 2 - 80, height - 280, 160, 80);
+    
+    // Steam wand
+    ctx.fillStyle = '#9e9e9e';
+    ctx.beginPath();
+    ctx.moveTo(width / 2 + 80, height - 240);
+    ctx.lineTo(width / 2 + 120, height - 180);
+    ctx.lineTo(width / 2 + 110, height - 180);
+    ctx.lineTo(width / 2 + 70, height - 240);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Draw coffee cup
+    this.drawCoffeeCup(ctx, width / 2, height - 120);
+    
+    // Text for current order
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '24px Arial';
+    ctx.textAlign = 'center';
+    if (this.currentOrder) {
+      ctx.fillText(`Current Order: ${this.currentOrder.name}`, width / 2, 50);
+    } else {
+      ctx.fillText('Welcome to Barista Challenge!', width / 2, 50);
+    }
+  }
+  
+  /**
+   * Draws a coffee cup
+   */
+  drawCoffeeCup(ctx: CanvasRenderingContext2D, x: number, y: number) {
+    // Cup
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.ellipse(x, y, 40, 20, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.beginPath();
+    ctx.ellipse(x, y - 60, 40, 20, 0, Math.PI, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillRect(x - 40, y - 60, 80, 60);
+    
+    // Handle
+    ctx.beginPath();
+    ctx.ellipse(x + 50, y - 30, 10, 20, 0, -Math.PI / 2, Math.PI / 2);
+    ctx.fill();
+    
+    // Coffee liquid - level based on preparation
+    const fillHeight = 50 * (this.milkLevel / 100);
+    ctx.fillStyle = `rgb(${139 - this.grindLevel}, ${69 - this.grindLevel / 2}, ${19})`;
+    ctx.beginPath();
+    ctx.ellipse(x, y - 55 + fillHeight, 35, 18, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Steam - varies with temperature
+    if (this.tempLevel > 80) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      for (let i = 0; i < 3; i++) {
+        const steamIntensity = (this.tempLevel - 80) / 20;
+        const offset = Math.sin(Date.now() / 200 + i) * 5;
+        ctx.beginPath();
+        ctx.moveTo(x - 10 + i * 10, y - 60);
+        ctx.quadraticCurveTo(
+          x - 20 + i * 10 + offset, 
+          y - 90 - 10 * steamIntensity, 
+          x - 15 + i * 10, 
+          y - 110 - 20 * steamIntensity
+        );
+        ctx.quadraticCurveTo(
+          x - 10 + i * 10, 
+          y - 100 - 10 * steamIntensity, 
+          x - 10 + i * 10, 
+          y - 60
+        );
+        ctx.fill();
+      }
+    }
+  }
+  
+  /**
+   * Starts the game loop
+   */
+  startGameLoop() {
+    if (!this.gameInstance) return;
+    
+    const tick = (time: number) => {
+      // Calculate delta time
+      const deltaTime = time - (this.gameInstance.lastFrameTime || 0);
+      this.gameInstance.lastFrameTime = time;
+      
+      // Clear canvas
+      this.gameInstance.ctx.clearRect(0, 0, this.gameInstance.canvas.width, this.gameInstance.canvas.height);
+      
+      // Update game state
+      this.updateGame(deltaTime);
+      
+      // Draw game
+      this.drawGame();
+      
+      // Schedule next frame
+      this.gameInstance.animationFrameId = requestAnimationFrame(tick);
+    };
+    
+    // Start animation loop
+    this.gameInstance.animationFrameId = requestAnimationFrame(tick);
+  }
+  
+  /**
+   * Updates game state
+   */
+  updateGame(deltaTime: number) {
+    // Update game logic here
+  }
+  
+  /**
+   * Draws the game
+   */
+  drawGame() {
+    if (!this.gameInstance) return;
+    
+    const { ctx, canvas } = this.gameInstance;
+    
+    // Draw background
+    this.drawCoffeeShopBackground(ctx, canvas.width, canvas.height);
+  }
+  
+  /**
+   * Generates a new coffee order
+   */
+  generateNewOrder() {
+    const orders = [
+      { name: 'Espresso', grind: 90, temp: 92, milk: 0 },
+      { name: 'Cappuccino', grind: 70, temp: 90, milk: 70 },
+      { name: 'Latte', grind: 65, temp: 85, milk: 85 },
+      { name: 'Americano', grind: 75, temp: 95, milk: 10 },
+      { name: 'Flat White', grind: 68, temp: 88, milk: 60 }
+    ];
+    
+    this.currentOrder = orders[Math.floor(Math.random() * orders.length)];
+    
+    // Show toast with new order
+    this.presentToast(`New order: ${this.currentOrder.name}`);
+  }
+  
+  /**
+   * Handles order serving
+   */
+  serveDrink() {
+    if (!this.currentOrder) {
+      this.presentToast('No current order to serve!');
+      return;
+    }
+    
+    // Calculate score based on how close the player got to the target values
+    const grindDiff = Math.abs(this.grindLevel - this.currentOrder.grind);
+    const tempDiff = Math.abs(this.tempLevel - this.currentOrder.temp);
+    const milkDiff = Math.abs(this.milkLevel - this.currentOrder.milk);
+    
+    // Score formula - higher is better
+    const accuracy = 100 - ((grindDiff + tempDiff + milkDiff) / 3);
+    const points = Math.floor(accuracy * 10);
+    
+    // Update score
+    this.gameScore += points;
+    
+    // Show result
+    if (accuracy > 90) {
+      this.presentToast(`Perfect ${this.currentOrder.name}! +${points} points`);
+    } else if (accuracy > 70) {
+      this.presentToast(`Good ${this.currentOrder.name}. +${points} points`);
+    } else if (accuracy > 50) {
+      this.presentToast(`Acceptable ${this.currentOrder.name}. +${points} points`);
+    } else {
+      this.presentToast(`The customer looks disappointed... +${points} points`);
+    }
+    
+    // Generate new order
+    this.generateNewOrder();
+    
+    // Update high score if needed
+    if (this.gameScore > this.highScore) {
+      this.highScore = this.gameScore;
+      this.savePlayerStats();
+    }
+  }
+  
+  /**
+   * Handles input changes
+   */
+  onGrindChange(event: Event) {
+    // Update game state
+    const value = (event as RangeCustomEvent).detail.value as number;
+    this.grindLevel = value;
+  }
+  
+  onTempChange(event: Event) {
+    const value = (event as RangeCustomEvent).detail.value as number;
+    this.tempLevel = value;
+  }
+  
+  onMilkChange(event: Event) {
+    const value = (event as RangeCustomEvent).detail.value as number;
+    this.milkLevel = value;
   }
   
   /**
    * Handles score updates from the game
    */
-  handleScoreUpdate(event: Event) {
-    const customEvent = event as GameScoreEvent;
-    this.gameScore = customEvent.detail.score;
+  handleScoreUpdate(event: CustomEvent) {
+    this.gameScore = event.detail.score;
   }
   
   /**
    * Handles game completion
    */
-  async handleGameCompleted(event: Event) {
-    const customEvent = event as GameCompletedEvent;
-    const finalScore = customEvent.detail.score;
-    const level = customEvent.detail.level;
+  async handleGameCompleted(event: CustomEvent) {
+    const finalScore = event.detail.score;
     
     // Update high score if needed
     if (finalScore > this.highScore) {
@@ -146,38 +436,35 @@ export class CoffeeGamePage implements OnInit, AfterViewInit, OnDestroy {
     // Increment completed games
     this.completedGames++;
     
-    // Save stats to local storage
-    localStorage.setItem('coffeeGameStats', JSON.stringify({
-      highScore: this.highScore,
-      completedGames: this.completedGames
-    }));
+    // Save stats
+    this.savePlayerStats();
     
     // Award loyalty points based on score
     const pointsToAward = Math.floor(finalScore / 10);
     
     if (pointsToAward > 0) {
-      const userId = await this.getCurrentUserId();
-      
-      this.loyaltyService.addPoints(
-        userId,
-        pointsToAward,
-        undefined  // Changed from null to undefined
-      )
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.presentToast(`You earned ${pointsToAward} loyalty points!`);
-        },
-        error: () => {
-          // Silently fail - don't ruin the game experience
-          console.error('Failed to award loyalty points');
+      try {
+        const userId = await this.getCurrentUserId();
+        if (userId) {
+          this.loyaltyService.addPoints(userId, pointsToAward, undefined)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.presentToast(`You earned ${pointsToAward} loyalty points!`);
+              },
+              error: () => {
+                console.error('Failed to award loyalty points');
+              }
+            });
         }
-      });
+      } catch (err) {
+        console.error('Error awarding points:', err);
+      }
     }
     
     // Show game results
     const toast = await this.toastController.create({
-      message: `Game Over! Final Score: ${finalScore}, Level: ${level}`,
+      message: `Game Over! Final Score: ${finalScore}`,
       duration: 3000,
       position: 'middle',
       buttons: [
@@ -195,11 +482,26 @@ export class CoffeeGamePage implements OnInit, AfterViewInit, OnDestroy {
   }
   
   /**
+   * Saves player stats to local storage
+   */
+  savePlayerStats() {
+    localStorage.setItem('coffeeGameStats', JSON.stringify({
+      highScore: this.highScore,
+      completedGames: this.completedGames
+    }));
+  }
+  
+  /**
    * Gets the current user ID
    */
-  async getCurrentUserId(): Promise<string> {
-    const user = await this.authService.getCurrentUser();
-    return user?.uid || '';
+  async getCurrentUserId(): Promise<string | null> {
+    try {
+      const user = await this.authService.getCurrentUser();
+      return user?.uid || null;
+    } catch (err) {
+      console.error('Error getting current user:', err);
+      return null;
+    }
   }
   
   /**
@@ -209,7 +511,7 @@ export class CoffeeGamePage implements OnInit, AfterViewInit, OnDestroy {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
-      position: 'bottom'
+      position: 'top'
     });
     
     await toast.present();
@@ -219,16 +521,35 @@ export class CoffeeGamePage implements OnInit, AfterViewInit, OnDestroy {
    * Resets the game
    */
   resetGame() {
+    // Reset game score
+    this.gameScore = 0;
+    
+    // Generate new order
+    this.generateNewOrder();
+    
+    // Reset controls
+    this.grindLevel = 50;
+    this.tempLevel = 85;
+    this.milkLevel = 50;
+    
     // Trigger game reset through window event
     window.dispatchEvent(new CustomEvent('reset-coffee-game'));
+    
+    // Show toast
+    this.presentToast('Game Reset!');
   }
   
   /**
    * Cleans up game resources
    */
   cleanupGame() {
-    // Remove event listeners - using the bound handlers ensures proper cleanup
-    window.removeEventListener('game-score-updated', this.boundScoreUpdateHandler);
-    window.removeEventListener('game-completed', this.boundGameCompletedHandler);
+    // Cancel animation frame
+    if (this.gameInstance && this.gameInstance.animationFrameId) {
+      cancelAnimationFrame(this.gameInstance.animationFrameId);
+    }
+    
+    // Remove event listeners
+    window.removeEventListener('game-score-updated', this.handleScoreUpdate);
+    window.removeEventListener('game-completed', this.handleGameCompleted);
   }
 }

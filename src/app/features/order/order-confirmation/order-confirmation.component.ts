@@ -71,15 +71,16 @@ export class OrderConfirmationComponent implements OnInit, OnDestroy {
       });
   }
   
-  goToHome() {
-    this.router.navigate(['/home']);
+ // In order-confirmation.component.ts
+goToHome() {
+  this.router.navigate(['/']);
+}
+
+trackOrder() {
+  if (this.order) {
+    this.router.navigate(['/order'], { queryParams: { orderId: this.order.id } });
   }
-  
-  trackOrder() {
-    if (this.order) {
-      this.router.navigate(['/orders', this.order.id]);
-    }
-  }
+}
   
   formatDate(date: Date | null): string {
     if (!date) return '';

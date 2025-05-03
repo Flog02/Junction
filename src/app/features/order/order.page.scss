@@ -249,21 +249,21 @@
   }
   
   // Dark mode adjustments
-  @media (prefers-color-scheme: dark) {
-    ion-item-divider {
-      --background: var(--ion-color-dark);
-      --color: var(--ion-color-light);
-    }
+  // @media (prefers-color-scheme: dark) {
+  //   ion-item-divider {
+  //     --background: var(--ion-color-dark);
+  //     --color: var(--ion-color-light);
+  //   }
     
-    .order-item:active {
-      background-color: rgba(255, 255, 255, 0.05);
-    }
+  //   .order-item:active {
+  //     background-color: rgba(255, 255, 255, 0.05);
+  //   }
     
-    .item-custom {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
+  //   .item-custom {
+  //     background-color: rgba(255, 255, 255, 0.1);
+  //   }
     
-    .order-details {
-      border-top-color: rgba(255, 255, 255, 0.1);
-    }
-  }
+  //   .order-details {
+  //     border-top-color: rgba(255, 255, 255, 0.1);
+  //   }
+  // }

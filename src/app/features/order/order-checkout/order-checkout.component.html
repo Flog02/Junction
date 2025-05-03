@@ -1,0 +1,200 @@
+<!-- src/app/features/order/order-checkout/order-checkout.component.html -->
+
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/order/cart"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Checkout</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <!-- Loading indicator -->
+    <div *ngIf="isLoading" class="loading-container">
+      <ion-spinner name="circles"></ion-spinner>
+      <p>Processing your order...</p>
+    </div>
+    
+    <div *ngIf="!isLoading" class="checkout-container">
+      <!-- Order summary -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Order Summary</ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <!-- Items list -->
+          <div class="items-list">
+            <div *ngFor="let item of cartItems" class="order-item">
+              <div class="item-quantity">{{ item.quantity }}x</div>
+              <div class="item-details">
+                <div class="item-name">{{ item.name }}</div>
+                <div class="item-customizations" *ngIf="item.customizations">
+                  <span *ngIf="item.customizations.size">
+                    {{ item.customizations.size.name }}
+                  </span>
+                  <span *ngIf="item.customizations.milk">
+                    • {{ item.customizations.milk.name }}
+                  </span>
+                  <!-- Add other customizations here -->
+                </div>
+              </div>
+              <div class="item-price">{{ item.itemTotal | currency }}</div>
+            </div>
+          </div>
+          
+          <!-- Order details -->
+          <div class="service-details">
+            <div class="detail-item">
+              <ion-icon name="location-outline"></ion-icon>
+              <div *ngIf="serviceType === 'pickup'">Pickup</div>
+              <div *ngIf="serviceType === 'dine-in'">Dine In (Table #{{ tableNumber }})</div>
+            </div>
+            
+            <div class="detail-item" *ngIf="serviceType === 'pickup'">
+              <ion-icon name="time-outline"></ion-icon>
+              <div>
+                {{ pickupTime === 'asap' ? 'As soon as possible' : pickupTime }}
+              </div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      
+      <!-- Payment method -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Payment Method</ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="payment-methods">
+            <div 
+              class="payment-method" 
+              [class.selected]="paymentMethod === 'card'"
+              (click)="paymentMethod = 'card'"
+            >
+              <ion-icon name="card-outline"></ion-icon>
+              <div class="method-name">Credit Card</div>
+            </div>
+            
+            <div 
+              class="payment-method" 
+              [class.selected]="paymentMethod === 'cash'"
+              (click)="paymentMethod = 'cash'"
+            >
+              <ion-icon name="cash-outline"></ion-icon>
+              <div class="method-name">Cash</div>
+            </div>
+            
+            <div 
+              class="payment-method" 
+              [class.selected]="paymentMethod === 'wallet'"
+              (click)="paymentMethod = 'wallet'"
+            >
+              <ion-icon name="wallet-outline"></ion-icon>
+              <div class="method-name">Digital Wallet</div>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      
+      <!-- Tip options -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Add a Tip</ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="tip-options">
+            <div 
+              class="tip-option" 
+              [class.selected]="tipPercentage === 0"
+              (click)="tipPercentage = 0; updateTip()"
+            >
+              No Tip
+            </div>
+            
+            <div 
+              class="tip-option" 
+              [class.selected]="tipPercentage === 10"
+              (click)="tipPercentage = 10; updateTip()"
+            >
+              10%
+            </div>
+            
+            <div 
+              class="tip-option" 
+              [class.selected]="tipPercentage === 15"
+              (click)="tipPercentage = 15; updateTip()"
+            >
+              15%
+            </div>
+            
+            <div 
+              class="tip-option" 
+              [class.selected]="tipPercentage === 20"
+              (click)="tipPercentage = 20; updateTip()"
+            >
+              20%
+            </div>
+            
+            <div class="tip-option custom-tip">
+              <ion-input
+                type="number"
+                placeholder="Custom"
+                [value]="tipAmount"
+                (ionChange)="handleCustomTip($event)"
+              ></ion-input>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      
+      <!-- Order total -->
+      <div class="order-total-card">
+        <div class="total-row">
+          <span>Subtotal</span>
+          <span>{{ subtotal | currency }}</span>
+        </div>
+        
+        <div class="total-row">
+          <span>Tax</span>
+          <span>{{ tax | currency }}</span>
+        </div>
+        
+        <div class="total-row">
+          <span>Tip</span>
+          <span>{{ tipAmount | currency }}</span>
+        </div>
+        
+        <div class="total-row" *ngIf="rewardDiscount > 0">
+          <span>Reward Discount</span>
+          <span>-{{ rewardDiscount | currency }}</span>
+        </div>
+        
+        <div class="total-row" *ngIf="giftCardAmount > 0">
+          <span>Gift Card</span>
+          <span>-{{ giftCardAmount | currency }}</span>
+        </div>
+        
+        <div class="total-row final-total">
+          <span>Total</span>
+          <span>{{ total | currency }}</span>
+        </div>
+      </div>
+      
+      <!-- Place order button -->
+      <div class="action-buttons">
+        <ion-button expand="block" (click)="placeOrder()">
+          Place Order
+          <ion-icon name="checkmark-circle-outline" slot="end"></ion-icon>
+        </ion-button>
+        
+        <ion-button expand="block" fill="outline" (click)="cancelCheckout()">
+          Cancel
+        </ion-button>
+      </div>
+    </div>
+  </ion-content>

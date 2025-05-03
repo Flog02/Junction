@@ -1,0 +1,260 @@
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/menu"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Your Cart</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content>
+    <!-- Empty cart state -->
+    <div class="empty-cart" *ngIf="cartItems.length === 0">
+      <div class="empty-icon">
+        <ion-icon name="cart-outline"></ion-icon>
+      </div>
+      <h2>Your cart is empty</h2>
+      <p>Looks like you haven't added any items to your cart yet.</p>
+      <ion-button expand="block" (click)="continueShopping()">
+        <ion-icon name="cafe-outline" slot="start"></ion-icon>
+        Browse Menu
+      </ion-button>
+    </div>
+  
+    <!-- Cart with items -->
+    <div class="cart-container" *ngIf="cartItems.length > 0">
+      <!-- Cart items -->
+      <div class="cart-items">
+        <div class="section-title">
+          <h2>Items ({{ cartItems.length }})</h2>
+        </div>
+        
+        <div class="item-list">
+          <div 
+            *ngFor="let item of cartItems; let i = index" 
+            class="cart-item" 
+            [class.animate-in]="animateItems"
+            [style.animation-delay]="i * 0.1 + 's'"
+          >
+            <div class="item-image">
+              <img [src]="getItemImage(item)" [alt]="item.name">
+            </div>
+            
+            <div class="item-details">
+              <div class="item-name">{{ item.name }}</div>
+              
+              <div class="item-customizations" *ngIf="item.customizations">
+                <!-- Size -->
+                <span *ngIf="item.customizations.size">
+                  {{ item.customizations.size.name }}
+                </span>
+                
+                <!-- Milk -->
+                <span *ngIf="item.customizations.milk">
+                  • {{ item.customizations.milk.name }}
+                </span>
+                
+                <!-- Shots -->
+                <span *ngIf="item.customizations.shots && item.customizations.shots.length > 0">
+                  • {{ item.customizations.shots.length }} extra shot{{ item.customizations.shots.length > 1 ? 's' : '' }}
+                </span>
+                
+                <!-- Syrups -->
+                <span *ngIf="item.customizations.syrups && item.customizations.syrups.length > 0">
+                  • {{ item.customizations.syrups.length }} syrup{{ item.customizations.syrups.length > 1 ? 's' : '' }}
+                </span>
+                
+                <!-- Toppings -->
+                <span *ngIf="item.customizations.toppings && item.customizations.toppings.length > 0">
+                  • {{ item.customizations.toppings.length }} topping{{ item.customizations.toppings.length > 1 ? 's' : '' }}
+                </span>
+              </div>
+              
+              <!-- Sugar and caffeine levels -->
+              <div class="item-levels" *ngIf="item.sugarLevel !== undefined || item.caffeineLevel !== undefined">
+                <span *ngIf="item.sugarLevel !== undefined">
+                  Sugar: {{ item.sugarLevel }}/5
+                </span>
+                <span *ngIf="item.caffeineLevel !== undefined">
+                  • Caffeine: {{ item.caffeineLevel }}/5
+                </span>
+              </div>
+              
+              <!-- Special instructions -->
+              <div class="item-instructions" *ngIf="item.specialInstructions">
+                <ion-icon name="chatbubble-outline"></ion-icon>
+                {{ item.specialInstructions }}
+              </div>
+            </div>
+            
+            <div class="item-actions">
+              <div class="item-price">{{ item.itemTotal | currency }}</div>
+              
+              <div class="quantity-control">
+                <ion-button fill="clear" size="small" (click)="decrementQuantity(i)">
+                  <ion-icon name="remove-outline"></ion-icon>
+                </ion-button>
+                <span class="quantity">{{ item.quantity }}</span>
+                <ion-button fill="clear" size="small" (click)="incrementQuantity(i)">
+                  <ion-icon name="add-outline"></ion-icon>
+                </ion-button>
+              </div>
+              
+              <ion-button fill="clear" color="danger" (click)="removeItem(i)">
+                <ion-icon name="trash-outline"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Service options -->
+      <div class="order-options">
+        <div class="section-title">
+          <h2>How would you like your order?</h2>
+        </div>
+        
+        <div class="service-options">
+          <ion-button 
+            *ngFor="let option of serviceOptions"
+            [fill]="selectedServiceType === option.value ? 'solid' : 'outline'"
+            (click)="selectedServiceType = option.value"
+          >
+            <ion-icon [name]="option.icon" slot="start"></ion-icon>
+            {{ option.label }}
+          </ion-button>
+        </div>
+        
+        <!-- Pickup time selector -->
+        <div class="time-selector" *ngIf="selectedServiceType === 'pickup'">
+          <div class="option-label">When would you like to pick up your order?</div>
+          <ion-select 
+            interface="popover" 
+            [(ngModel)]="selectedPickupTime"
+            placeholder="Select pickup time"
+          >
+            <ion-select-option 
+              *ngFor="let time of pickupTimes" 
+              [value]="time.value"
+            >
+              {{ time.label }}
+            </ion-select-option>
+          </ion-select>
+        </div>
+        
+        <!-- Table number input -->
+        <div class="table-input" *ngIf="selectedServiceType === 'dine-in'">
+          <div class="option-label">Please enter your table number:</div>
+          <ion-input 
+            type="number" 
+            [(ngModel)]="tableNumber" 
+            placeholder="Table number"
+            min="1"
+            max="100"
+          ></ion-input>
+        </div>
+      </div>
+      
+      <!-- Rewards and gift cards -->
+      <div class="promotions">
+        <div class="section-title">
+          <h2>Rewards & Gift Cards</h2>
+        </div>
+        
+        <!-- Rewards section -->
+        <div class="rewards-section" *ngIf="availableRewards.length > 0">
+          <div class="option-label">Apply a reward:</div>
+          <ion-select 
+            interface="popover" 
+            [(ngModel)]="selectedReward"
+            placeholder="Select a reward"
+            (ionChange)="applyReward()"
+          >
+            <ion-select-option [value]="null">None</ion-select-option>
+            <ion-select-option 
+              *ngFor="let reward of availableRewards" 
+              [value]="reward.id"
+            >
+              {{ reward.name }} ({{ reward.pointsCost }} pts)
+            </ion-select-option>
+          </ion-select>
+        </div>
+        
+        <!-- No rewards available message -->
+        <div class="no-rewards" *ngIf="availableRewards.length === 0">
+          <p>You don't have any rewards available.</p>
+        </div>
+        
+        <!-- Gift card section -->
+        <div class="gift-card-section">
+          <div class="option-label">Apply a gift card:</div>
+          <div class="gift-card-input">
+            <ion-input 
+              type="text" 
+              [(ngModel)]="giftCardCode" 
+              placeholder="Enter gift card code"
+              [disabled]="giftCardApplied"
+            ></ion-input>
+            <ion-button 
+              [fill]="giftCardApplied ? 'solid' : 'outline'"
+              [disabled]="!giftCardCode && !giftCardApplied"
+              (click)="giftCardApplied ? giftCardApplied = false : applyGiftCard()"
+            >
+              {{ giftCardApplied ? 'Remove' : 'Apply' }}
+            </ion-button>
+          </div>
+          
+          <!-- Applied gift card -->
+          <div class="applied-gift-card" *ngIf="giftCardApplied">
+            <ion-icon name="card-outline"></ion-icon>
+            <span>Gift card applied: {{ giftCardAmount | currency }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order summary -->
+      <div class="order-summary">
+        <div class="section-title">
+          <h2>Order Summary</h2>
+        </div>
+        
+        <div class="summary-line">
+          <span>Subtotal</span>
+          <span>{{ cartSubtotal | currency }}</span>
+        </div>
+        
+        <div class="summary-line">
+          <span>Tax</span>
+          <span>{{ cartTax | currency }}</span>
+        </div>
+        
+        <div class="summary-line" *ngIf="rewardDiscount > 0">
+          <span>Reward Discount</span>
+          <span>-{{ rewardDiscount | currency }}</span>
+        </div>
+        
+        <div class="summary-line" *ngIf="giftCardApplied">
+          <span>Gift Card</span>
+          <span>-{{ giftCardAmount | currency }}</span>
+        </div>
+        
+        <div class="summary-line total">
+          <span>Total</span>
+          <span>{{ cartTotal | currency }}</span>
+        </div>
+        
+        <div class="estimated-time">
+          <ion-icon name="time-outline"></ion-icon>
+          <span>Estimated ready in {{ estimatedReadyTime }} minutes</span>
+        </div>
+        
+        <ion-button expand="block" (click)="proceedToCheckout()">
+          Proceed to Checkout
+        </ion-button>
+        
+        <ion-button expand="block" fill="outline" (click)="continueShopping()">
+          Continue Shopping
+        </ion-button>
+      </div>
+    </div>
+  </ion-content>

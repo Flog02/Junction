@@ -1,0 +1,268 @@
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/menu"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Customize Your Order</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content class="ion-padding">
+    <!-- Loading state -->
+    <div *ngIf="isLoading" class="loading-container">
+      <ion-spinner name="circles"></ion-spinner>
+      <p class="loading-text">Loading product details...</p>
+    </div>
+  
+    <!-- Product details and customization form -->
+    <div *ngIf="!isLoading && product" class="customize-container">
+      <div class="product-header">
+        <div class="product-image-container">
+          <img [src]="product.imageURL" [alt]="product.name" class="product-image">
+        </div>
+        
+        <div class="product-info">
+          <h1 class="product-name">{{ product.name }}</h1>
+          <p class="product-description">{{ product.description }}</p>
+          
+          <div class="nutrition-preview" *ngIf="nutritionInfo">
+            <div class="nutrition-item">
+              <ion-icon name="flame-outline"></ion-icon>
+              <span>{{ nutritionInfo.calories }} cal</span>
+            </div>
+            
+            <div class="nutrition-item" *ngIf="nutritionInfo.caffeine">
+              <ion-icon name="cafe-outline"></ion-icon>
+              <span>{{ nutritionInfo.caffeine }} mg</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <form [formGroup]="orderForm" (ngSubmit)="addToCart()" class="customize-form">
+        <!-- Quantity selector -->
+        <div class="form-section">
+          <h2 class="section-title">Quantity</h2>
+          <div class="quantity-selector">
+            <ion-button fill="clear" (click)="decrementQuantity()" [disabled]="orderForm.get('quantity')?.value <= 1">
+              <ion-icon name="remove-circle-outline"></ion-icon>
+            </ion-button>
+            <span class="quantity-value">{{ orderForm.get('quantity')?.value || 1 }}</span>
+            <ion-button fill="clear" (click)="incrementQuantity()">
+              <ion-icon name="add-circle-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </div>
+        
+        <!-- Size options -->
+        <div class="form-section" *ngIf="availableSizes.length > 0">
+          <h2 class="section-title">Size</h2>
+          <div class="options-grid size-options">
+            <div 
+              *ngFor="let size of availableSizes" 
+              class="option-item" 
+              [class.selected]="orderForm.get('size')?.value === size.id"
+              (click)="orderForm.get('size')?.setValue(size.id)"
+            >
+              <div class="option-icon" [class]="'size-' + size.id.toLowerCase()">
+                <ion-icon name="cafe-outline"></ion-icon>
+              </div>
+              <div class="option-details">
+                <div class="option-name">{{ size.name }}</div>
+                <div class="price-modifier" *ngIf="size.priceModifier > 0">+{{ size.priceModifier | currency }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Milk options -->
+        <div class="form-section" *ngIf="availableMilk.length > 0">
+          <h2 class="section-title">Milk</h2>
+          <div class="options-grid milk-options">
+            <div 
+              *ngFor="let milk of availableMilk" 
+              class="option-item" 
+              [class.selected]="orderForm.get('milk')?.value === milk.id"
+              (click)="orderForm.get('milk')?.setValue(milk.id)"
+            >
+              <div class="option-icon">
+                <ion-icon name="water-outline"></ion-icon>
+              </div>
+              <div class="option-details">
+                <div class="option-name">{{ milk.name }}</div>
+                <div class="price-modifier" *ngIf="milk.priceModifier > 0">+{{ milk.priceModifier | currency }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Shots options -->
+        <div class="form-section" *ngIf="availableShots.length > 0">
+          <h2 class="section-title">Extra Shots</h2>
+          <div class="options-grid shots-options">
+            <div 
+              *ngFor="let shot of availableShots; let i = index" 
+              class="option-item" 
+              [class.selected]="shot.selected"
+              (click)="toggleShot(i)"
+            >
+              <div class="option-icon">
+                <ion-icon name="flash-outline"></ion-icon>
+              </div>
+              <div class="option-details">
+                <div class="option-name">{{ shot.name }}</div>
+                <div class="price-modifier" *ngIf="shot.priceModifier > 0">+{{ shot.priceModifier | currency }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Syrups options -->
+        <div class="form-section" *ngIf="availableSyrups.length > 0">
+          <h2 class="section-title">Syrups</h2>
+          <div class="options-grid syrups-options">
+            <div 
+              *ngFor="let syrup of availableSyrups; let i = index" 
+              class="option-item" 
+              [class.selected]="syrup.selected"
+              (click)="toggleSyrup(i)"
+            >
+              <div class="option-icon">
+                <ion-icon name="color-fill-outline"></ion-icon>
+              </div>
+              <div class="option-details">
+                <div class="option-name">{{ syrup.name }}</div>
+                <div class="price-modifier" *ngIf="syrup.priceModifier > 0">+{{ syrup.priceModifier | currency }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Toppings options -->
+        <div class="form-section" *ngIf="availableToppings.length > 0">
+          <h2 class="section-title">Toppings</h2>
+          <div class="options-grid toppings-options">
+            <div 
+              *ngFor="let topping of availableToppings; let i = index" 
+              class="option-item" 
+              [class.selected]="topping.selected"
+              (click)="toggleTopping(i)"
+            >
+              <div class="option-icon">
+                <ion-icon name="ice-cream-outline"></ion-icon>
+              </div>
+              <div class="option-details">
+                <div class="option-name">{{ topping.name }}</div>
+                <div class="price-modifier" *ngIf="topping.priceModifier > 0">+{{ topping.priceModifier | currency }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Sugar level -->
+        <div class="form-section">
+          <h2 class="section-title">Sugar Level</h2>
+          <div class="slider-container">
+            <div class="slider-labels">
+              <span>None</span>
+              <span>Regular</span>
+              <span>Extra</span>
+            </div>
+            <input 
+              type="range" 
+              min="0" 
+              max="5" 
+              formControlName="sugarLevel" 
+              class="custom-slider"
+            >
+            <div class="slider-value">Level: {{ orderForm.get('sugarLevel')?.value }}</div>
+          </div>
+        </div>
+        
+        <!-- Caffeine level -->
+        <div class="form-section" *ngIf="product?.category === 'coffee' || product?.category === 'tea'">
+          <h2 class="section-title">Caffeine Level</h2>
+          <div class="slider-container">
+            <div class="slider-labels">
+              <span>Decaf</span>
+              <span>Regular</span>
+              <span>Extra</span>
+            </div>
+            <input 
+              type="range" 
+              min="0" 
+              max="5" 
+              formControlName="caffeineLevel" 
+              class="custom-slider"
+            >
+            <div class="slider-value">Level: {{ orderForm.get('caffeineLevel')?.value }}</div>
+          </div>
+        </div>
+        
+        <!-- Special instructions -->
+        <div class="form-section">
+          <h2 class="section-title">Special Instructions</h2>
+          <ion-textarea
+            formControlName="specialInstructions"
+            placeholder="Add any special requests here..."
+            rows="3"
+            class="special-instructions"
+          ></ion-textarea>
+        </div>
+        
+        <!-- Nutrition summary -->
+        <div class="nutrition-summary">
+          <h2 class="section-title">Nutrition Information</h2>
+          <div class="nutrition-grid">
+            <div class="nutrition-item">
+              <ion-icon name="flame-outline"></ion-icon>
+              <div class="nutrition-label">Calories</div>
+              <div class="nutrition-value">{{ nutritionInfo.calories }}</div>
+            </div>
+            
+            <div class="nutrition-item">
+              <ion-icon name="cafe-outline"></ion-icon>
+              <div class="nutrition-label">Caffeine</div>
+              <div class="nutrition-value">{{ nutritionInfo.caffeine }}mg</div>
+            </div>
+            
+            <div class="nutrition-item">
+              <ion-icon name="water-outline"></ion-icon>
+              <div class="nutrition-label">Sugar</div>
+              <div class="nutrition-value">{{ nutritionInfo.sugar }}g</div>
+            </div>
+            
+            <div class="nutrition-item">
+              <ion-icon name="restaurant-outline"></ion-icon>
+              <div class="nutrition-label">Fat</div>
+              <div class="nutrition-value">{{ nutritionInfo.fat }}g</div>
+            </div>
+            
+            <div class="nutrition-item">
+              <ion-icon name="barbell-outline"></ion-icon>
+              <div class="nutrition-label">Protein</div>
+              <div class="nutrition-value">{{ nutritionInfo.protein }}g</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Order summary and button -->
+        <div class="order-summary">
+          <div class="price-container">
+            <span class="label">Total</span>
+            <span class="total-price">{{ itemTotal | currency }}</span>
+          </div>
+          
+          <ion-button 
+            type="submit" 
+            expand="block" 
+            [disabled]="orderForm.invalid || itemTotal === 0"
+            class="add-to-cart-button"
+          >
+            Add to Cart
+            <ion-icon name="cart-outline" slot="end"></ion-icon>
+          </ion-button>
+        </div>
+      </form>
+    </div>
+  </ion-content>
