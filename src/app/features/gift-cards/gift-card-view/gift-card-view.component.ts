@@ -366,8 +366,8 @@ export class GiftCardViewComponent implements OnInit, OnDestroy {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Lazy Café Gift Card',
-          text: `I've sent you a ${this.giftCard.amount} gift card for Lazy Café!`,
+          title: 'ArtCoffee Gift Card',
+          text: `I've sent you a ${this.giftCard.amount} gift card for ArtCoffee!`,
           url: window.location.href
         });
       } catch (error) {
