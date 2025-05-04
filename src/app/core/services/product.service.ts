@@ -1190,6 +1190,33 @@ calculateNutrition(
     ...dessertProducts
   ];
 }
+
+addToCart(product: any): Observable<any> {
+  // For demo purposes, we'll use a mock successful response
+  // In a real app, you would use the HTTP client to call your API
+  // return this.http.post(`${this.apiUrl}/cart`, product);
+  
+  console.log('Adding to cart:', product);
+  
+  // Simulate API call with a successful response
+  return of({
+    success: true,
+    message: 'Product added to cart',
+    cartCount: 1,
+    product: product
+  }).pipe(
+    // Add a small delay to simulate network request
+    map(response => {
+      return new Promise(resolve => {
+        setTimeout(() => resolve(response), 800);
+      });
+    }),
+    catchError(error => {
+      console.error('Error in add to cart:', error);
+      throw 'Failed to add item to cart. Please try again.';
+    })
+  );
+}
 }
   
 

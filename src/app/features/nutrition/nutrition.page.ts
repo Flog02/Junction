@@ -4,7 +4,7 @@
 
 import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {IonCardHeader,IonCard,IonCardContent,IonCardSubtitle,IonCardTitle,IonToolbar,IonHeader,IonButtons,IonTitle,IonContent,IonLabel,IonItem,IonInput,IonButton,IonIcon} from '@ionic/angular/standalone'
+import {IonBackButton,IonCardHeader,IonCard,IonCardContent,IonCardSubtitle,IonCardTitle,IonToolbar,IonHeader,IonButtons,IonTitle,IonContent,IonLabel,IonItem,IonInput,IonButton,IonIcon} from '@ionic/angular/standalone'
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
@@ -17,6 +17,9 @@ import { AlertController, ToastController } from '@ionic/angular/standalone';
   selector: 'app-nutrition',
   template: `<ion-header>
   <ion-toolbar>
+  <ion-buttons slot="start">
+        <ion-back-button defaultHref="/home"></ion-back-button>
+      </ion-buttons>
     <ion-title>Nutrition Dashboard</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="showNutritionInfo()">
@@ -269,7 +272,7 @@ import { AlertController, ToastController } from '@ionic/angular/standalone';
     margin: 16px 0;
   }`,
   standalone: true,
-  imports: [IonCardHeader, CommonModule, IonCard, IonCardContent, IonCardSubtitle, IonCardTitle, IonToolbar, IonHeader, IonButtons, IonTitle, IonContent, IonLabel, IonItem, IonInput, IonButton, IonIcon, ReactiveFormsModule, RouterModule]
+  imports: [IonBackButton,IonCardHeader, CommonModule, IonCard, IonCardContent, IonCardSubtitle, IonCardTitle, IonToolbar, IonHeader, IonButtons, IonTitle, IonContent, IonLabel, IonItem, IonInput, IonButton, IonIcon, ReactiveFormsModule, RouterModule]
 })
 export class NutritionPage implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('weeklyChart') weeklyChartCanvas!: ElementRef;

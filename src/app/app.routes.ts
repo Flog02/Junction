@@ -39,6 +39,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'ar-experience',
+    loadComponent: () =>
+      import('./features/ar-experience/ar-experience.page').then(m=>m.ArExperiencePage),
+    canActivate: [authGuard],
+  },
+  {
     path: 'order',
     loadChildren: () =>
       import('./features/order/order.routes').then((m) => m.ORDER_ROUTES),

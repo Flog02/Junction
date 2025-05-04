@@ -54,13 +54,17 @@ export class ArExperiencePage implements OnInit, AfterViewInit, OnDestroy {
   isScanning = false;
   coffeeInfoVisible = false;
   
+  // Video stream elements
+  @ViewChild('videoElement', { static: false }) videoElement: ElementRef | undefined;
+  videoStream: MediaStream | null = null;
+  
   // Coffee Options
   coffeeOptions = [
-    { id: 'espresso', name: 'Espresso', thumbnail: 'assets/coffees/espresso-thumb.png' },
-    { id: 'latte', name: 'Latte', thumbnail: 'assets/coffees/latte-thumb.png' },
-    { id: 'cappuccino', name: 'Cappuccino', thumbnail: 'assets/coffees/cappuccino-thumb.png' },
-    { id: 'mocha', name: 'Mocha', thumbnail: 'assets/coffees/mocha-thumb.png' },
-    { id: 'americano', name: 'Americano', thumbnail: 'assets/coffees/americano-thumb.png' }
+    { id: 'espresso', name: 'Espresso', thumbnail: 'assets/products/espresso.jpg' },
+    { id: 'latte', name: 'Latte', thumbnail: 'assets/products/latte.jpg' },
+    { id: 'cappuccino', name: 'Cappuccino', thumbnail: 'assets/products/cappuccino.jpg' },
+    { id: 'mocha', name: 'Mocha', thumbnail: 'assets/products/mocha.jpg' },
+    // { id: 'americano', name: 'Americano', thumbnail: 'assets/products/americano.jpg' }
   ];
   
   // Customization options
@@ -114,9 +118,22 @@ export class ArExperiencePage implements OnInit, AfterViewInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     
+    // Stop video stream
+    this.stopVideoStream();
+    
     // Clean up AR session
     if (this.arSession) {
       this.arSession.end();
+    }
+  }
+  
+  /**
+   * Stop the video stream
+   */
+  stopVideoStream() {
+    if (this.videoStream) {
+      this.videoStream.getTracks().forEach(track => track.stop());
+      this.videoStream = null;
     }
   }
   
@@ -132,6 +149,10 @@ export class ArExperiencePage implements OnInit, AfterViewInit, OnDestroy {
       if (this.cameraPermissionGranted) {
         setTimeout(() => {
           this.isLoading = false;
+          // If permission is already granted, start the camera
+          if (!this.showInstructions) {
+            this.startCamera();
+          }
         }, 1500);
       } else {
         this.isLoading = false;
@@ -147,19 +168,59 @@ export class ArExperiencePage implements OnInit, AfterViewInit, OnDestroy {
    */
   async requestCameraPermission() {
     try {
-      // Request camera access
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      
-      // Stop the stream immediately, we just needed permission
-      stream.getTracks().forEach(track => track.stop());
+      // Request camera access and keep the stream
+      this.videoStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment', // Prefer back camera
+          width: { ideal: 1280 },
+          height: { ideal: 720 } 
+        } 
+      });
       
       // Update permission state
       this.cameraPermissionGranted = true;
       
-      // Initialize AR session
+      // Initialize AR session with the video stream
       this.initializeAR();
+      
+      // Connect the video stream to the video element in the DOM
+      this.startCamera();
     } catch (error) {
       console.error('Error requesting camera permission:', error);
+    }
+  }
+  
+  /**
+   * Start camera feed
+   */
+  async startCamera() {
+    if (!this.videoElement || this.cameraPermissionGranted === false) return;
+    
+    try {
+      // If we don't have a stream yet, get one
+      if (!this.videoStream) {
+        this.videoStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'environment', // Prefer back camera
+            width: { ideal: 1280 },
+            height: { ideal: 720 } 
+          } 
+        });
+      }
+      
+      // Connect stream to video element
+      const videoEl = this.videoElement.nativeElement as HTMLVideoElement;
+      videoEl.srcObject = this.videoStream;
+      videoEl.play();
+      
+      // Start scanning when the video is playing
+      videoEl.onplaying = () => {
+        if (!this.showInstructions) {
+          this.startScanning();
+        }
+      };
+    } catch (error) {
+      console.error('Error starting camera:', error);
     }
   }
   
@@ -167,7 +228,7 @@ export class ArExperiencePage implements OnInit, AfterViewInit, OnDestroy {
    * Initialize AR session
    */
   async initializeAR() {
-    if (!this.arCanvas || !this.cameraPermissionGranted) return;
+    if (!this.arCanvas) return;
     
     // Simulate AR initialization
     this.isLoading = true;
@@ -176,9 +237,9 @@ export class ArExperiencePage implements OnInit, AfterViewInit, OnDestroy {
     setTimeout(() => {
       this.isLoading = false;
       
-      // Start surface scanning when ready
+      // Start camera and surface scanning when ready
       if (this.cameraPermissionGranted && !this.showInstructions) {
-        this.startScanning();
+        this.startCamera();
       }
     }, 2000);
     
@@ -217,7 +278,9 @@ export class ArExperiencePage implements OnInit, AfterViewInit, OnDestroy {
     this.showInstructions = false;
     
     if (this.cameraPermissionGranted) {
-      this.startScanning();
+      this.startCamera();
+    } else {
+      this.requestCameraPermission();
     }
   }
   
@@ -273,6 +336,34 @@ export class ArExperiencePage implements OnInit, AfterViewInit, OnDestroy {
   }
   
   /**
+   * Add selected coffee to cart
+   */
+  addToCart() {
+    // Get the selected coffee details
+    const coffeeDetails = {
+      type: this.getSelectedCoffeeName(),
+      size: this.selectedSize,
+      color: this.selectedColor,
+      price: this.getSelectedCoffeePrice()
+    };
+    
+    // Add to cart through the product service
+    this.productService.addToCart(coffeeDetails).subscribe(
+      (response) => {
+        console.log('Added to cart successfully:', response);
+        // Show success message or navigate to cart
+        alert('Coffee added to cart successfully!');
+        this.hideCoffeeInfo();
+      },
+      (error) => {
+        console.error('Error adding to cart:', error);
+        // Show error message
+        alert('Failed to add to cart. Please try again.');
+      }
+    );
+  }
+  
+  /**
    * Get selected coffee name
    */
   getSelectedCoffeeName(): string {
@@ -284,7 +375,13 @@ export class ArExperiencePage implements OnInit, AfterViewInit, OnDestroy {
    * Get selected coffee image
    */
   getSelectedCoffeeImage(): string {
-    return `assets/coffees/${this.selectedCoffee}.png`;
+    // First try to find the coffee in our options to get the exact thumbnail path
+    const coffee = this.coffeeOptions.find(c => c.id === this.selectedCoffee);
+    if (coffee && coffee.thumbnail) {
+      return coffee.thumbnail;
+    }
+    // Fallback to constructed path
+    return `assets/products/${this.selectedCoffee}.jpg`;
   }
   
   /**
@@ -327,10 +424,10 @@ export class ArExperiencePage implements OnInit, AfterViewInit, OnDestroy {
     return Math.round(baseCalorie * multiplier);
   }
   
-/**
+  /**
    * Get coffee caffeine content
    */
-getSelectedCoffeeCaffeine(): number {
+  getSelectedCoffeeCaffeine(): number {
     const baseCaffeine: {[key: string]: number} = {
       'espresso': 64,
       'latte': 64,
