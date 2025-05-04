@@ -39,11 +39,11 @@ The app's description stands as:
 
 5. I display this data on a dashboard using Chart.js, giving users visual feedback on their consumption.
 
-6. 3D Coffee Visualization
+6. 3D Coffee Visualization.
 
 7. I use Three.js to render dynamic 3D coffee models based on order details.
 
-8. I implement a points-based loyalty system to track points, tiers, and redemption history.
+8. I implement a points-based loyalty system to track points, tiers, and redemption history. The points can be recieved through ordering and through interaction with the app (like playig the designated game). There is also a three tier ranking system , where rewards improve as you go up.
 
 9. We created a journey page to show every step the product takes and where it is sourced from, to increase customer trust.
 
@@ -55,4 +55,10 @@ The app's description stands as:
 
 13. There is an order tracking system that takes live updates from staff accounts on the stage of your order.
 
-14. There is a whole new version of the app for staff, where they can manage all orders, previous ones, and many different features.
+14. The user can leave a message on their order as well as set a specific time for pick up... if that is his choice.
+
+15. The client can check his past orders as well as reorder anything he desires.
+
+16. There is a notifications section where all are displayed and seperated by category on the type of notification a user recieves. Improving usability.
+
+17. There is a whole new version of the app for staff, where they can manage all orders, previous ones, and many different features, like generating new QR codes for new tables. They can choose through three different states for an order as to reflect where it is in preparation: pending, processing, delivered. Their actions on changing the state of an order triger an immideate notification on the client, as to keep them on the know for eeverything happeneing with their order. 
