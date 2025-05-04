@@ -1,5 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
+import { Router } from '@angular/router';
 import { 
   IonHeader, 
   IonToolbar, 
@@ -89,7 +91,8 @@ export class NotificationComponent implements OnInit, OnDestroy {
 
   constructor(
     private notificationService: NotificationService,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private router:Router
   ) {
     addIcons({
       notificationsOutline, 
@@ -339,13 +342,17 @@ export class NotificationComponent implements OnInit, OnDestroy {
   /**
    * Handle notification click
    */
-  handleNotificationClick(notification: Notification) {
-    // Mark as read
-    this.markAsRead(notification);
-    
-    // Handle action URL if present
-    if (notification.actionUrl) {
-      // Navigate to the URL (implement based on your routing)
+  // In your notification click handler (e.g., in NotificationService or component):
+handleNotificationClick(notification: Notification) {
+    if (notification.type === 'promotion' && notification.targetId) {
+      // For product promotions, navigate to the product page
+      this.router.navigate(['/product', notification.targetId]);
+    } else if (notification.type === 'order' && notification.targetId) {
+      // For order updates, navigate to the order details
+      this.router.navigate(['/orders', notification.targetId]);
+    } else {
+      // Default to notifications page
+      this.router.navigate(['/notifications']);
     }
   }
 }

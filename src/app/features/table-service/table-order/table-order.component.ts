@@ -1,331 +1,376 @@
-// src/app/features/table-service/table-order/table-order.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
-import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { 
-  IonContent, 
   IonHeader, 
   IonToolbar, 
   IonTitle, 
-  IonButton, 
-  IonIcon, 
-  IonCard, 
-  IonCardHeader, 
-  IonCardTitle, 
+  IonContent, 
+  IonButtons, 
+  IonBackButton,
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
   IonCardContent,
+  IonButton,
+  IonIcon,
   IonList,
   IonItem,
   IonLabel,
-  IonBackButton,
-  IonButtons,
-  IonSpinner,
-  AlertController,
+  IonBadge,
   ToastController,
-  LoadingController
+  AlertController
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
-  cafeOutline, 
-  restaurantOutline,
+  restaurantOutline, 
+  cartOutline, 
+  personOutline, 
   timeOutline,
-  cartOutline,
-  addCircleOutline,
-  removeCircleOutline,
-  checkmarkCircleOutline,
-  peopleOutline,
-  cashOutline
+  callOutline,
+  locationOutline
 } from 'ionicons/icons';
 
-import { TableService, TableInfo } from '../../../core/services/table.service';
-import { TableOrderService } from '../../../core/services/table-order.service';
-import { ProductService } from '../../../core/services/product.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { Product } from '../../../core/models/product.model';
-import { OrderItem, Order } from '../../../core/models/order.model';
+import { TableInfo, StoreInfo } from '../../../core/models/table.model';
+import { TableService } from '../../../core/services/table.service';
 
 @Component({
   selector: 'app-table-order',
-  templateUrl: './table-order.component.html',
-  styleUrls: ['./table-order.component.scss'],
+  template: `
+    <ion-header>
+      <ion-toolbar color="primary">
+        <ion-buttons slot="start">
+          <ion-back-button defaultHref="/table-service"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Place Order</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    
+    <ion-content class="ion-padding">
+      <!-- Table Information Card -->
+      <ion-card *ngIf="tableInfo">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="restaurant-outline"></ion-icon>
+            Table {{ tableInfo.tableNumber }}
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="table-details">
+            <p><strong>Store:</strong> {{ storeName }}</p>
+            <p><strong>Seats:</strong> {{ tableInfo.seats }}</p>
+            <p><strong>Status:</strong> 
+              <ion-badge [color]="getStatusColor(tableInfo.status)">
+                {{ tableInfo.status }}
+              </ion-badge>
+            </p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      
+      <!-- Store Information Card -->
+      <ion-card *ngIf="storeInfo">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="location-outline"></ion-icon>
+            {{ storeInfo.name }}
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="store-details">
+            <p>
+              <ion-icon name="location-outline"></ion-icon>
+              {{ storeInfo.address.street }}, {{ storeInfo.address.city }}, {{ storeInfo.address.zipCode }}
+            </p>
+            <p>
+              <ion-icon name="call-outline"></ion-icon>
+              {{ storeInfo.contactInfo.phoneNumber }}
+            </p>
+            <p>
+              <ion-icon name="time-outline"></ion-icon>
+              {{ isStoreOpen ? 'Open Now' : 'Closed' }}
+              <span *ngIf="isStoreOpen && currentBusinessHours">
+                (Until {{ currentBusinessHours.close }})
+              </span>
+            </p>
+            <p *ngIf="storeInfo.currentWaitTime">
+              <ion-icon name="time-outline"></ion-icon>
+              Current Wait Time: {{ storeInfo.currentWaitTime }} min
+            </p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+      
+      <!-- Menu Placeholder - In a real app, this would show the actual menu -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="restaurant-outline"></ion-icon>
+            Menu
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <ion-list>
+            <ion-item button (click)="showMenuCategory('starters')">
+              <ion-label>Starters</ion-label>
+            </ion-item>
+            <ion-item button (click)="showMenuCategory('mains')">
+              <ion-label>Main Courses</ion-label>
+            </ion-item>
+            <ion-item button (click)="showMenuCategory('desserts')">
+              <ion-label>Desserts</ion-label>
+            </ion-item>
+            <ion-item button (click)="showMenuCategory('drinks')">
+              <ion-label>Drinks</ion-label>
+            </ion-item>
+          </ion-list>
+          
+          <div class="order-actions">
+            <ion-button expand="block" color="primary" (click)="startOrder()">
+              <ion-icon name="cart-outline" slot="start"></ion-icon>
+              Start Order
+            </ion-button>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </ion-content>
+  `,
+  styles: `
+    .table-details, .store-details {
+      margin-bottom: 16px;
+    }
+    
+    .table-details p, .store-details p {
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .store-details ion-icon {
+      margin-right: 8px;
+      color: var(--ion-color-medium);
+    }
+    
+    ion-card-title {
+      display: flex;
+      align-items: center;
+    }
+    
+    ion-card-title ion-icon {
+      margin-right: 8px;
+    }
+    
+    .order-actions {
+      margin-top: 20px;
+    }
+  `,
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
-    ReactiveFormsModule,
-    IonContent,
     IonHeader,
     IonToolbar,
     IonTitle,
-    IonButton,
-    IonIcon,
+    IonContent,
+    IonButtons,
+    IonBackButton,
     IonCard,
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
+    IonButton,
+    IonIcon,
     IonList,
     IonItem,
     IonLabel,
-    IonBackButton,
-    IonButtons,
-    IonSpinner
-]
+    IonBadge
+  ]
 })
 export class TableOrderComponent implements OnInit {
   tableInfo: TableInfo | null = null;
-  featuredProducts: Product[] = [];
-  cartItems: OrderItem[] = [];
-  isLoading = true;
-  isPlacingOrder = false;
+  storeInfo: StoreInfo | null = null;
+  storeName: string = '';
+  isStoreOpen: boolean = false;
+  currentBusinessHours: { open: string; close: string } | null = null;
   
   constructor(
+    private route: ActivatedRoute,
     private router: Router,
-    private formBuilder: FormBuilder,
     private tableService: TableService,
-    private tableOrderService: TableOrderService,
-    private productService: ProductService,
-    private authService: AuthService,
-    private alertController: AlertController,
     private toastController: ToastController,
-    private loadingController: LoadingController
+    private alertController: AlertController
   ) {
     addIcons({ 
-      cafeOutline, 
-      restaurantOutline,
+      restaurantOutline, 
+      cartOutline, 
+      personOutline, 
       timeOutline,
-      cartOutline,
-      addCircleOutline,
-      removeCircleOutline,
-      checkmarkCircleOutline,
-      peopleOutline,
-      cashOutline
+      callOutline,
+      locationOutline
     });
     
-    // Get table info from router state
+    // Get navigation state
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras.state) {
-      this.tableInfo = navigation.extras.state['tableInfo'];
+      this.tableInfo = navigation.extras.state['tableInfo'] as TableInfo;
+      
+      if (this.tableInfo) {
+        this.loadStoreInfo(this.tableInfo.storeId);
+      }
     }
   }
-  /**
- * Increases the quantity of an item in the cart
- */
-addItemQuantity(index: number): void {
-  if (index >= 0 && index < this.cartItems.length) {
-    // Increment quantity
-    this.cartItems[index].quantity += 1;
-    
-    // Recalculate total
-    this.cartItems[index].itemTotal = 
-      this.cartItems[index].quantity * this.cartItems[index].basePrice;
-      
-    this.showToast(`Added another ${this.cartItems[index].name}`);
-  }
-}
-
+  
   ngOnInit() {
+    // If no tableInfo from navigation state, check for query params
     if (!this.tableInfo) {
-      // If no table info is available, redirect back to table service page
-      this.showError('No table information available. Please scan a table QR code.');
-      this.router.navigate(['/table-service']);
-      return;
-    }
-    
-    // Check if the store is open
-    this.tableService.isStoreOpen(this.tableInfo.storeId).subscribe({
-      next: isOpen => {
-        if (!isOpen) {
-          this.showError('This café location is currently closed. Please try again during business hours.');
-          this.router.navigate(['/table-service']);
-          return;
-        }
+      this.route.queryParams.subscribe(params => {
+        const storeId = params['storeId'];
+        const tableNumber = parseInt(params['tableNumber'], 10);
         
-        // Load featured products
-        this.loadFeaturedProducts();
+        if (storeId && !isNaN(tableNumber)) {
+          // Create a QR code URL and process it
+          const qrCode = `${window.location.origin}/table/${storeId}/${tableNumber}`;
+          this.processQRCode(qrCode);
+        } else {
+          // No table info available, redirect to scanner
+          this.showNoTableAlert();
+        }
+      });
+    }
+  }
+  
+  /**
+   * Process a QR code to get table information
+   */
+  private processQRCode(qrCode: string) {
+    this.tableService.getTableInfoFromQRCode(qrCode).subscribe({
+      next: tableInfo => {
+        this.tableInfo = tableInfo;
+        this.loadStoreInfo(tableInfo.storeId);
       },
       error: error => {
-        this.showError('Error checking store status: ' + error.message);
-        this.router.navigate(['/table-service']);
+        console.error('Error processing QR code:', error);
+        this.showNoTableAlert();
       }
     });
   }
   
-  loadFeaturedProducts() {
-    this.isLoading = true;
-    this.productService.getFeaturedProducts().subscribe({
-      next: products => {
-        this.featuredProducts = products;
-        this.isLoading = false;
+  /**
+   * Load store information based on storeId
+   */
+  private loadStoreInfo(storeId: string) {
+    this.tableService.getStoreInfo(storeId).subscribe({
+      next: store => {
+        if (store) {
+          this.storeInfo = store;
+          this.storeName = store.name;
+          
+          // Check if store is open
+          this.checkStoreOpen();
+        } else {
+          this.presentToast('Store information not found');
+        }
       },
       error: error => {
-        this.showError('Error loading products: ' + error.message);
-        this.isLoading = false;
+        console.error('Error loading store info:', error);
+        this.presentToast('Could not load store information');
       }
     });
   }
   
-  addToCart(product: Product) {
-    // Check if product is already in cart
-    const existingItemIndex = this.cartItems.findIndex(item => item.productId === product.id);
+  /**
+   * Check if the store is currently open
+   */
+  private checkStoreOpen() {
+    if (!this.storeInfo) return;
     
-    if (existingItemIndex !== -1) {
-      // Increment quantity
-      this.cartItems[existingItemIndex].quantity += 1;
-      // Recalculate total
-      this.cartItems[existingItemIndex].itemTotal = 
-        this.cartItems[existingItemIndex].quantity * product.price;
+    // If store has isOpen flag, use that
+    if (typeof this.storeInfo.isOpen === 'boolean') {
+      this.isStoreOpen = this.storeInfo.isOpen;
     } else {
-      // Add new item to cart
-      const newItem: OrderItem = {
-        productId: product.id,
-        name: product.name,
-        quantity: 1,
-        basePrice: product.price,
-        customizations: {
-          size: product.customizationOptions.sizes[0], // Default to first size
-          milk: product.customizationOptions.milk[0], // Default to first milk option
-          shots: [],
-          syrups: [],
-          toppings: []
-        },
-        sugarLevel: 3, // Default sugar level (0-5)
-        caffeineLevel: 3, // Default caffeine level (0-5)
-        specialInstructions: '',
-        itemTotal: product.price,
-        nutritionInfo: product.nutritionInfo
-      };
+      // Otherwise, check business hours
+      const now = new Date();
+      const day = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
       
-      this.cartItems.push(newItem);
-    }
-    
-    this.showToast(`${product.name} added to cart`);
-  }
-  
-  removeFromCart(index: number) {
-    if (this.cartItems[index].quantity > 1) {
-      // Decrement quantity
-      this.cartItems[index].quantity -= 1;
-      // Recalculate total
-      this.cartItems[index].itemTotal = 
-        this.cartItems[index].quantity * this.cartItems[index].basePrice;
-    } else {
-      // Remove item completely
-      this.cartItems.splice(index, 1);
-    }
-  }
-  
-  getCartTotal(): number {
-    return this.cartItems.reduce((total, item) => total + item.itemTotal, 0);
-  }
-  
-  getCartItemCount(): number {
-    return this.cartItems.reduce((count, item) => count + item.quantity, 0);
-  }
-  
-  async placeOrder() {
-    if (this.cartItems.length === 0) {
-      this.showToast('Your cart is empty');
-      return;
-    }
-    
-    // Confirm order
-    const alert = await this.alertController.create({
-      header: 'Confirm Order',
-      message: `Place order for table ${this.tableInfo?.tableNumber}?`,
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
-        {
-          text: 'Place Order',
-          handler: () => {
-            this.submitOrder();
-          }
-        }
-      ]
-    });
-    
-    await alert.present();
-  }
-  
-  async submitOrder() {
-    this.isPlacingOrder = true;
-    
-    const loading = await this.loadingController.create({
-      message: 'Placing your order...'
-    });
-    await loading.present();
-    
-    // Get current user
-    const user = await this.authService.getCurrentUser();
-    
-    if (!user) {
-      loading.dismiss();
-      this.showError('You must be logged in to place an order');
-      this.router.navigate(['/auth/login']);
-      return;
-    }
-    
-    if (!this.tableInfo) {
-      loading.dismiss();
-      this.showError('Table information is missing');
-      return;
-    }
-    
-    // Create order object
-    const order: Order = {
-      userId: user.uid,
-      storeId: this.tableInfo.storeId,
-      tableNumber: this.tableInfo.tableNumber,
-      orderTime: new Date(),
-      processTime: null,
-      completionTime: null,
-      status: 'pending',
-      paymentStatus: 'pending',
-      paymentMethod: 'app', // Default payment method
-      total: 0, // Will be calculated in the service
-      subtotal: this.getCartTotal(),
-      tax: 0, // Will be calculated in the service
-      tip: 0,
-      items: this.cartItems,
-      loyaltyPointsEarned: 0, // Will be calculated in the service
-      giftCardApplied: null,
-      deliveredBy: null,
-      notes: ''
-    };
-    
-    // Submit the order
-    this.tableOrderService.createTableOrder(
-      this.tableInfo.storeId,
-      this.tableInfo.tableNumber,
-      order
-    ).subscribe({
-      next: orderId => {
-        loading.dismiss();
-        this.isPlacingOrder = false;
-        this.showOrderSuccess(orderId);
-      },
-      error: error => {
-        loading.dismiss();
-        this.isPlacingOrder = false;
-        this.showError('Failed to place order: ' + error.message);
+      if (this.storeInfo.businessHours && this.storeInfo.businessHours[day]) {
+        this.currentBusinessHours = this.storeInfo.businessHours[day];
+        
+        // Parse opening and closing times
+        const openTime = this.parseTime(this.currentBusinessHours.open);
+        const closeTime = this.parseTime(this.currentBusinessHours.close);
+        
+        // Get current time
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
+        const currentTotalMinutes = currentHour * 60 + currentMinute;
+        
+        // Check if current time is within business hours
+        this.isStoreOpen = currentTotalMinutes >= openTime && currentTotalMinutes <= closeTime;
+      } else {
+        this.isStoreOpen = false;
       }
-    });
+    }
   }
   
-  async showOrderSuccess(orderId: string) {
+  /**
+   * Helper method to parse time string (format: "HH:MM") to total minutes
+   */
+  private parseTime(timeString: string): number {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
+  
+  /**
+   * Get color for table status badge
+   */
+  getStatusColor(status: string): string {
+    switch (status) {
+      case 'available':
+        return 'success';
+      case 'occupied':
+        return 'danger';
+      case 'reserved':
+        return 'warning';
+      default:
+        return 'medium';
+    }
+  }
+  
+  /**
+   * Show menu category (placeholder for actual menu implementation)
+   */
+  showMenuCategory(category: string) {
+    this.presentToast(`${category} category selected`);
+    // In a real app, this would navigate to the menu category or load it
+  }
+  
+  /**
+   * Start the ordering process
+   */
+  startOrder() {
+    if (!this.isStoreOpen) {
+      this.presentAlert('Store Closed', 'Sorry, this store is currently closed. Please try again during business hours.');
+      return;
+    }
+    
+    this.presentAlert('Order Started', 'This is a demo. In a real app, you would now be able to select items from the menu.');
+    // In a real app, this would start the ordering process
+  }
+  
+  /**
+   * Show an alert when no table information is available
+   */
+  private async showNoTableAlert() {
     const alert = await this.alertController.create({
-      header: 'Order Placed!',
-      message: `Your order has been placed successfully. Order #${orderId.substring(0, 6).toUpperCase()}`,
+      header: 'No Table Information',
+      message: 'No table information was found. Please scan a valid table QR code.',
       buttons: [
         {
-          text: 'OK',
+          text: 'Go to Scanner',
           handler: () => {
-            // Clear cart
-            this.cartItems = [];
-            // Redirect to home
-            this.router.navigate(['/home']);
+            this.router.navigate(['/table-service/scan']);
           }
         }
       ]
@@ -334,17 +379,10 @@ addItemQuantity(index: number): void {
     await alert.present();
   }
   
-  async showError(message: string) {
-    const alert = await this.alertController.create({
-      header: 'Error',
-      message,
-      buttons: ['OK']
-    });
-    
-    await alert.present();
-  }
-  
-  async showToast(message: string) {
+  /**
+   * Present a toast message
+   */
+  private async presentToast(message: string) {
     const toast = await this.toastController.create({
       message,
       duration: 2000,
@@ -352,5 +390,18 @@ addItemQuantity(index: number): void {
     });
     
     await toast.present();
+  }
+  
+  /**
+   * Present an alert message
+   */
+  private async presentAlert(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: ['OK']
+    });
+    
+    await alert.present();
   }
 }

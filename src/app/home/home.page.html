@@ -154,7 +154,7 @@
       </ion-button>
     </div>
     <div class="products-scroll">
-      <ion-card  *ngFor="let product of featuredProducts"  [routerLink]="['/menu', product.id]" class="product-card" >
+      <ion-card  *ngFor="let product of featuredProducts"  [routerLink]="['/order/custom', product.id]" class="product-card" >
         <div class="product-image-container" >
           <img [src]="product.imageURL" [alt]="product.name" class="product-image">
           <div class="product-price">{{ product.price | currency }}</div>
@@ -166,6 +166,9 @@
       </ion-card>
     </div>
   </div>
+
+  <app-product-suggestions></app-product-suggestions>
+
   
   <!-- Promotional Section -->
   <div class="promo-section" [@slideInUp]="animateCards">

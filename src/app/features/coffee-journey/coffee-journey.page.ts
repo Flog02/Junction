@@ -3,7 +3,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent } from '@ionic/angular/standalone';
+import { IonButtons,IonBackButton,IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent } from '@ionic/angular/standalone';
 import { CoffeeVisualizationComponent } from './coffe-visualization.component';
 import { OrderItem } from '../../core/models/order.model';
 
@@ -11,6 +11,9 @@ import { OrderItem } from '../../core/models/order.model';
   selector: 'app-coffee-journey',
   template:`<ion-header>
   <ion-toolbar>
+  <ion-buttons slot="start">
+        <ion-back-button defaultHref="/home"></ion-back-button>
+      </ion-buttons>
     <ion-title>Coffee Journey</ion-title>
   </ion-toolbar>
 </ion-header>
@@ -298,7 +301,7 @@ import { OrderItem } from '../../core/models/order.model';
     line-height: 1.6;
   }`,
   standalone: true,
-  imports: [CommonModule, IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent,CoffeeVisualizationComponent]
+  imports: [IonButtons,IonBackButton,CommonModule, IonHeader,IonIcon,IonToolbar,IonTitle,IonContent,IonCard,IonCardHeader,IonCardTitle,IonCardSubtitle,IonCardContent,CoffeeVisualizationComponent]
 })
 export class CoffeeJourneyPage implements OnInit {
   // Sample order item for visualization

@@ -516,7 +516,7 @@ calculateNutrition(
    /**
    * Get sample products for testing or when Firestore is not available
    */
-   private getSampleProducts(): Product[] {
+    getSampleProducts(): Product[] {
     // Coffee products
     const coffeeProducts: Product[] = [
       {

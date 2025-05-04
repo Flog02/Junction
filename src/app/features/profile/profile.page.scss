@@ -1,232 +1,340 @@
 /* src/app/features/profile/profile.page.scss */
 :host {
-    display: block;
-  }
+  display: block;
+}
+
+// Variables
+$card-border-radius: 18px;
+$avatar-size: 90px;
+$primary-gradient: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+$box-shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.08);
+$box-shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.12);
+$transition-standard: all 0.3s ease;
+
+// Loading Container
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
   
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 300px;
-    
-    ion-spinner {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 16px;
-    }
-    
-    p {
-      color: var(--ion-color-medium);
-    }
-  }
-  
-  .profile-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 24px;
-    
-    .profile-avatar {
-      width: 80px;
-      height: 80px;
-      margin-right: 16px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-      border: 3px solid var(--ion-color-light);
-      
-      .avatar-placeholder {
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: var(--ion-color-primary);
-        color: white;
-        font-size: 2rem;
-        font-weight: bold;
-      }
-    }
-    
-    .profile-info {
-      flex: 1;
-      
-      h1 {
-        margin: 0 0 4px 0;
-        font-size: 1.5rem;
-        font-weight: 600;
-      }
-      
-      p {
-        margin: 0 0 8px 0;
-        color: var(--ion-color-medium);
-        font-size: 0.9rem;
-      }
-      
-      .loyalty-badge {
-        display: inline-flex;
-        align-items: center;
-        background-color: rgba(var(--ion-color-primary-rgb), 0.1);
-        color: var(--ion-color-primary);
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 0.8rem;
-        
-        ion-icon {
-          margin-right: 4px;
-        }
-      }
-    }
-  }
-  
-  .tab-navigation {
-    display: flex;
-    justify-content: space-between;
+  ion-spinner {
+    width: 60px;
+    height: 60px;
     margin-bottom: 20px;
-    border-bottom: 1px solid var(--ion-color-light);
+    --color: var(--ion-color-primary);
+  }
+  
+  p {
+    color: var(--ion-color-medium);
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+}
+
+// Profile Header
+.profile-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+  padding: 0 8px;
+  
+  .profile-avatar {
+    width: $avatar-size;
+    height: $avatar-size;
+    margin-right: 24px;
+    box-shadow: $box-shadow-soft;
+    border: 4px solid var(--ion-color-light);
+    overflow: hidden;
+    transition: $transition-standard;
     
-    ion-button {
-      flex: 1;
-      margin: 0;
-      --border-radius: 0;
-      
-      &::part(native) {
-        padding-top: 10px;
-        padding-bottom: 10px;
-        font-weight: 500;
-      }
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: $box-shadow-hover;
     }
-  }
-  
-  ion-card {
-    border-radius: 16px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     
-    ion-card-header {
-      ion-card-title {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        font-size: 1.2rem;
-        
-        .edit-button {
-          margin: 0;
-          height: auto;
-          font-size: 0.9rem;
-        }
-      }
-    }
-  }
-  
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  
-  // Loyalty Card Styles
-  .loyalty-summary {
-    display: flex;
-    margin-bottom: 20px;
-    
-    .points-container {
-      flex: 0 0 120px;
+    .avatar-placeholder {
+      width: 100%;
+      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
+      background: $primary-gradient;
+      color: white;
+      font-size: 2.5rem;
+      font-weight: 600;
+    }
+  }
+  
+  .profile-info {
+    flex: 1;
+    
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--ion-color-dark);
+    }
+    
+    p {
+      margin: 0 0 12px 0;
+      color: var(--ion-color-medium);
+      font-size: 1rem;
+    }
+    
+    .loyalty-badge {
+      display: inline-flex;
+      align-items: center;
+      background-color: rgba(var(--ion-color-primary-rgb), 0.12);
+      color: var(--ion-color-primary);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(var(--ion-color-primary-rgb), 0.2);
+      transition: $transition-standard;
       
-      .points-circle {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 10px rgba(var(--ion-color-primary-rgb), 0.3);
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
+      }
+      
+      ion-icon {
+        margin-right: 6px;
+        font-size: 1.1rem;
+      }
+    }
+  }
+}
+
+// Tab Navigation
+.tab-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--ion-color-light);
+  
+  ion-button {
+    flex: 1;
+    margin: 0;
+    --border-radius: 0;
+    --background-hover: rgba(var(--ion-color-primary-rgb), 0.08);
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+    
+    &::part(native) {
+      padding-top: 12px;
+      padding-bottom: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: $transition-standard;
+    }
+    
+    &[fill="solid"] {
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: $primary-gradient;
+        border-radius: 3px 3px 0 0;
+      }
+    }
+  }
+}
+
+// Cards
+ion-card {
+  border-radius: $card-border-radius;
+  margin-bottom: 24px;
+  box-shadow: $box-shadow-soft;
+  overflow: hidden;
+  transition: $transition-standard;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: $box-shadow-hover;
+  }
+  
+  ion-card-header {
+    padding-bottom: 0;
+    
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--ion-color-dark);
+      padding: 4px 0;
+      
+      .edit-button {
+        margin: 0;
+        height: auto;
+        font-size: 0.9rem;
+        --color: var(--ion-color-primary);
+        --color-hover: var(--ion-color-primary-shade);
+        transition: $transition-standard;
         
-        .points-value {
-          color: white;
-          font-size: 2rem;
-          font-weight: bold;
-          line-height: 1;
-        }
-        
-        .points-label {
-          color: white;
-          font-size: 0.8rem;
+        &:hover {
           opacity: 0.9;
         }
       }
     }
+  }
+  
+  ion-card-content {
+    padding: 16px;
+  }
+}
+
+// Lists
+ion-list {
+  background: transparent;
+  
+  ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --background: transparent;
+    --background-hover: rgba(var(--ion-color-light-rgb), 0.5);
+    margin-bottom: 4px;
+    border-radius: 8px;
     
-    .loyalty-details {
-      flex: 1;
-      padding-left: 16px;
-      
-      .tier-info {
-        margin-bottom: 16px;
-        
-        h3 {
-          margin: 0 0 4px 0;
-          color: var(--ion-color-primary);
-          font-weight: 600;
-        }
-        
-        p {
-          margin: 0;
-          color: var(--ion-color-medium);
-          font-size: 0.9rem;
-        }
+    ion-icon {
+      margin-right: 12px;
+      font-size: 1.2rem;
+      color: var(--ion-color-primary);
+    }
+    
+    ion-label {
+      h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+        margin-bottom: 4px;
       }
       
-      .tier-progress {
-        p {
-          margin: 0 0 4px 0;
-          color: var(--ion-color-dark);
-          font-size: 0.9rem;
-        }
-        
-        .progress-bar {
-          height: 8px;
-          background-color: var(--ion-color-light);
-          border-radius: 4px;
-          overflow: hidden;
-          margin-bottom: 4px;
-          
-          .progress-fill {
-            height: 100%;
-            background: linear-gradient(to right, var(--ion-color-primary), var(--ion-color-primary-tint));
-            border-radius: 4px;
-            transition: width 0.3s ease;
-          }
-        }
-        
-        .progress-text {
-          text-align: right;
-          font-size: 0.8rem;
-          color: var(--ion-color-medium);
-        }
+      p {
+        font-size: 0.9rem;
+        color: var(--ion-color-medium);
+      }
+    }
+    
+    ion-button[slot="end"] {
+      margin: 0;
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// Form Controls
+ion-input, ion-select {
+  --padding-start: 0;
+  --padding-end: 0;
+  --padding-top: 8px;
+  --padding-bottom: 8px;
+  --placeholder-color: var(--ion-color-medium);
+  --placeholder-opacity: 0.6;
+  font-size: 1rem;
+}
+
+ion-toggle {
+  --background: var(--ion-color-light);
+  --background-checked: var(--ion-color-primary-tint);
+  --handle-background: white;
+  --handle-background-checked: var(--ion-color-primary);
+  --handle-width: 24px;
+  --handle-height: 24px;
+  --handle-border-radius: 50%;
+  --handle-box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  
+  ion-button {
+    --padding-start: 20px;
+    --padding-end: 20px;
+    font-weight: 600;
+    
+    &[type="submit"] {
+      --background: $primary-gradient;
+      --box-shadow: 0 4px 10px rgba(var(--ion-color-primary-rgb), 0.3);
+      transition: $transition-standard;
+      
+      &:hover:not([disabled]) {
+        --box-shadow: 0 6px 14px rgba(var(--ion-color-primary-rgb), 0.4);
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+// Loyalty Card Styles
+.loyalty-summary {
+  display: flex;
+  margin-bottom: 24px;
+  
+  .points-container {
+    flex: 0 0 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    .points-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: $primary-gradient;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px rgba(var(--ion-color-primary-rgb), 0.35);
+      transition: $transition-standard;
+      
+      &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 20px rgba(var(--ion-color-primary-rgb), 0.4);
+      }
+      
+      .points-value {
+        color: white;
+        font-size: 2.5rem;
+        font-weight: bold;
+        line-height: 1;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      
+      .points-label {
+        color: white;
+        font-size: 0.9rem;
+        opacity: 0.9;
+        margin-top: 4px;
       }
     }
   }
   
-  // Security Tab Styles
-  .verification-status {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
+  .loyalty-details {
+    flex: 1;
+    padding-left: 20px;
     
-    ion-icon {
-      font-size: 32px;
-      margin-right: 16px;
-    }
-    
-    .status-text {
+    .tier-info {
+      margin-bottom: 20px;
+      
       h3 {
-        margin: 0 0 4px 0;
-        font-weight: 500;
+        margin: 0 0 6px 0;
+        color: var(--ion-color-primary);
+        font-weight: 700;
+        font-size: 1.2rem;
       }
       
       p {
@@ -235,19 +343,195 @@
         font-size: 0.9rem;
       }
     }
+    
+    .tier-progress {
+      p {
+        margin: 0 0 6px 0;
+        color: var(--ion-color-dark);
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+      
+      .progress-bar {
+        height: 10px;
+        background-color: var(--ion-color-light);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 6px;
+        
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(to right, var(--ion-color-primary), var(--ion-color-primary-tint));
+          border-radius: 8px;
+          transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+      }
+      
+      .progress-text {
+        text-align: right;
+        font-size: 0.85rem;
+        color: var(--ion-color-medium);
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.view-rewards-btn {
+  margin-top: 8px;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  transition: $transition-standard;
+  
+  &:hover {
+    --background: rgba(var(--ion-color-primary-rgb), 0.1);
+    --color: var(--ion-color-primary-shade);
+    --box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+// Security Tab Styles
+.verification-status {
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: rgba(var(--ion-color-light-rgb), 0.5);
+  border-radius: 12px;
+  
+  ion-icon {
+    font-size: 36px;
+    margin-right: 20px;
+    
+    &[color="success"] {
+      color: var(--ion-color-success);
+    }
+    
+    &[color="warning"] {
+      color: var(--ion-color-warning);
+    }
   }
   
-  // Dark mode adjustments
-  // @media (prefers-color-scheme: dark) {
-  //   ion-card {
-  //     background: var(--ion-background-color-step-50);
-  //   }
+  .status-text {
+    h3 {
+      margin: 0 0 6px 0;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
     
-  //   .loyalty-badge {
-  //     background-color: rgba(var(--ion-color-primary-rgb), 0.2) !important;
-  //   }
+    p {
+      margin: 0;
+      color: var(--ion-color-medium);
+      font-size: 0.95rem;
+    }
+  }
+}
+
+// Responsive Adjustments
+@media (max-width: 576px) {
+  .profile-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
     
-  //   .tab-navigation {
-  //     border-bottom: 1px solid var(--ion-color-dark);
-  //   }
-  // }
+    .profile-avatar {
+      margin-right: 0;
+      margin-bottom: 16px;
+    }
+  }
+  
+  .loyalty-summary {
+    flex-direction: column;
+    
+    .points-container {
+      flex: auto;
+      margin-bottom: 24px;
+    }
+    
+    .loyalty-details {
+      padding-left: 0;
+    }
+  }
+  
+  .tab-navigation ion-button {
+    font-size: 0.9rem;
+    
+    ion-icon {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+// Custom Animations
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.loyalty-badge,
+.profile-avatar {
+  &:active {
+    animation: pulse 0.5s ease-in-out;
+  }
+}
+
+// Preferences Tab Styles
+ion-range {
+  --bar-background: var(--ion-color-light);
+  --bar-background-active: var(--ion-color-primary);
+  --bar-height: 6px;
+  --bar-border-radius: 3px;
+  --knob-background: var(--ion-color-primary);
+  --knob-size: 24px;
+  --knob-box-shadow: 0 3px 8px rgba(var(--ion-color-primary-rgb), 0.3);
+  padding: 0;
+  
+  ion-label {
+    font-size: 0.85rem;
+    color: var(--ion-color-medium);
+  }
+}
+
+// Custom scrollbar
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ion-color-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--ion-color-primary-rgb), 0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ion-color-primary);
+}
+
+// Transitions
+ion-content {
+  --background: var(--ion-background-color);
+  
+  & > div {
+    animation: fadeIn 0.4s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

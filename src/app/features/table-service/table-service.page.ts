@@ -1,4 +1,3 @@
-// src/app/features/table-service/table-service.page.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
@@ -15,7 +14,7 @@ import {
   IonCardContent,
   IonGrid,
   IonRow,
-  IonCol} from '@ionic/angular/standalone';
+  IonCol, IonBackButton, IonButtons } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
   qrCodeOutline, 
@@ -35,7 +34,7 @@ import { TableOrderService } from '../../core/services/table-order.service';
   templateUrl: './table-service.page.html',
   styleUrls: ['./table-service.page.scss'],
   standalone: true,
-  imports: [
+  imports: [IonButtons, IonBackButton, 
     CommonModule,
     RouterModule,
     IonContent,

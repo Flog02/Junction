@@ -1,4 +1,5 @@
 // src/app/core/services/notification.service.ts
+import { Router } from '@angular/router'; // Add this import
 
 import { Injectable } from '@angular/core';
 import { 
@@ -16,7 +17,8 @@ import {
   setDoc,
   DocumentReference,
   limit,
-  query
+  query,
+  onSnapshot
 } from '@angular/fire/firestore';
 import { Auth, user } from '@angular/fire/auth';
 import { Observable, from, of, BehaviorSubject } from 'rxjs';
@@ -42,18 +44,148 @@ export interface Notification {
 export class NotificationService {
   private unreadCountSubject = new BehaviorSubject<number>(0);
   public unreadCount$ = this.unreadCountSubject.asObservable();
-  
+  private lastNotificationTime = new Date().getTime();
+
   constructor(
     private firestore: Firestore,
     private auth: Auth,
     private toastController: ToastController,
-    private platform: Platform
+    private platform: Platform,
+    private router: Router // Add router injection
+
   ) {
     // Initialize unread count when service is created
     this.updateUnreadCount();
+    
+    // Set up real-time listener for new notifications
+    this.setupNotificationListener();
   }
-
-
+  private setupNotificationListener() {
+    user(this.auth).pipe(
+      switchMap(user => {
+        if (!user) return of(null);
+        
+        // Get reference to the notifications collection
+        const notificationsRef = collection(this.firestore, 'notifications');
+        
+        // Query for new notifications for this user, ordered by creation time
+        const userNotificationsQuery = query(
+          notificationsRef,
+          where('userId', '==', user.uid),
+          orderBy('createdDate', 'desc'),
+          limit(10)
+        );
+        
+        // Set up the snapshot listener
+        const unsubscribe = onSnapshot(
+          userNotificationsQuery, 
+          (snapshot) => {
+            // Process any changes
+            snapshot.docChanges().forEach((change) => {
+              if (change.type === 'added') {
+                const notification = change.doc.data() as any;
+                
+                // Convert timestamp if necessary
+                let createdDate = notification.createdDate;
+                if (createdDate && typeof createdDate.toDate === 'function') {
+                  createdDate = createdDate.toDate();
+                }
+                
+                // Check if this is a truly new notification (within last 10 seconds)
+                const notificationTime = (createdDate instanceof Date) 
+                  ? createdDate.getTime() 
+                  : new Date(createdDate).getTime();
+                  
+                if (notificationTime > this.lastNotificationTime && 
+                    notificationTime > Date.now() - 10000) {
+                  // Show toast notification for this new notification
+                  this.showToastNotification(notification);
+                  this.lastNotificationTime = notificationTime;
+                }
+              }
+            });
+            
+            // Update unread count
+            this.updateUnreadCount();
+          },
+          (error) => {
+            console.error('Error listening to notifications:', error);
+          }
+        );
+        
+        return of(unsubscribe);
+      })
+    ).subscribe();
+  }
+  
+ /**
+ * Show a toast notification for a new notification
+ */
+private async showToastNotification(notification: any) {
+  // Only show if app is in foreground - using correct platform check
+  // The platform.is('active') was incorrect, we need another approach
+  if (document.hidden) {
+    return; // Skip showing toast if browser/app tab is not visible
+  }
+  
+  // Set color based on notification type
+  let color = 'primary';
+  let icon = 'notifications-outline';
+  
+  switch (notification.type) {
+    case 'order':
+      color = 'primary';
+      icon = 'cafe-outline';
+      break;
+    case 'loyalty':
+      color = 'success';
+      icon = 'gift-outline';
+      break;
+    case 'promotion':
+      color = 'warning';
+      icon = 'megaphone-outline';
+      break;
+    case 'system':
+      color = 'medium';
+      icon = 'information-circle-outline';
+      break;
+  }
+  
+  const toast = await this.toastController.create({
+    header: notification.title,
+    message: notification.message,
+    color: color,
+    duration: 4000,
+    position: 'top',
+    buttons: [
+      {
+        side: 'start',
+        icon: icon,
+        role: 'info'
+      },
+      {
+        text: 'View',
+        role: 'cancel',
+        handler: () => {
+          // Navigate to notifications page or specific notification
+          if (notification.targetId && notification.type === 'order') {
+            // Navigate to the order detail page
+            this.router.navigate(['/orders', notification.targetId]);
+          } else {
+            // Navigate to notifications page
+            this.router.navigate(['/notifications']);
+          }
+          if (notification.id) {
+            this.markAsRead(notification.id).subscribe();
+          }
+        }
+      }
+    ],
+    cssClass: 'notification-toast'
+  });
+  
+  await toast.present();
+}
 
   
   
@@ -206,6 +338,7 @@ export class NotificationService {
  * Creates a notification for a specific user
  * This version ensures the notification goes to the specified userId, not the current auth user
  */
+
 createNotification(notification: Omit<Notification, 'id' | 'createdDate' | 'readDate'>): Observable<string> {
   console.log('Creating notification for user:', notification.userId);
   const notificationsRef = collection(this.firestore, 'notifications');

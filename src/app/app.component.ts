@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { NotificationDrawerComponent } from './shared/components/notification/notification-drawer/notification-drawer.component';
 import { NotificationBadgeComponent } from "./shared/components/notification/notification-badge/notification-badge.component";
+import { ReminderSchedulerService } from './core/services/scheduler.service';
 
 @Component({
   selector: 'app-root',
@@ -33,7 +34,8 @@ export class AppComponent implements OnInit, OnDestroy {
     private platform: Platform,
     private router: Router,
     private authService: AuthService,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private reminderScheduler: ReminderSchedulerService
   ) {
     this.initializeApp();
     console.log('App Component initialized');
@@ -107,8 +109,10 @@ export class AppComponent implements OnInit, OnDestroy {
   }
   
   ngOnInit() {
+
     console.log('Application started');
-    
+        this.reminderScheduler.startScheduler();
+
     // Track router navigation events
     this.routerSubscription = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),

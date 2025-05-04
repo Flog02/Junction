@@ -101,6 +101,46 @@ loadComponent: () => import('./shared/components/notification/notification.page'
       ),
     canActivate: [authGuard],
   },
+  {
+    path:'ai-suggestions',
+    loadComponent:()=>import('./shared/components/scheduler.component/scheduler.component').then(m=>m.ProductSuggestionsComponent)
+  },
+  {
+    path: 'staff',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/staff/staff-dashboard/staff-dashboard.component').then(m => m.StaffDashboardComponent)
+      },
+      {
+        path: 'qr-generator',
+        loadComponent: () => import('./features/staff/table-management/qr-code-generator/qr-code-generator.component').then(m => m.QrCodeGeneratorComponent)
+      }
+    ]
+  },
+  // Table service routes
+  {
+    path: 'table-service',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/table-service/table-service.page').then(m => m.TableServicePage)
+      },
+      {
+        path: 'scan',
+        loadComponent: () => import('./features/table-service/table-scanner/table-scanner.component').then(m => m.TableScannerComponent)
+      },
+      {
+        path: 'order',
+        loadComponent: () => import('./features/table-service/table-order/table-order.component').then(m => m.TableOrderComponent)
+      }
+    ]
+  },
+  // Direct table routes for URL-based QR codes
+  {
+    path: 'table/:storeId/:tableNumber',
+    redirectTo: 'table-service/order'
+  },
 
   // Catch-all route - redirects handled in app component
   {

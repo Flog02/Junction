@@ -1,9 +1,8 @@
-// src/app/features/table-service/table-scanner/table-scanner.component.ts
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationExtras } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { BrowserMultiFormatReader } from '@zxing/library';
+import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from '@zxing/library';
 
 import {  
   ToastController, 
@@ -194,8 +193,8 @@ export class TableScannerComponent implements OnInit, OnDestroy {
   isSupported = false;
   scanResult: string | null = null;
   tableInfo: TableInfo | null = null;
-  private codeReader: BrowserMultiFormatReader;
   
+  private codeReader: BrowserMultiFormatReader;
   private destroy$ = new Subject<void>();
   
   constructor(
@@ -212,10 +211,17 @@ export class TableScannerComponent implements OnInit, OnDestroy {
       alertCircleOutline 
     });
     
-    this.codeReader = new BrowserMultiFormatReader();
+    // Configure the QR code reader with optimized settings for mobile scanning
+    const hints = new Map();
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]);
+    hints.set(DecodeHintType.TRY_HARDER, true);
+    this.codeReader = new BrowserMultiFormatReader(hints);
   }
   
   ngOnInit() {
+    // Make sure we're using mock data to support test QR codes
+    this.tableService.setUseMockData(true);
+    
     // Check if camera is supported
     this.checkCameraSupport();
   }
@@ -234,7 +240,14 @@ export class TableScannerComponent implements OnInit, OnDestroy {
       // Check if mediaDevices is supported
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         // Request camera permission to test support
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'environment', // Use back camera on mobile
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
+        });
+        
         // Release camera immediately after checking
         stream.getTracks().forEach(track => track.stop());
         this.isSupported = true;
@@ -270,8 +283,18 @@ export class TableScannerComponent implements OnInit, OnDestroy {
       
       const videoElement = this.videoElement.nativeElement;
       
-      this.codeReader.decodeFromVideoDevice(
-        null, 
+      // Optimize for back camera on mobile devices
+      const constraints = {
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          aspectRatio: { ideal: 1 }
+        }
+      };
+      
+      this.codeReader.decodeFromConstraints(
+        constraints, 
         videoElement, 
         (result, err) => {
           if (result) {
@@ -279,6 +302,7 @@ export class TableScannerComponent implements OnInit, OnDestroy {
             this.scanActive = false;
             this.stopScan();
             
+            console.log('QR Code detected:', this.scanResult);
             this.processQRCode(this.scanResult);
           }
           
@@ -305,9 +329,12 @@ export class TableScannerComponent implements OnInit, OnDestroy {
    */
   async processQRCode(qrCode: string) {
     const loading = await this.loadingController.create({
-      message: 'Processing table information...'
+      message: 'Processing table information...',
+      duration: 5000 // Maximum 5 seconds
     });
     await loading.present();
+    
+    console.log('Processing QR code:', qrCode);
     
     this.tableService.getTableInfoFromQRCode(qrCode)
       .pipe(takeUntil(this.destroy$))
@@ -316,16 +343,31 @@ export class TableScannerComponent implements OnInit, OnDestroy {
           loading.dismiss();
           this.tableInfo = tableInfo;
           
-          // Navigate to table order page
-          this.router.navigate(['/table-service/order'], {
-            state: { tableInfo }
-          });
+          // Navigate to table order page with the table info
+          this.navigateToOrderPage(tableInfo);
         },
         error: error => {
           loading.dismiss();
+          console.error('Error processing QR code:', error);
           this.presentToast(`Error: ${error.message}`);
         }
       });
+  }
+  
+  /**
+   * Navigate to the order page with table information
+   */
+  navigateToOrderPage(tableInfo: TableInfo) {
+    // First show a success message
+    this.presentToast(`Successfully connected to Table ${tableInfo.tableNumber}`);
+    
+    // Create navigation extras to pass the table info
+    const navigationExtras: NavigationExtras = {
+      state: { tableInfo }
+    };
+    
+    // Navigate to the order page
+    this.router.navigate(['/table-service/order'], navigationExtras);
   }
   
   /**

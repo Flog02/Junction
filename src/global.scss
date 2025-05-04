@@ -61,4 +61,24 @@
 //     --padding-end: 16px;
 //     background: transparent; /* Optional: if you want the modal background from above */
 //   }
-  
+  /* Add this to your global.scss or a component-specific style */
+.notification-toast {
+    --border-radius: 10px;
+    --box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+    --min-width: 250px;
+    --min-height: auto;
+    
+    &::part(header) {
+      font-size: 16px;
+      font-weight: bold;
+      padding-bottom: 8px;
+    }
+    
+    &::part(message) {
+      font-size: 14px;
+    }
+    
+    &::part(button) {
+      font-weight: bold;
+    }
+  }

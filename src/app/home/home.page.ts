@@ -24,6 +24,7 @@ import { ProductService } from '../core/services/product.service';
 import { Order } from '../core/models/order.model';
 import { UserLoyalty } from '../core/models/loyalty.model';
 import { Product } from '../core/models/product.model';
+import { ProductSuggestionsComponent } from "../shared/components/scheduler.component/scheduler.component";
 
 @Component({
   selector: 'app-home',
@@ -44,8 +45,9 @@ import { Product } from '../core/models/product.model';
     IonCard,
     IonCardContent,
     IonBadge,
-    IonProgressBar
-  ],
+    IonProgressBar,
+    ProductSuggestionsComponent
+],
   animations: [
     trigger('fadeInOut', [
       state('in', style({ opacity: 1 })),

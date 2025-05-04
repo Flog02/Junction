@@ -1,4 +1,3 @@
-// src/app/features/profile/profile.page.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -42,8 +41,7 @@ import {
   notificationsOutline,
   heartOutline,
   imageOutline,
-  keyOutline
-} from 'ionicons/icons';
+  keyOutline, pencilOutline, closeOutline, checkmarkOutline, diamondOutline, giftOutline, shieldCheckmarkOutline, shieldOutline, checkmarkCircleOutline, phonePortraitOutline, chatboxOutline, cafeOutline, nutritionOutline, flashOutline, saveOutline } from 'ionicons/icons';
 import { User } from '@angular/fire/auth';
 import { take } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
@@ -101,20 +99,7 @@ export class ProfilePage implements OnInit {
     private alertController: AlertController,
     private toastController: ToastController
   ) {
-    addIcons({ 
-      personOutline, 
-      mailOutline, 
-      cameraOutline, 
-      lockClosedOutline, 
-      logOutOutline,
-      calendarOutline,
-      ribbonOutline,
-      settingsOutline,
-      notificationsOutline,
-      heartOutline,
-      imageOutline,
-      keyOutline
-    });
+    addIcons({logOutOutline,ribbonOutline,personOutline,lockClosedOutline,settingsOutline,pencilOutline,imageOutline,closeOutline,checkmarkOutline,mailOutline,calendarOutline,diamondOutline,giftOutline,shieldCheckmarkOutline,keyOutline,shieldOutline,checkmarkCircleOutline,notificationsOutline,phonePortraitOutline,chatboxOutline,cafeOutline,nutritionOutline,flashOutline,saveOutline,cameraOutline,heartOutline});
     
     // Initialize forms
     this.profileForm = this.formBuilder.group({

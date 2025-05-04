@@ -1,321 +1,368 @@
 <!-- src/app/features/profile/profile.page.html -->
-<ion-header>
-    <ion-toolbar color="primary">
-      <ion-buttons slot="start">
-        <ion-back-button defaultHref="/home"></ion-back-button>
-      </ion-buttons>
-      <ion-title>My Profile</ion-title>
-      <ion-buttons slot="end">
-        <ion-button (click)="logout()">
-          <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
-        </ion-button>
-      </ion-buttons>
-    </ion-toolbar>
-  </ion-header>
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home"></ion-back-button>
+    </ion-buttons>
+    <ion-title>My Profile</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading your profile...</p>
+  </div>
   
-  <ion-content class="ion-padding">
-    <div *ngIf="isLoading" class="loading-container">
-      <ion-spinner name="crescent"></ion-spinner>
-      <p>Loading profile...</p>
-    </div>
-    
-    <div *ngIf="!isLoading">
-      <!-- Profile Header -->
-      <div class="profile-header">
-        <ion-avatar class="profile-avatar">
-          <img *ngIf="userProfile?.photoURL" [src]="userProfile?.photoURL" alt="Profile Photo">
-          <div *ngIf="!userProfile?.photoURL" class="avatar-placeholder">
-            {{ userProfile?.displayName?.charAt(0) || 'U' }}
-          </div>
-        </ion-avatar>
+  <div *ngIf="!isLoading" class="profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <ion-avatar class="profile-avatar">
+        <img *ngIf="userProfile?.photoURL" [src]="userProfile?.photoURL" alt="Profile Photo">
+        <div *ngIf="!userProfile?.photoURL" class="avatar-placeholder">
+          {{ userProfile?.displayName?.charAt(0) || 'U' }}
+        </div>
+      </ion-avatar>
+      
+      <div class="profile-info">
+        <h1>{{ userProfile?.displayName || 'User' }}</h1>
+        <p>{{ user?.email }}</p>
         
-        <div class="profile-info">
-          <h1>{{ userProfile?.displayName || 'User' }}</h1>
-          <p>{{ user?.email }}</p>
-          
-          <!-- Loyalty Badge -->
-          <div class="loyalty-badge" *ngIf="userProfile?.loyalty?.tier">
-            <ion-icon name="ribbon-outline"></ion-icon>
-            <span>{{ userProfile?.loyalty?.tier | titlecase }} Tier</span>
-          </div>
+        <!-- Loyalty Badge -->
+        <div class="loyalty-badge" *ngIf="userProfile?.loyalty?.tier" routerLink="/loyalty">
+          <ion-icon name="ribbon-outline"></ion-icon>
+          <span>{{ userProfile?.loyalty?.tier | titlecase }} Member</span>
         </div>
       </div>
+    </div>
+    
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+      <ion-button 
+        [fill]="activeTab === 'profile' ? 'solid' : 'clear'" 
+        (click)="setActiveTab('profile')">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        Profile
+      </ion-button>
       
-      <!-- Tab Navigation -->
-      <div class="tab-navigation">
-        <ion-button 
-          [fill]="activeTab === 'profile' ? 'solid' : 'clear'" 
-          (click)="setActiveTab('profile')">
-          <ion-icon name="person-outline" slot="start"></ion-icon>
-          Profile
-        </ion-button>
-        
-        <ion-button 
-          [fill]="activeTab === 'security' ? 'solid' : 'clear'" 
-          (click)="setActiveTab('security')">
-          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
-          Security
-        </ion-button>
-        
-        <ion-button 
-          [fill]="activeTab === 'preferences' ? 'solid' : 'clear'" 
-          (click)="setActiveTab('preferences')">
-          <ion-icon name="settings-outline" slot="start"></ion-icon>
-          Preferences
-        </ion-button>
-      </div>
+      <ion-button 
+        [fill]="activeTab === 'security' ? 'solid' : 'clear'" 
+        (click)="setActiveTab('security')">
+        <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+        Security
+      </ion-button>
       
-      <!-- Profile Tab -->
-      <div *ngIf="activeTab === 'profile'">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-title>
-              Personal Information
-              <ion-button fill="clear" (click)="toggleEdit()" *ngIf="!isEditing" size="small" class="edit-button">
-                Edit
-              </ion-button>
-            </ion-card-title>
-          </ion-card-header>
-          
-          <ion-card-content>
-            <!-- Edit Profile Form -->
-            <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" *ngIf="isEditing">
-              <ion-list lines="full">
-                <ion-item>
-                  <ion-icon name="person-outline" slot="start"></ion-icon>
-                  <ion-label position="stacked">Full Name</ion-label>
-                  <ion-input type="text" formControlName="displayName"></ion-input>
-                </ion-item>
-                
-                <ion-item>
-                  <ion-icon name="image-outline" slot="start"></ion-icon>
-                  <ion-label position="stacked">Profile Photo URL</ion-label>
-                  <ion-input type="text" formControlName="photoURL" placeholder="https://example.com/photo.jpg"></ion-input>
-                </ion-item>
-              </ion-list>
-              
-              <div class="form-actions">
-                <ion-button type="button" fill="outline" (click)="toggleEdit()">Cancel</ion-button>
-                <ion-button type="submit" [disabled]="profileForm.invalid || isLoading">
-                  <ng-container *ngIf="!isLoading">Save Changes</ng-container>
-                  <ion-spinner name="dots" *ngIf="isLoading"></ion-spinner>
-                </ion-button>
-              </div>
-            </form>
-            
-            <!-- Profile Details (View Mode) -->
-            <ion-list lines="full" *ngIf="!isEditing">
+      <ion-button 
+        [fill]="activeTab === 'preferences' ? 'solid' : 'clear'" 
+        (click)="setActiveTab('preferences')">
+        <ion-icon name="settings-outline" slot="start"></ion-icon>
+        Preferences
+      </ion-button>
+    </div>
+    
+    <!-- Profile Tab -->
+    <div *ngIf="activeTab === 'profile'" class="tab-content">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            Personal Information
+            <ion-button fill="clear" (click)="toggleEdit()" *ngIf="!isEditing" size="small" class="edit-button">
+              <ion-icon name="pencil-outline" slot="start"></ion-icon>
+              Edit
+            </ion-button>
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <!-- Edit Profile Form -->
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" *ngIf="isEditing">
+            <ion-list lines="full">
               <ion-item>
                 <ion-icon name="person-outline" slot="start"></ion-icon>
-                <ion-label>
-                  <h3>Full Name</h3>
-                  <p>{{ userProfile?.displayName || 'Not set' }}</p>
-                </ion-label>
+                <ion-label position="stacked">Full Name</ion-label>
+                <ion-input type="text" formControlName="displayName" placeholder="Your name"></ion-input>
               </ion-item>
               
               <ion-item>
-                <ion-icon name="mail-outline" slot="start"></ion-icon>
-                <ion-label>
-                  <h3>Email</h3>
-                  <p>{{ user?.email }}</p>
-                </ion-label>
-              </ion-item>
-              
-              <ion-item>
-                <ion-icon name="calendar-outline" slot="start"></ion-icon>
-                <ion-label>
-                  <h3>Joined</h3>
-                  <p>{{ userProfile?.createdAt?.toDate() | date:'mediumDate' }}</p>
-                </ion-label>
+                <ion-icon name="image-outline" slot="start"></ion-icon>
+                <ion-label position="stacked">Profile Photo URL</ion-label>
+                <ion-input type="text" formControlName="photoURL" placeholder="https://example.com/photo.jpg"></ion-input>
               </ion-item>
             </ion-list>
-          </ion-card-content>
-        </ion-card>
-        
-        <!-- Loyalty Information Card -->
-        <ion-card *ngIf="userProfile?.loyalty">
-          <ion-card-header>
-            <ion-card-title>Loyalty Program</ion-card-title>
-          </ion-card-header>
+            
+            <div class="form-actions">
+              <ion-button type="button" fill="outline" (click)="toggleEdit()">
+                <ion-icon name="close-outline" slot="start"></ion-icon>
+                Cancel
+              </ion-button>
+              <ion-button type="submit" [disabled]="profileForm.invalid || isLoading">
+                <ion-icon name="checkmark-outline" slot="start" *ngIf="!isLoading"></ion-icon>
+                <ng-container *ngIf="!isLoading">Save Changes</ng-container>
+                <ion-spinner name="dots" *ngIf="isLoading"></ion-spinner>
+              </ion-button>
+            </div>
+          </form>
           
-          <ion-card-content>
-            <div class="loyalty-summary">
-              <div class="points-container">
-                <div class="points-circle">
-                  <span class="points-value">{{ userProfile?.loyalty?.points || 0 }}</span>
-                  <span class="points-label">Points</span>
-                </div>
-              </div>
-              
-              <div class="loyalty-details">
-                <div class="tier-info">
-                  <h3>{{ userProfile?.loyalty?.tier | titlecase }} Tier</h3>
-                  <p>Expires: {{ userProfile?.loyalty?.tierExpiryDate?.toDate() | date:'mediumDate' }}</p>
-                </div>
-                
-                <div class="tier-progress">
-                  <p>Next Tier Progress</p>
-                  <div class="progress-bar">
-                    <div class="progress-fill" [style.width.%]="userProfile?.loyalty?.nextTierProgress || 0"></div>
-                  </div>
-                  <p class="progress-text">{{ userProfile?.loyalty?.nextTierProgress || 0 }}% Complete</p>
-                </div>
+          <!-- Profile Details (View Mode) -->
+          <ion-list lines="full" *ngIf="!isEditing">
+            <ion-item>
+              <ion-icon name="person-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Full Name</h3>
+                <p>{{ userProfile?.displayName || 'Not set' }}</p>
+              </ion-label>
+            </ion-item>
+            
+            <ion-item>
+              <ion-icon name="mail-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Email</h3>
+                <p>{{ user?.email }}</p>
+              </ion-label>
+            </ion-item>
+            
+            <ion-item>
+              <ion-icon name="calendar-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Joined</h3>
+                <p>{{ userProfile?.createdAt?.toDate() | date:'mediumDate' }}</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+      
+      <!-- Loyalty Information Card -->
+      <ion-card *ngIf="userProfile?.loyalty" class="loyalty-card">
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="diamond-outline" class="card-icon"></ion-icon>
+            Loyalty Program
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="loyalty-summary">
+            <div class="points-container">
+              <div class="points-circle">
+                <span class="points-value">{{ userProfile?.loyalty?.points || 0 }}</span>
+                <span class="points-label">Points</span>
               </div>
             </div>
             
-            <ion-button expand="block" fill="outline" routerLink="/loyalty" class="view-rewards-btn">
-              View Rewards
-            </ion-button>
-          </ion-card-content>
-        </ion-card>
-      </div>
+            <div class="loyalty-details">
+              <div class="tier-info">
+                <h3>{{ userProfile?.loyalty?.tier | titlecase }} Tier</h3>
+                <p>Expires: {{ userProfile?.loyalty?.tierExpiryDate?.toDate() | date:'mediumDate' }}</p>
+              </div>
+              
+              <div class="tier-progress">
+                <p>Next Tier Progress</p>
+                <div class="progress-bar">
+                  <div class="progress-fill" [style.width.%]="userProfile?.loyalty?.nextTierProgress || 0"></div>
+                </div>
+                <p class="progress-text">{{ userProfile?.loyalty?.nextTierProgress || 0 }}% Complete</p>
+              </div>
+            </div>
+          </div>
+          
+          <ion-button expand="block" fill="outline" routerLink="/loyalty" class="view-rewards-btn">
+            <ion-icon name="gift-outline" slot="start"></ion-icon>
+            View Rewards
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+    
+    <!-- Security Tab -->
+    <div *ngIf="activeTab === 'security'" class="tab-content">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="shield-checkmark-outline" class="card-icon"></ion-icon>
+            Account Security
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <ion-list lines="full">
+            <ion-item>
+              <ion-icon name="mail-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Email Address</h3>
+                <p>{{ user?.email }}</p>
+              </ion-label>
+              <ion-button slot="end" fill="outline" (click)="changeEmail()">Change</ion-button>
+            </ion-item>
+            
+            <ion-item>
+              <ion-icon name="key-outline" slot="start"></ion-icon>
+              <ion-label>
+                <h3>Password</h3>
+                <p>••••••••</p>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+          
+          <form [formGroup]="securityForm" (ngSubmit)="changePassword()">
+            <ion-list lines="full">
+              <ion-item>
+                <ion-label position="stacked">Current Password</ion-label>
+                <ion-input type="password" formControlName="currentPassword" placeholder="Enter current password"></ion-input>
+              </ion-item>
+              
+              <ion-item>
+                <ion-label position="stacked">New Password</ion-label>
+                <ion-input type="password" formControlName="newPassword" placeholder="Enter new password"></ion-input>
+              </ion-item>
+            </ion-list>
+            
+            <div class="form-actions">
+              <ion-button type="submit" expand="block" [disabled]="!securityForm.get('currentPassword')?.valid || !securityForm.get('newPassword')?.valid || isLoading">
+                <ion-icon name="shield-outline" slot="start" *ngIf="!isLoading"></ion-icon>
+                <ng-container *ngIf="!isLoading">Update Password</ng-container>
+                <ion-spinner name="dots" *ngIf="isLoading"></ion-spinner>
+              </ion-button>
+            </div>
+          </form>
+        </ion-card-content>
+      </ion-card>
       
-      <!-- Security Tab -->
-      <div *ngIf="activeTab === 'security'">
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>
+            <ion-icon name="checkmark-circle-outline" class="card-icon"></ion-icon>
+            Account Verification
+          </ion-card-title>
+        </ion-card-header>
+        
+        <ion-card-content>
+          <div class="verification-status">
+            <ion-icon [name]="user?.emailVerified ? 'checkmark-circle' : 'alert-circle'" 
+                      [color]="user?.emailVerified ? 'success' : 'warning'"></ion-icon>
+            <div class="status-text">
+              <h3>Email Verification</h3>
+              <p *ngIf="user?.emailVerified">Your email is verified</p>
+              <p *ngIf="!user?.emailVerified">Your email is not verified. Please check your inbox for a verification email.</p>
+            </div>
+          </div>
+          
+          <ion-button *ngIf="user && !user.emailVerified" expand="block" (click)="resendVerificationEmail()">
+            <ion-icon name="mail-outline" slot="start"></ion-icon>
+            Resend Verification Email
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+    </div>
+    
+    <!-- Preferences Tab -->
+    <div *ngIf="activeTab === 'preferences'" class="tab-content">
+      <form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()">
         <ion-card>
           <ion-card-header>
-            <ion-card-title>Email & Password</ion-card-title>
+            <ion-card-title>
+              <ion-icon name="notifications-outline" class="card-icon"></ion-icon>
+              Notifications
+            </ion-card-title>
           </ion-card-header>
           
           <ion-card-content>
             <ion-list lines="full">
               <ion-item>
                 <ion-icon name="mail-outline" slot="start"></ion-icon>
-                <ion-label>
-                  <h3>Email Address</h3>
-                  <p>{{ user?.email }}</p>
-                </ion-label>
-                <ion-button slot="end" fill="outline" (click)="changeEmail()">Change</ion-button>
+                <ion-label>Email Notifications</ion-label>
+                <ion-toggle formControlName="emailNotifications"></ion-toggle>
               </ion-item>
               
               <ion-item>
-                <ion-icon name="key-outline" slot="start"></ion-icon>
-                <ion-label>
-                  <h3>Password</h3>
-                  <p>••••••••</p>
-                </ion-label>
+                <ion-icon name="phone-portrait-outline" slot="start"></ion-icon>
+                <ion-label>Push Notifications</ion-label>
+                <ion-toggle formControlName="pushNotifications"></ion-toggle>
+              </ion-item>
+              
+              <ion-item>
+                <ion-icon name="chatbox-outline" slot="start"></ion-icon>
+                <ion-label>SMS Notifications</ion-label>
+                <ion-toggle formControlName="smsNotifications"></ion-toggle>
               </ion-item>
             </ion-list>
-            
-            <form [formGroup]="securityForm" (ngSubmit)="changePassword()">
-              <ion-list lines="full">
-                <ion-item>
-                  <ion-label position="stacked">Current Password</ion-label>
-                  <ion-input type="password" formControlName="currentPassword"></ion-input>
-                </ion-item>
-                
-                <ion-item>
-                  <ion-label position="stacked">New Password</ion-label>
-                  <ion-input type="password" formControlName="newPassword"></ion-input>
-                </ion-item>
-              </ion-list>
-              
-              <div class="form-actions">
-                <ion-button type="submit" expand="block" [disabled]="!securityForm.get('currentPassword')?.valid || !securityForm.get('newPassword')?.valid || isLoading">
-                  <ng-container *ngIf="!isLoading">Update Password</ng-container>
-                  <ion-spinner name="dots" *ngIf="isLoading"></ion-spinner>
-                </ion-button>
-              </div>
-            </form>
           </ion-card-content>
         </ion-card>
         
         <ion-card>
-            <ion-card-header>
-              <ion-card-title>Account Verification</ion-card-title>
-            </ion-card-header>
-            
-            <ion-card-content>
-              <div class="verification-status">
-                <ion-icon [name]="user?.emailVerified ? 'checkmark-circle' : 'alert-circle'" 
-                          [color]="user?.emailVerified ? 'success' : 'warning'"></ion-icon>
-                <div class="status-text">
-                  <h3>Email Verification</h3>
-                  <p *ngIf="user?.emailVerified">Your email is verified</p>
-                  <p *ngIf="!user?.emailVerified">Your email is not verified. Please check your inbox for a verification email.</p>
-                </div>
-              </div>
-              
-              <!-- Fixed this button to only appear AND only call the method when user exists -->
-              <ion-button *ngIf="user && !user.emailVerified" expand="block" (click)="resendVerificationEmail()">
-                Resend Verification Email
-              </ion-button>
-            </ion-card-content>
-          </ion-card>
-      </div>
-      
-      <!-- Preferences Tab -->
-      <div *ngIf="activeTab === 'preferences'">
-        <form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()">
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title>Notifications</ion-card-title>
-            </ion-card-header>
-            
-            <ion-card-content>
-              <ion-list lines="full">
-                <ion-item>
-                  <ion-label>Email Notifications</ion-label>
-                  <ion-toggle formControlName="emailNotifications"></ion-toggle>
-                </ion-item>
-                
-                <ion-item>
-                  <ion-label>Push Notifications</ion-label>
-                  <ion-toggle formControlName="pushNotifications"></ion-toggle>
-                </ion-item>
-                
-                <ion-item>
-                  <ion-label>SMS Notifications</ion-label>
-                  <ion-toggle formControlName="smsNotifications"></ion-toggle>
-                </ion-item>
-              </ion-list>
-            </ion-card-content>
-          </ion-card>
+          <ion-card-header>
+            <ion-card-title>
+              <ion-icon name="cafe-outline" class="card-icon"></ion-icon>
+              Coffee Preferences
+            </ion-card-title>
+          </ion-card-header>
           
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title>Coffee Preferences</ion-card-title>
-            </ion-card-header>
-            
-            <ion-card-content>
-              <ion-list lines="full">
-                <ion-item>
-                  <ion-label>Dietary Restrictions</ion-label>
-                  <ion-select multiple="true" formControlName="dietaryRestrictions">
-                    <ion-select-option value="lactose-free">Lactose Free</ion-select-option>
-                    <ion-select-option value="vegan">Vegan</ion-select-option>
-                    <ion-select-option value="gluten-free">Gluten Free</ion-select-option>
-                    <ion-select-option value="nut-free">Nut Free</ion-select-option>
-                    <ion-select-option value="low-sugar">Low Sugar</ion-select-option>
-                  </ion-select>
-                </ion-item>
-                
-                <ion-item>
-                  <ion-label>Sugar Preference</ion-label>
-                  <ion-range min="0" max="5" step="1" snaps="true" formControlName="sugarPreference">
-                    <ion-label slot="start">Less Sweet</ion-label>
-                    <ion-label slot="end">More Sweet</ion-label>
-                  </ion-range>
-                </ion-item>
-                
-                <ion-item>
-                  <ion-label>Caffeine Preference</ion-label>
-                  <ion-range min="0" max="5" step="1" snaps="true" formControlName="caffeinePreference">
-                    <ion-label slot="start">Decaf</ion-label>
-                    <ion-label slot="end">Strong</ion-label>
-                  </ion-range>
-                </ion-item>
-              </ion-list>
+          <ion-card-content>
+            <ion-list lines="full">
+              <ion-item>
+                <ion-icon name="nutrition-outline" slot="start"></ion-icon>
+                <ion-label>Dietary Restrictions</ion-label>
+                <ion-select multiple="true" formControlName="dietaryRestrictions" interface="popover">
+                  <ion-select-option value="lactose-free">Lactose Free</ion-select-option>
+                  <ion-select-option value="vegan">Vegan</ion-select-option>
+                  <ion-select-option value="gluten-free">Gluten Free</ion-select-option>
+                  <ion-select-option value="nut-free">Nut Free</ion-select-option>
+                  <ion-select-option value="low-sugar">Low Sugar</ion-select-option>
+                </ion-select>
+              </ion-item>
               
-              <div class="form-actions">
-                <ion-button type="submit" expand="block" [disabled]="preferencesForm.invalid || isLoading">
-                  <ng-container *ngIf="!isLoading">Save Preferences</ng-container>
-                  <ion-spinner name="dots" *ngIf="isLoading"></ion-spinner>
-                </ion-button>
-              </div>
-            </ion-card-content>
-          </ion-card>
-        </form>
-      </div>
+              <ion-item class="preference-slider">
+                <ion-icon name="cafe-outline" slot="start"></ion-icon>
+                <ion-label>
+                  <h3>Sugar Preference</h3>
+                </ion-label>
+                <ion-range min="0" max="5" step="1" snaps="true" formControlName="sugarPreference" class="preference-range">
+                  <ion-label slot="start">Less Sweet</ion-label>
+                  <ion-label slot="end">More Sweet</ion-label>
+                </ion-range>
+              </ion-item>
+              
+              <ion-item class="preference-slider">
+                <ion-icon name="flash-outline" slot="start"></ion-icon>
+                <ion-label>
+                  <h3>Caffeine Preference</h3>
+                </ion-label>
+                <ion-range min="0" max="5" step="1" snaps="true" formControlName="caffeinePreference" class="preference-range">
+                  <ion-label slot="start">Decaf</ion-label>
+                  <ion-label slot="end">Strong</ion-label>
+                </ion-range>
+              </ion-item>
+            </ion-list>
+            
+            <div class="form-actions">
+              <ion-button type="submit" expand="block" [disabled]="preferencesForm.invalid || isLoading">
+                <ion-icon name="save-outline" slot="start" *ngIf="!isLoading"></ion-icon>
+                <ng-container *ngIf="!isLoading">Save Preferences</ng-container>
+                <ion-spinner name="dots" *ngIf="isLoading"></ion-spinner>
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </form>
     </div>
-  </ion-content>
+    
+    <!-- Admin Section (Optional) -->
+    <ion-card *ngIf="isAdmin" class="admin-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="shield-outline" class="card-icon"></ion-icon>
+          Admin Controls
+        </ion-card-title>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <app-role-management></app-role-management>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
