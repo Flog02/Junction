@@ -16,11 +16,10 @@ import { ReminderSchedulerService } from './core/services/scheduler.service';
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
   standalone: true,
-  imports: [IonButtons, IonTitle, IonToolbar,
+  imports: [
     CommonModule,
-    RouterOutlet,
     IonApp,
-    IonRouterOutlet, NotificationBadgeComponent]
+    IonRouterOutlet]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private routerSubscription: Subscription | undefined;

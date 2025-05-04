@@ -168,15 +168,12 @@ import { sparklesOutline, thumbsUpOutline, cafeOutline } from 'ionicons/icons';
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonButton,
-    IonImg,
-    IonLabel,
     IonSkeletonText,
     IonIcon,
     IonRow,
     IonCol,
     IonGrid
-  ]
+]
 })
 export class ProductSuggestionsComponent implements OnInit {
   suggestions: any[] = [];
