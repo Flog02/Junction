@@ -692,9 +692,8 @@ import { Order } from 'src/app/core/models/order.model';
     IonCardHeader,
     IonCardTitle,
     IonCardContent,
-    IonButton,
-    IonBadge
-  ]
+    IonButton
+]
 })
 export class OrderQueueComponent implements OnInit {
   pendingOrders: Order[] = [];

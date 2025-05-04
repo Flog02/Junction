@@ -47,11 +47,10 @@ interface SelectableCustomizationOption extends ProductCustomizationOption {
   styleUrls: ['./order-custom.component.scss'],
   standalone: true,
   imports: [
-    IonIcon, 
-    IonCard, IonCardContent, IonCardHeader, IonCardTitle,
+    IonIcon,
     CommonModule,
-    IonTextarea, IonToolbar, IonSpinner, IonHeader, IonButtons, IonBackButton, IonTitle, 
-    IonContent, IonLabel, IonItem, IonInput, IonButton, IonSelect, IonSelectOption,
+    IonTextarea, IonToolbar, IonSpinner, IonHeader, IonButtons, IonBackButton, IonTitle,
+    IonContent, IonButton,
     ReactiveFormsModule,
     MatSliderModule,
     MatSelectModule,
@@ -59,7 +58,7 @@ interface SelectableCustomizationOption extends ProductCustomizationOption {
     MatInputModule,
     MatFormFieldModule,
     MatCardModule
-  ]
+]
 })
 export class OrderCustomComponent implements OnInit, OnDestroy {
   orderForm: FormGroup;
