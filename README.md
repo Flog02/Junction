@@ -9,9 +9,11 @@ We chose to use Angluar due to our familiarity with it and also the scalability 
 has this neet little feature called 'capacitors'. They are used for turning an application into a compiled mobile application. It made our job much easier on creating the APK of our app. 
 
 During development a number of other technologies were used. Three.js helped us build a 3D visualization of a model we decided to use.
+
 ![image](https://github.com/user-attachments/assets/e51dfecb-9174-402b-8043-23bfc4fe75d3)
 
-We used Chart.js to provide charts about nutritions of each product in their nutrition dashboard. 
+We used Chart.js to provide charts about nutritions of each product in their nutrition dashboard.
+
 ![image](https://github.com/user-attachments/assets/3b6187e5-aba2-4509-a744-547bd344caa9)
 
 Our team used  FireBase as our designated BackEnd. We have found that its security features and amount of shortcuts it allows you are extremely important in a timed challenge  such as this. We have used it before in hackathons and it has turned into a lucky charm.
