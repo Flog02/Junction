@@ -1,22 +1,83 @@
-.scanner-container {
+:host {
+    display: block;
+    height: 100%;
+  }
+  
+  .camera-permission {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding: 2rem;
+    text-align: center;
+  
+    ion-icon {
+      font-size: 64px;
+      margin-bottom: 1rem;
+      color: var(--ion-color-warning);
+    }
+  
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+  
+    p {
+      margin-bottom: 1.5rem;
+      color: var(--ion-color-medium);
+    }
+  }
+  
+  .scanner-container {
+    display: flex;
+    flex-direction: column;
     height: 100%;
+    position: relative;
+  }
+  
+  .scanner-prompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    flex: 1;
+  
+    ion-icon {
+      font-size: 64px;
+      margin-bottom: 1rem;
+      color: var(--ion-color-primary);
+    }
+  
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+  
+    p {
+      margin-bottom: 1.5rem;
+      color: var(--ion-color-medium);
+      max-width: 300px;
+    }
+  }
+  
+  .scanner-active {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    flex: 1;
   }
   
   .video-container {
     position: relative;
-    width: 100%;
-    max-width: 400px;
     height: 0;
     padding-bottom: 100%;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: 12px;
     background-color: #000;
-    margin-bottom: 20px;
+    margin-bottom: 1rem;
   }
   
   video {
@@ -26,195 +87,111 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    
-    &.active {
-      opacity: 1;
-    }
   }
   
-  .scan-overlay {
+  .scan-region {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    right: 0;
+    bottom: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    
-    &.active {
-      opacity: 1;
-    }
-    
-    .scan-frame {
-      width: 70%;
-      height: 70%;
-      border: 2px solid var(--ion-color-primary);
-      border-radius: 16px;
-      position: relative;
-      
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background-color: var(--ion-color-primary);
-        animation: scan-animation 2s linear infinite;
-      }
-      
-      // Corner markers for better visual guidance
-      &::after, &::before {
-        content: '';
-        position: absolute;
-        width: 24px;
-        height: 24px;
-        border-color: var(--ion-color-secondary);
-      }
-      
-      // Top-left corner
-      &::before {
-        top: -2px;
-        left: -2px;
-        border-top: 4px solid;
-        border-left: 4px solid;
-        border-top-left-radius: 16px;
-      }
-      
-      // Add pseudo-elements for the other corners
-      &::after {
-        top: -2px;
-        right: -2px;
-        border-top: 4px solid;
-        border-right: 4px solid;
-        border-top-right-radius: 16px;
-      }
-    }
+    background-color: rgba(0, 0, 0, 0.4);
   }
   
-  // Additional corners
-  .scan-frame::before {
-    content: '';
+  .scan-frame {
+    width: 70%;
+    height: 70%;
+    border: 2px solid var(--ion-color-primary);
+    border-radius: 12px;
+    box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.3);
+    position: relative;
+  }
+  
+  .scan-line {
     position: absolute;
-    width: 24px;
-    height: 24px;
-    bottom: -2px;
-    left: -2px;
-    border-bottom: 4px solid var(--ion-color-secondary);
-    border-left: 4px solid var(--ion-color-secondary);
-    border-bottom-left-radius: 16px;
+    width: 70%;
+    height: 2px;
+    background-color: var(--ion-color-primary);
+    animation: scan-animation 2s linear infinite;
   }
   
-  .scan-frame::after {
-    content: '';
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    bottom: -2px;
-    right: -2px;
-    border-bottom: 4px solid var(--ion-color-secondary);
-    border-right: 4px solid var(--ion-color-secondary);
-    border-bottom-right-radius: 16px;
-  }
-  
-  // Scanning animation
   @keyframes scan-animation {
     0% {
-      top: 0;
+      transform: translateY(-40%);
     }
     50% {
-      top: calc(100% - 2px);
+      transform: translateY(40%);
     }
     100% {
-      top: 0;
+      transform: translateY(-40%);
     }
   }
   
-  .scan-controls {
+  .scan-instructions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem;
+  
+    p {
+      margin-bottom: 1rem;
+      color: var(--ion-color-medium);
+    }
+  }
+  
+  .processing-overlay {
     position: absolute;
-    bottom: 16px;
+    top: 0;
     left: 0;
     right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
     z-index: 10;
-    
-    .scan-btn {
-      --padding-start: 16px;
-      --padding-end: 16px;
-      --background: rgba(var(--ion-color-primary-rgb), 0.2);
-      --border-radius: 50%;
-      height: 64px;
-      width: 64px;
-      margin: 0;
-      
-      ion-icon {
-        font-size: 32px;
-      }
-    }
-  }
+    color: white;
   
-  .scanner-status {
-    text-align: center;
-    margin-top: 16px;
-    min-height: 60px;
-    
-    p {
-      margin: 8px 0;
-      color: var(--ion-color-medium);
-      font-size: 16px;
-    }
-    
-    .error-text {
-      color: var(--ion-color-danger);
-    }
-    
     ion-spinner {
-      margin-top: 16px;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1rem;
     }
   }
   
-  .error-card {
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-    
-    .error-message {
-      display: flex;
-      align-items: center;
-      margin-bottom: 16px;
-      
-      ion-icon {
-        color: var(--ion-color-danger);
-        margin-right: 12px;
-        font-size: 24px;
-        flex-shrink: 0;
-      }
-      
-      p {
-        margin: 0;
-      }
+  .error-message {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    margin-top: 1rem;
+    background-color: var(--ion-color-danger-tint);
+    border-radius: 8px;
+    color: var(--ion-color-danger-contrast);
+  
+    ion-icon {
+      font-size: 24px;
+      margin-right: 0.75rem;
+    }
+  
+    p {
+      margin: 0;
     }
   }
   
-  /* iOS-specific styles */
-  :host-context(.ios) {
-    .video-container {
-      transform: rotate(0deg);
-    }
-  }
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1.5rem;
   
-  /* Make sure full screen works properly */
-  :fullscreen .scanner-container,
-  :fullscreen .video-container {
-    height: 100%;
-    width: 100%;
-    max-width: none;
-    padding: 0;
+    ion-icon {
+      font-size: 48px;
+      margin-bottom: 1rem;
+      color: var(--ion-color-warning);
+    }
   }

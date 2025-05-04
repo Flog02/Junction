@@ -1,34 +1,52 @@
-<!-- src/app/features/table-service/qr-scanner/qr-scanner.component.html -->
 <div class="scanner-container">
-    <ion-card *ngIf="!hasPermission" class="error-card">
-      <ion-card-content>
-        <div class="error-message">
-          <ion-icon name="alert-circle-outline" size="large"></ion-icon>
-          <p>Camera permission denied. Please enable camera access to scan QR codes.</p>
-        </div>
-        <ion-button expand="block" (click)="checkPermissions()">Try Again</ion-button>
-      </ion-card-content>
-    </ion-card>
-  
-    <div class="video-container" *ngIf="hasPermission">
-      <video #videoElement width="100%" height="auto" [class.active]="isScanning"></video>
-      
-      <div class="scan-overlay" [class.active]="isScanning">
-        <div class="scan-frame"></div>
+  <ion-card *ngIf="!hasPermission" class="error-card">
+    <ion-card-content>
+      <div class="error-message">
+        <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+        <p>Camera permission denied. Please enable camera access to scan QR codes.</p>
       </div>
-      
-      <div class="scan-controls">
-        <ion-button [disabled]="processingQR" (click)="toggleScanner()" fill="clear" class="scan-btn">
-          <ion-icon [name]="isScanning ? 'stop-circle-outline' : 'scan-outline'" slot="icon-only"></ion-icon>
-        </ion-button>
-      </div>
+      <ion-button expand="block" (click)="checkPermissions()">Try Again</ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <div class="video-container" *ngIf="hasPermission">
+    <!-- Use playsinline and muted to improve iOS compatibility -->
+    <video #videoElement width="100%" height="auto" [class.active]="isScanning" playsinline muted></video>
+    
+    <div class="scan-overlay" [class.active]="isScanning">
+      <div class="scan-frame"></div>
     </div>
     
-    <div class="scanner-status" *ngIf="hasPermission">
-      <p *ngIf="isScanning">Position the QR code within the frame</p>
-      <p *ngIf="!isScanning && !scanError">Tap the button to start scanning</p>
-      <p *ngIf="scanError" class="error-text">{{ scanError }}</p>
-      
-      <ion-spinner *ngIf="processingQR" name="circles"></ion-spinner>
+    <div class="scan-controls">
+      <ion-button [disabled]="processingQR" (click)="toggleScanner()" fill="clear" class="scan-btn">
+        <ion-icon [name]="isScanning ? 'stop-circle-outline' : 'scan-outline'" slot="icon-only"></ion-icon>
+      </ion-button>
     </div>
   </div>
+  
+  <div class="scanner-status" *ngIf="hasPermission">
+    <p *ngIf="isScanning">Position the QR code within the frame</p>
+    <p *ngIf="!isScanning && !scanError">Tap the button to start scanning</p>
+    <p *ngIf="scanError" class="error-text">{{ scanError }}</p>
+    
+    <ion-spinner *ngIf="processingQR" name="circles"></ion-spinner>
+  </div>
+
+  <div class="scanning-tips" *ngIf="isScanning">
+    <h4>Scanning Tips:</h4>
+    <ul>
+      <li>Hold your phone steady</li>
+      <li>Make sure the QR code is well-lit</li>
+      <li>Center the QR code in the frame</li>
+      <li>Keep a distance of 15-30 cm (6-12 inches)</li>
+    </ul>
+  </div>
+
+  <!-- Manual entry fallback -->
+  <div class="manual-entry" *ngIf="!isScanning && hasPermission">
+    <ion-button expand="block" color="medium" routerLink="/table-service/manual-entry">
+      <ion-icon name="keypad-outline" slot="start"></ion-icon>
+      Enter Table Number Manually
+    </ion-button>
+  </div>
+</div>

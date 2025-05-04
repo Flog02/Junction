@@ -1,33 +1,65 @@
-<div class="scanner-container">
-    <ion-card *ngIf="!hasPermission" class="error-card">
-      <ion-card-content>
-        <div class="error-message">
-          <ion-icon name="alert-circle-outline" size="large"></ion-icon>
-          <p>Camera permission denied. Please enable camera access to scan QR codes.</p>
-        </div>
-        <ion-button expand="block" (click)="checkPermissions()">Try Again</ion-button>
-      </ion-card-content>
-    </ion-card>
+<ion-header>
+    <ion-toolbar color="primary">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/table-service"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Scan Table QR Code</ion-title>
+    </ion-toolbar>
+  </ion-header>
   
-    <div class="video-container" *ngIf="hasPermission">
-      <video #videoElement width="100%" height="auto" [class.active]="isScanning"></video>
-      
-      <div class="scan-overlay" [class.active]="isScanning">
-        <div class="scan-frame"></div>
-      </div>
-      
-      <div class="scan-controls">
-        <ion-button [disabled]="processingQR" (click)="toggleScanner()" fill="clear" class="scan-btn">
-          <ion-icon [name]="isScanning ? 'stop-circle-outline' : 'scan-outline'" slot="icon-only"></ion-icon>
-        </ion-button>
-      </div>
+  <ion-content class="ion-padding">
+    <div *ngIf="!hasPermission" class="camera-permission">
+      <ion-card>
+        <ion-card-content>
+          <div class="error-container">
+            <ion-icon name="alert-circle-outline" size="large"></ion-icon>
+            <h2>Camera Access Required</h2>
+            <p>Please allow camera access to scan table QR codes.</p>
+          </div>
+          <ion-button expand="block" (click)="checkPermissions()">
+            Grant Camera Access
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
     </div>
     
-    <div class="scanner-status" *ngIf="hasPermission">
-      <p *ngIf="isScanning">Position the QR code within the frame</p>
-      <p *ngIf="!isScanning && !scanError">Tap the button to start scanning</p>
-      <p *ngIf="scanError" class="error-text">{{ scanError }}</p>
+    <div *ngIf="hasPermission" class="scanner-container">
+      <div class="scanner-prompt" *ngIf="!isScanning">
+        <ion-icon name="qr-code-outline" size="large"></ion-icon>
+        <h2>Ready to Scan</h2>
+        <p>Scan the QR code on your table to place an order directly to your table.</p>
+        <ion-button expand="block" (click)="startScanner()">
+          <ion-icon name="scan-outline" slot="start"></ion-icon>
+          Start Scanning
+        </ion-button>
+      </div>
       
-      <ion-spinner *ngIf="processingQR" name="circles"></ion-spinner>
+      <div class="scanner-active" *ngIf="isScanning">
+        <div class="video-container">
+          <video #videoElement width="100%" height="100%"></video>
+          <div class="scan-region">
+            <div class="scan-frame"></div>
+            <div class="scan-line"></div>
+          </div>
+        </div>
+        
+        <div class="scan-instructions">
+          <p>Position the QR code within the frame</p>
+          <ion-button (click)="stopScanner()" color="light" shape="round">
+            <ion-icon name="stop-circle-outline" slot="start"></ion-icon>
+            Cancel
+          </ion-button>
+        </div>
+      </div>
+      
+      <div class="processing-overlay" *ngIf="processingQR">
+        <ion-spinner name="circles"></ion-spinner>
+        <p>Processing QR code...</p>
+      </div>
+      
+      <div class="error-message" *ngIf="scanError">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <p>{{ scanError }}</p>
+      </div>
     </div>
-  </div>
+  </ion-content>

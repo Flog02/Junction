@@ -28,8 +28,7 @@ import {
   personOutline, 
   timeOutline,
   callOutline,
-  locationOutline
-} from 'ionicons/icons';
+  locationOutline, cafeOutline, removeCircleOutline, addCircleOutline, checkmarkCircleOutline } from 'ionicons/icons';
 
 import { TableInfo, StoreInfo } from '../../../core/models/table.model';
 import { TableService } from '../../../core/services/table.service';
@@ -202,14 +201,7 @@ export class TableOrderComponent implements OnInit {
     private toastController: ToastController,
     private alertController: AlertController
   ) {
-    addIcons({ 
-      restaurantOutline, 
-      cartOutline, 
-      personOutline, 
-      timeOutline,
-      callOutline,
-      locationOutline
-    });
+    addIcons({cartOutline,restaurantOutline,cafeOutline,removeCircleOutline,addCircleOutline,checkmarkCircleOutline,personOutline,timeOutline,callOutline,locationOutline});
     
     // Get navigation state
     const navigation = this.router.getCurrentNavigation();
@@ -354,8 +346,10 @@ export class TableOrderComponent implements OnInit {
       this.presentAlert('Store Closed', 'Sorry, this store is currently closed. Please try again during business hours.');
       return;
     }
+
+    this.router.navigateByUrl('/menu')
     
-    this.presentAlert('Order Started', 'This is a demo. In a real app, you would now be able to select items from the menu.');
+    // this.presentAlert('Order Started', 'This is a demo. In a real app, you would now be able to select items from the menu.');
     // In a real app, this would start the ordering process
   }
   

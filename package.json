@@ -41,6 +41,7 @@
     "ar.js": "^2.2.2",
     "chart.js": "^4.4.9",
     "firebase": "^11.6.1",
+    "html5-qrcode": "^2.3.8",
     "ionicons": "^7.0.0",
     "Junction": "file:",
     "ngx-captcha": "^13.0.0",
